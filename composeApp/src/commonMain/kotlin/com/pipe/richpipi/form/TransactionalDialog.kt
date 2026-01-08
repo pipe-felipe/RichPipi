@@ -23,6 +23,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import org.jetbrains.compose.resources.stringResource
+import richpipi.composeapp.generated.resources.Res
+import richpipi.composeapp.generated.resources.form_close_button_description
+import richpipi.composeapp.generated.resources.form_prompt
+import richpipi.composeapp.generated.resources.form_submit_button
+import richpipi.composeapp.generated.resources.form_textfield_label
+import richpipi.composeapp.generated.resources.form_title
 
 @Composable
 fun TransactionalDialog(viewModel: TransactionalViewModel, onDismiss: () -> Unit) {
@@ -36,16 +43,16 @@ fun TransactionalDialog(viewModel: TransactionalViewModel, onDismiss: () -> Unit
                 Column(
                     modifier = Modifier.padding(24.dp)
                 ) {
-                    Text("Formulário", style = MaterialTheme.typography.headlineSmall)
+                    Text(stringResource(Res.string.form_title), style = MaterialTheme.typography.headlineSmall)
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    Text("Preencha o campo abaixo:")
+                    Text(stringResource(Res.string.form_prompt))
                     Spacer(modifier = Modifier.height(8.dp))
 
                     OutlinedTextField(
                         value = uiState.textValue,
                         onValueChange = { viewModel.onTextChange(it) },
-                        label = { Text("Campo de texto") },
+                        label = { Text(stringResource(Res.string.form_textfield_label)) },
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(16.dp))
@@ -57,14 +64,14 @@ fun TransactionalDialog(viewModel: TransactionalViewModel, onDismiss: () -> Unit
                         },
                         modifier = Modifier.align(Alignment.End)
                     ) {
-                        Text("Enviar")
+                        Text(stringResource(Res.string.form_submit_button))
                     }
                 }
                 IconButton(
                     onClick = onDismiss,
                     modifier = Modifier.align(Alignment.TopEnd).padding(8.dp)
                 ) {
-                    Icon(Icons.Default.Close, contentDescription = "Fechar")
+                    Icon(Icons.Default.Close, contentDescription = stringResource(Res.string.form_close_button_description))
                 }
             }
         }

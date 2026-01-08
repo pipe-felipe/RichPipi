@@ -1,0 +1,7 @@
+<resources>
+    <string name="form_title">Felipe</string>
+    <string name="form_prompt">Preencha o campo abaixo:</string>
+    <string name="form_textfield_label">Campo de texto</string>
+    <string name="form_submit_button">Enviar</string>
+    <string name="form_close_button_description">Fechar</string>
+</resources>

@@ -20,7 +20,6 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Preview
 fun App() {
     var showDialog by remember { mutableStateOf(false) }
-    // Get a ViewModel instance that is tied to the lifecycle of this screen
     val transactionalViewModel: TransactionalViewModel = viewModel()
 
     MaterialTheme {
