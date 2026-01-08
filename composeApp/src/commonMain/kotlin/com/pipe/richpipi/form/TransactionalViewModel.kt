@@ -5,12 +5,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 /**
  * Represents the state of the form UI.
  */
 data class FormUiState(
-    val textValue: String = ""
+    val date: String = "",
+    val category: String = "",
+    val quantity: String = "",
+    val notes: String = "",
+    val isQuantityError: Boolean = false
 )
 
 /**
@@ -24,21 +30,60 @@ class TransactionalViewModel : ViewModel() {
     val uiState: StateFlow<FormUiState> = _uiState.asStateFlow()
 
     /**
-     * Called when the text field value changes.
+     * Called when the date field value changes.
      */
-    fun onTextChange(newText: String) {
+    fun onDateChange(newText: String) {
         _uiState.update { currentState ->
-            currentState.copy(textValue = newText)
+            currentState.copy(date = newText)
+        }
+    }
+
+    /**
+     * Called when the category field value changes.
+     */
+    fun onCategoryChange(newText: String) {
+        _uiState.update { currentState ->
+            currentState.copy(category = newText)
+        }
+    }
+
+    /**
+     * Called when the quantity field value changes.
+     */
+    fun onQuantityChange(input: String) {
+        val isValid = input
+            .replace(",", ".")
+            .toFloatOrNull() != null
+
+        _uiState.update { currentState ->
+            currentState.copy(
+                quantity = input,
+                isQuantityError = input.isNotBlank() && !isValid
+            )
+        }
+    }
+
+
+    /**
+     * Called when the notes field value changes.
+     */
+    fun onNotesChange(newText: String) {
+        _uiState.update { currentState ->
+            currentState.copy(notes = newText)
         }
     }
 
     /**
      * Called when the form is submitted.
      */
+    @OptIn(ExperimentalTime::class)
     fun submit() {
         // You can add your submission logic here.
-        // For example, print the value:
-        println("Submitted value: ${_uiState.value.textValue}")
+        val date = uiState.value.date.ifBlank {
+            val today = Clock.System.now()
+            today.toString()
+        }
+        println("Submitted value: $date")
 
         // You might want to reset the state after submission
         // _uiState.value = FormUiState()
