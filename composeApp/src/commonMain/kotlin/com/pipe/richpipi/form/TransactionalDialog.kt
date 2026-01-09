@@ -11,6 +11,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -20,26 +24,38 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import org.jetbrains.compose.resources.stringResource
-import richpipi.composeapp.generated.resources.Res
-import richpipi.composeapp.generated.resources.form_category_label
-import richpipi.composeapp.generated.resources.form_close_button_description
-import richpipi.composeapp.generated.resources.form_notes_label
-import richpipi.composeapp.generated.resources.form_quantity_label
-import richpipi.composeapp.generated.resources.form_submit_button
-import richpipi.composeapp.generated.resources.form_title
+import richpipi.composeapp.generated.resources.*
 
+@Composable
+private fun mapCategoryString(category: TransactionCategoryExpanse): String {
+    return when (category) {
+        TransactionCategoryExpanse.TRANSPORT -> stringResource(Res.string.category_transport)
+        TransactionCategoryExpanse.GIFT -> stringResource(Res.string.category_gift)
+        TransactionCategoryExpanse.RECURRING -> stringResource(Res.string.category_recurring)
+        TransactionCategoryExpanse.FOOD -> stringResource(Res.string.category_food)
+        TransactionCategoryExpanse.STUFF -> stringResource(Res.string.category_stuff)
+        TransactionCategoryExpanse.MEDICINE -> stringResource(Res.string.category_medicine)
+        TransactionCategoryExpanse.CLOTHES -> stringResource(Res.string.category_clothes)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionalDialog(
     viewModel: TransactionalViewModel,
     onDismiss: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var expanded by remember { mutableStateOf(false) }
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
@@ -49,20 +65,36 @@ fun TransactionalDialog(
                 Column(
                     modifier = Modifier.padding(24.dp)
                 ) {
-                    Text(
-                        text = stringResource(Res.string.form_title),
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
                     // Categoria
-                    OutlinedTextField(
-                        value = uiState.category,
-                        onValueChange = viewModel::onCategoryChange,
-                        label = { Text(stringResource(Res.string.form_category_label)) },
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    ExposedDropdownMenuBox(
+                        expanded = expanded,
+                        onExpandedChange = { expanded = !expanded },
+                    ) {
+                        OutlinedTextField(
+                            modifier = Modifier.menuAnchor().fillMaxWidth(),
+                            readOnly = true,
+                            value = mapCategoryString(uiState.category),
+                            onValueChange = {},
+                            label = { Text(stringResource(Res.string.form_category_label)) },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                        )
+                        ExposedDropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false },
+                        ) {
+                            TransactionCategoryExpanse.entries.forEach { selectionOption ->
+                                DropdownMenuItem(
+                                    text = { Text(mapCategoryString(selectionOption)) },
+                                    onClick = {
+                                        viewModel.onCategoryChange(selectionOption)
+                                        expanded = false
+                                    },
+                                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                                )
+                            }
+                        }
+                    }
 
                     Spacer(modifier = Modifier.height(8.dp))
 
@@ -87,7 +119,6 @@ fun TransactionalDialog(
                             modifier = Modifier.padding(start = 16.dp, top = 4.dp)
                         )
                     }
-
                     Spacer(modifier = Modifier.height(8.dp))
 
                     // Observações
@@ -97,7 +128,6 @@ fun TransactionalDialog(
                         label = { Text(stringResource(Res.string.form_notes_label)) },
                         modifier = Modifier.fillMaxWidth()
                     )
-
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Button(
@@ -116,7 +146,7 @@ fun TransactionalDialog(
                     onClick = onDismiss,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(8.dp)
+                        .padding(4.dp)
                 ) {
                     Icon(
                         Icons.Default.Close,

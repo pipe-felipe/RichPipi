@@ -8,12 +8,22 @@ import kotlinx.coroutines.flow.update
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
+enum class TransactionCategoryExpanse {
+    TRANSPORT,
+    GIFT,
+    RECURRING,
+    FOOD,
+    STUFF,
+    MEDICINE,
+    CLOTHES
+}
+
 /**
  * Represents the state of the form UI.
  */
 data class FormUiState(
     val date: String = "",
-    val category: String = "",
+    val category: TransactionCategoryExpanse = TransactionCategoryExpanse.FOOD,
     val quantity: String = "",
     val notes: String = "",
     val isQuantityError: Boolean = false
@@ -41,9 +51,9 @@ class TransactionalViewModel : ViewModel() {
     /**
      * Called when the category field value changes.
      */
-    fun onCategoryChange(newText: String) {
+    fun onCategoryChange(newCategory: TransactionCategoryExpanse) {
         _uiState.update { currentState ->
-            currentState.copy(category = newText)
+            currentState.copy(category = newCategory)
         }
     }
 

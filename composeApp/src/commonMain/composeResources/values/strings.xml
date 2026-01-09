@@ -1,5 +1,4 @@
 <resources>
-    <string name="form_title">Formulário</string>
     <string name="form_prompt">Preencha o campo abaixo:</string>
     <string name="form_textfield_label">Campo de texto</string>
     <string name="form_submit_button">Enviar</string>
@@ -8,4 +7,11 @@
     <string name="form_category_label">Categoria</string>
     <string name="form_quantity_label">Quantidade</string>
     <string name="form_notes_label">Notas</string>
+    <string name="category_transport">Transporte</string>
+    <string name="category_gift">Presente</string>
+    <string name="category_recurring">Recorrente</string>
+    <string name="category_food">Comida</string>
+    <string name="category_stuff">Coisas</string>
+    <string name="category_medicine">Remédio</string>
+    <string name="category_clothes">Roupas</string>
 </resources>
