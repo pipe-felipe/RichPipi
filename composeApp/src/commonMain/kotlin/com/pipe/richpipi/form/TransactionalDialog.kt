@@ -18,7 +18,7 @@ import org.jetbrains.compose.resources.stringResource
 import richpipi.composeapp.generated.resources.*
 
 @Composable
-private fun getCategoryString(category: Any): String {
+private fun mapCategory(category: Any): String {
     return when (category) {
         is ExpenseCategory -> when (category) {
             ExpenseCategory.TRANSPORT -> stringResource(Res.string.expense_category_transport)
@@ -54,51 +54,36 @@ fun TransactionalDialog(
         ) {
             Box {
                 Column(
-                    modifier = Modifier.padding(24.dp)
+                    modifier = Modifier.padding(14.dp)
                 ) {
                     Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .height(56.dp)
-                            .selectable(
-                                selected = (uiState.transactionType == TransactionType.EXPENSE),
-                                onClick = { viewModel.onTransactionTypeChange(TransactionType.EXPENSE) },
-                                role = Role.RadioButton
-                            )
-                            .padding(horizontal = 16.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        RadioButton(
-                            selected = (uiState.transactionType == TransactionType.EXPENSE),
-                            onClick = null // null recommended for accessibility with screenreaders
-                        )
-                        Text(
-                            text = stringResource(Res.string.transaction_type_expense),
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(start = 16.dp)
-                        )
-                    }
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .height(56.dp)
-                            .selectable(
-                                selected = (uiState.transactionType == TransactionType.INCOME),
-                                onClick = { viewModel.onTransactionTypeChange(TransactionType.INCOME) },
-                                role = Role.RadioButton
-                            )
-                            .padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RadioButton(
-                            selected = (uiState.transactionType == TransactionType.INCOME),
-                            onClick = null // null recommended for accessibility with screenreaders
-                        )
-                        Text(
-                            text = stringResource(Res.string.transaction_type_income),
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(start = 16.dp)
-                        )
+                        val radioOptions = listOf(TransactionType.EXPENSE, TransactionType.INCOME)
+                        radioOptions.forEach { option ->
+                            Row(
+                                Modifier
+                                    .selectable(
+                                        selected = (uiState.transactionType == option),
+                                        onClick = { viewModel.onTransactionTypeChange(option) },
+                                        role = Role.RadioButton
+                                    )
+                                    .padding(horizontal = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                RadioButton(
+                                    selected = (uiState.transactionType == option),
+                                    onClick = null // Recommended for accessibility
+                                )
+                                Text(
+                                    text = if (option == TransactionType.EXPENSE) stringResource(Res.string.transaction_type_expense) else stringResource(Res.string.transaction_type_income),
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    modifier = Modifier.padding(start = 4.dp)
+                                )
+                            }
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -111,7 +96,7 @@ fun TransactionalDialog(
                         OutlinedTextField(
                             modifier = Modifier.menuAnchor().fillMaxWidth(),
                             readOnly = true,
-                            value = if (uiState.transactionType == TransactionType.EXPENSE) getCategoryString(uiState.expenseCategory) else getCategoryString(uiState.incomeCategory),
+                            value = if (uiState.transactionType == TransactionType.EXPENSE) mapCategory(uiState.expenseCategory) else mapCategory(uiState.incomeCategory),
                             onValueChange = {},
                             label = { Text(stringResource(Res.string.form_category_label)) },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
@@ -124,7 +109,7 @@ fun TransactionalDialog(
                             if (uiState.transactionType == TransactionType.EXPENSE) {
                                 ExpenseCategory.values().forEach { selectionOption ->
                                     DropdownMenuItem(
-                                        text = { Text(getCategoryString(selectionOption)) },
+                                        text = { Text(mapCategory(selectionOption)) },
                                         onClick = {
                                             viewModel.onExpenseCategoryChange(selectionOption)
                                             expanded = false
@@ -135,7 +120,7 @@ fun TransactionalDialog(
                             } else {
                                 IncomeCategory.values().forEach { selectionOption ->
                                     DropdownMenuItem(
-                                        text = { Text(getCategoryString(selectionOption)) },
+                                        text = { Text(mapCategory(selectionOption)) },
                                         onClick = {
                                             viewModel.onIncomeCategoryChange(selectionOption)
                                             expanded = false
