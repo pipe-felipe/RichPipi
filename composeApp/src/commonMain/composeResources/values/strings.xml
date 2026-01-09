@@ -7,11 +7,20 @@
     <string name="form_category_label">Categoria</string>
     <string name="form_quantity_label">Quantidade</string>
     <string name="form_notes_label">Notas</string>
-    <string name="category_transport">Transporte</string>
-    <string name="category_gift">Presente</string>
-    <string name="category_recurring">Recorrente</string>
-    <string name="category_food">Comida</string>
-    <string name="category_stuff">Coisas</string>
-    <string name="category_medicine">Remédio</string>
-    <string name="category_clothes">Roupas</string>
+
+    <string name="transaction_type_expense">Despesa</string>
+    <string name="transaction_type_income">Receita</string>
+
+    <string name="expense_category_transport">Transporte</string>
+    <string name="expense_category_gift">Presente</string>
+    <string name="expense_category_recurring">Recorrente</string>
+    <string name="expense_category_food">Comida</string>
+    <string name="expense_category_stuff">Coisas</string>
+    <string name="expense_category_medicine">Remédio</string>
+    <string name="expense_category_clothes">Roupas</string>
+
+    <string name="income_category_salary">Salário</string>
+    <string name="income_category_gift">Presente</string>
+    <string name="income_category_investment">Investimento</string>
+    <string name="income_category_other">Outro</string>
 </resources>

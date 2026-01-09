@@ -1,34 +1,16 @@
 package com.pipe.richpipi.form
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -36,15 +18,24 @@ import org.jetbrains.compose.resources.stringResource
 import richpipi.composeapp.generated.resources.*
 
 @Composable
-private fun mapCategoryString(category: TransactionCategoryExpanse): String {
+private fun getCategoryString(category: Any): String {
     return when (category) {
-        TransactionCategoryExpanse.TRANSPORT -> stringResource(Res.string.category_transport)
-        TransactionCategoryExpanse.GIFT -> stringResource(Res.string.category_gift)
-        TransactionCategoryExpanse.RECURRING -> stringResource(Res.string.category_recurring)
-        TransactionCategoryExpanse.FOOD -> stringResource(Res.string.category_food)
-        TransactionCategoryExpanse.STUFF -> stringResource(Res.string.category_stuff)
-        TransactionCategoryExpanse.MEDICINE -> stringResource(Res.string.category_medicine)
-        TransactionCategoryExpanse.CLOTHES -> stringResource(Res.string.category_clothes)
+        is ExpenseCategory -> when (category) {
+            ExpenseCategory.TRANSPORT -> stringResource(Res.string.expense_category_transport)
+            ExpenseCategory.GIFT -> stringResource(Res.string.expense_category_gift)
+            ExpenseCategory.RECURRING -> stringResource(Res.string.expense_category_recurring)
+            ExpenseCategory.FOOD -> stringResource(Res.string.expense_category_food)
+            ExpenseCategory.STUFF -> stringResource(Res.string.expense_category_stuff)
+            ExpenseCategory.MEDICINE -> stringResource(Res.string.expense_category_medicine)
+            ExpenseCategory.CLOTHES -> stringResource(Res.string.expense_category_clothes)
+        }
+        is IncomeCategory -> when (category) {
+            IncomeCategory.SALARY -> stringResource(Res.string.income_category_salary)
+            IncomeCategory.GIFT -> stringResource(Res.string.income_category_gift)
+            IncomeCategory.INVESTMENT -> stringResource(Res.string.income_category_investment)
+            IncomeCategory.OTHER -> stringResource(Res.string.income_category_other)
+        }
+        else -> ""
     }
 }
 
@@ -65,6 +56,53 @@ fun TransactionalDialog(
                 Column(
                     modifier = Modifier.padding(24.dp)
                 ) {
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .selectable(
+                                selected = (uiState.transactionType == TransactionType.EXPENSE),
+                                onClick = { viewModel.onTransactionTypeChange(TransactionType.EXPENSE) },
+                                role = Role.RadioButton
+                            )
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = (uiState.transactionType == TransactionType.EXPENSE),
+                            onClick = null // null recommended for accessibility with screenreaders
+                        )
+                        Text(
+                            text = stringResource(Res.string.transaction_type_expense),
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                    }
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .selectable(
+                                selected = (uiState.transactionType == TransactionType.INCOME),
+                                onClick = { viewModel.onTransactionTypeChange(TransactionType.INCOME) },
+                                role = Role.RadioButton
+                            )
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = (uiState.transactionType == TransactionType.INCOME),
+                            onClick = null // null recommended for accessibility with screenreaders
+                        )
+                        Text(
+                            text = stringResource(Res.string.transaction_type_income),
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     // Categoria
                     ExposedDropdownMenuBox(
                         expanded = expanded,
@@ -73,7 +111,7 @@ fun TransactionalDialog(
                         OutlinedTextField(
                             modifier = Modifier.menuAnchor().fillMaxWidth(),
                             readOnly = true,
-                            value = mapCategoryString(uiState.category),
+                            value = if (uiState.transactionType == TransactionType.EXPENSE) getCategoryString(uiState.expenseCategory) else getCategoryString(uiState.incomeCategory),
                             onValueChange = {},
                             label = { Text(stringResource(Res.string.form_category_label)) },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
@@ -83,15 +121,28 @@ fun TransactionalDialog(
                             expanded = expanded,
                             onDismissRequest = { expanded = false },
                         ) {
-                            TransactionCategoryExpanse.entries.forEach { selectionOption ->
-                                DropdownMenuItem(
-                                    text = { Text(mapCategoryString(selectionOption)) },
-                                    onClick = {
-                                        viewModel.onCategoryChange(selectionOption)
-                                        expanded = false
-                                    },
-                                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
-                                )
+                            if (uiState.transactionType == TransactionType.EXPENSE) {
+                                ExpenseCategory.values().forEach { selectionOption ->
+                                    DropdownMenuItem(
+                                        text = { Text(getCategoryString(selectionOption)) },
+                                        onClick = {
+                                            viewModel.onExpenseCategoryChange(selectionOption)
+                                            expanded = false
+                                        },
+                                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                                    )
+                                }
+                            } else {
+                                IncomeCategory.values().forEach { selectionOption ->
+                                    DropdownMenuItem(
+                                        text = { Text(getCategoryString(selectionOption)) },
+                                        onClick = {
+                                            viewModel.onIncomeCategoryChange(selectionOption)
+                                            expanded = false
+                                        },
+                                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                                    )
+                                }
                             }
                         }
                     }

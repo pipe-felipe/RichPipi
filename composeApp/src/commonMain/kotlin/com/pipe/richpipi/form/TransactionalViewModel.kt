@@ -8,7 +8,12 @@ import kotlinx.coroutines.flow.update
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
-enum class TransactionCategoryExpanse {
+enum class TransactionType {
+    EXPENSE,
+    INCOME
+}
+
+enum class ExpenseCategory {
     TRANSPORT,
     GIFT,
     RECURRING,
@@ -18,12 +23,21 @@ enum class TransactionCategoryExpanse {
     CLOTHES
 }
 
+enum class IncomeCategory {
+    SALARY,
+    GIFT,
+    INVESTMENT,
+    OTHER
+}
+
 /**
  * Represents the state of the form UI.
  */
 data class FormUiState(
     val date: String = "",
-    val category: TransactionCategoryExpanse = TransactionCategoryExpanse.FOOD,
+    val transactionType: TransactionType = TransactionType.EXPENSE,
+    val expenseCategory: ExpenseCategory = ExpenseCategory.FOOD,
+    val incomeCategory: IncomeCategory = IncomeCategory.SALARY,
     val quantity: String = "",
     val notes: String = "",
     val isQuantityError: Boolean = false
@@ -40,6 +54,15 @@ class TransactionalViewModel : ViewModel() {
     val uiState: StateFlow<FormUiState> = _uiState.asStateFlow()
 
     /**
+     * Called when the transaction type changes.
+     */
+    fun onTransactionTypeChange(newType: TransactionType) {
+        _uiState.update { currentState ->
+            currentState.copy(transactionType = newType)
+        }
+    }
+
+    /**
      * Called when the date field value changes.
      */
     fun onDateChange(newText: String) {
@@ -49,11 +72,20 @@ class TransactionalViewModel : ViewModel() {
     }
 
     /**
-     * Called when the category field value changes.
+     * Called when the expense category field value changes.
      */
-    fun onCategoryChange(newCategory: TransactionCategoryExpanse) {
+    fun onExpenseCategoryChange(newCategory: ExpenseCategory) {
         _uiState.update { currentState ->
-            currentState.copy(category = newCategory)
+            currentState.copy(expenseCategory = newCategory)
+        }
+    }
+
+    /**
+     * Called when the income category field value changes.
+     */
+    fun onIncomeCategoryChange(newCategory: IncomeCategory) {
+        _uiState.update { currentState ->
+            currentState.copy(incomeCategory = newCategory)
         }
     }
 
