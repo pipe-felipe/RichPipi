@@ -6,13 +6,13 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pipe.richpipi.form.TransactionalViewModel
 import com.pipe.richpipi.form.TransactionalDialog
+import com.pipe.richpipi.ui.theme.RichPipiTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -22,7 +22,7 @@ fun App() {
     var showDialog by remember { mutableStateOf(false) }
     val transactionalViewModel: TransactionalViewModel = viewModel()
 
-    MaterialTheme {
+    RichPipiTheme {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             floatingActionButton = {
