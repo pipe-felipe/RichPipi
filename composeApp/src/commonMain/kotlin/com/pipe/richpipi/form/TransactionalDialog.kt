@@ -43,27 +43,228 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import org.jetbrains.compose.resources.stringResource
-import richpipi.composeapp.generated.resources.Res
-import richpipi.composeapp.generated.resources.expense_category_clothes
-import richpipi.composeapp.generated.resources.expense_category_food
-import richpipi.composeapp.generated.resources.expense_category_gift
-import richpipi.composeapp.generated.resources.expense_category_medicine
-import richpipi.composeapp.generated.resources.expense_category_recurring
-import richpipi.composeapp.generated.resources.expense_category_stuff
-import richpipi.composeapp.generated.resources.expense_category_transport
-import richpipi.composeapp.generated.resources.form_category_label
-import richpipi.composeapp.generated.resources.form_close_button_description
-import richpipi.composeapp.generated.resources.form_notes_label
-import richpipi.composeapp.generated.resources.form_quantity_label
-import richpipi.composeapp.generated.resources.form_recurring_label
-import richpipi.composeapp.generated.resources.form_submit_button
-import richpipi.composeapp.generated.resources.income_category_gift
-import richpipi.composeapp.generated.resources.income_category_investment
-import richpipi.composeapp.generated.resources.income_category_other
-import richpipi.composeapp.generated.resources.income_category_salary
-import richpipi.composeapp.generated.resources.label_invalid_number
-import richpipi.composeapp.generated.resources.transaction_type_expense
-import richpipi.composeapp.generated.resources.transaction_type_income
+import richpipi.composeapp.generated.resources.*
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TransactionalDialog(
+    viewModel: TransactionalViewModel, onDismiss: () -> Unit
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    var expanded by remember { mutableStateOf(false) }
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(30.dp)
+        ) {
+            Box {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    TransactionTypeSelector(
+                        selectedType = uiState.transactionType,
+                        onTypeSelected = viewModel::onTransactionTypeChange
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    CategoryAndQuantityInput(
+                        uiState = uiState,
+                        onExpenseCategoryChange = viewModel::onExpenseCategoryChange,
+                        onIncomeCategoryChange = viewModel::onIncomeCategoryChange,
+                        onQuantityChange = viewModel::onQuantityChange,
+                        expanded = expanded,
+                        onExpandedChange = { expanded = it },
+                    )
+
+                    NotesInput(
+                        notes = uiState.notes,
+                        onNotesChange = viewModel::onNotesChange
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    ActionsBar(
+                        isRecurring = uiState.isRecurring,
+                        onRecurringChange = viewModel::onRecurringChange,
+                        isSubmitEnabled = !uiState.isQuantityError,
+                        onSubmit = {
+                            viewModel.submit()
+                            onDismiss()
+                        }
+                    )
+                }
+
+                IconButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.align(Alignment.TopEnd).offset(x = (3).dp, y = -(2.5).dp)
+                ) {
+                    Icon(
+                        Icons.Default.Close, contentDescription = stringResource(
+                            Res.string.form_close_button_description
+                        )
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TransactionTypeSelector(
+    selectedType: TransactionType,
+    onTypeSelected: (TransactionType) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val radioOptions = listOf(TransactionType.EXPENSE, TransactionType.INCOME)
+        radioOptions.forEach { option ->
+            Row(
+                Modifier.selectable(
+                    selected = (selectedType == option),
+                    onClick = { onTypeSelected(option) },
+                    role = Role.RadioButton
+                ).padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                RadioButton(selected = (selectedType == option), onClick = null)
+                Text(
+                    text = if (option == TransactionType.EXPENSE) stringResource(Res.string.transaction_type_expense)
+                    else stringResource(Res.string.transaction_type_income),
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(start = 4.dp)
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CategoryAndQuantityInput(
+    uiState: FormUiState,
+    onExpenseCategoryChange: (ExpenseCategory) -> Unit,
+    onIncomeCategoryChange: (IncomeCategory) -> Unit,
+    onQuantityChange: (String) -> Unit,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.Top,
+    ) {
+        ExposedDropdownMenuBox(
+            modifier = Modifier.weight(1f),
+            expanded = expanded,
+            onExpandedChange = onExpandedChange,
+        ) {
+            OutlinedTextField(
+                modifier = Modifier
+                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                    .fillMaxWidth(),
+                readOnly = true,
+                value = if (uiState.transactionType == TransactionType.EXPENSE) mapCategory(uiState.expenseCategory)
+                else mapCategory(uiState.incomeCategory),
+                onValueChange = {},
+                label = { Text(stringResource(Res.string.form_category_label)) },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+            )
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { onExpandedChange(false) },
+            ) {
+                if (uiState.transactionType == TransactionType.EXPENSE) {
+                    ExpenseCategory.entries.forEach { selectionOption ->
+                        DropdownMenuItem(
+                            text = { Text(mapCategory(selectionOption)) },
+                            onClick = {
+                                onExpenseCategoryChange(selectionOption)
+                                onExpandedChange(false)
+                            },
+                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                        )
+                    }
+                } else {
+                    IncomeCategory.entries.forEach { selectionOption ->
+                        DropdownMenuItem(
+                            text = { Text(mapCategory(selectionOption)) },
+                            onClick = {
+                                onIncomeCategoryChange(selectionOption)
+                                onExpandedChange(false)
+                            },
+                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        OutlinedTextField(
+            modifier = Modifier.weight(1f),
+            value = uiState.quantity,
+            onValueChange = onQuantityChange,
+            label = { Text(stringResource(Res.string.form_quantity_label)) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            singleLine = true,
+            isError = uiState.isQuantityError,
+            supportingText = {
+                if (uiState.isQuantityError) {
+                    Text(text = stringResource(Res.string.label_invalid_number))
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun NotesInput(notes: String, onNotesChange: (String) -> Unit) {
+    OutlinedTextField(
+        value = notes,
+        onValueChange = onNotesChange,
+        label = { Text(stringResource(Res.string.form_notes_label)) },
+        modifier = Modifier.fillMaxWidth().offset(y = -(8).dp)
+    )
+}
+
+@Composable
+private fun ActionsBar(
+    isRecurring: Boolean,
+    onRecurringChange: (Boolean) -> Unit,
+    isSubmitEnabled: Boolean,
+    onSubmit: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(Res.string.form_recurring_label))
+            Spacer(modifier = Modifier.width(8.dp))
+            Switch(
+                checked = isRecurring,
+                onCheckedChange = onRecurringChange
+            )
+        }
+        Button(
+            onClick = onSubmit,
+            enabled = isSubmitEnabled
+        ) {
+            Text(stringResource(Res.string.form_submit_button))
+        }
+    }
+}
 
 @Composable
 private fun mapCategory(category: Any): String {
@@ -86,182 +287,5 @@ private fun mapCategory(category: Any): String {
         }
 
         else -> ""
-    }
-
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TransactionalDialog(
-    viewModel: TransactionalViewModel, onDismiss: () -> Unit
-) {
-    val uiState by viewModel.uiState.collectAsState()
-    var expanded by remember { mutableStateOf(false) }
-
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
-    ) {
-        Surface(
-            shape = RoundedCornerShape(16.dp),
-            modifier = Modifier.fillMaxWidth().padding(30.dp)
-        ) {
-            Box {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().offset(x = -(8).dp, y = -(5).dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        val radioOptions = listOf(TransactionType.EXPENSE, TransactionType.INCOME)
-                        radioOptions.forEach { option ->
-                            Row(
-                                Modifier.selectable(
-                                    selected = (uiState.transactionType == option),
-                                    onClick = { viewModel.onTransactionTypeChange(option) },
-                                    role = Role.RadioButton
-                                ).padding(horizontal = 16.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                RadioButton(
-                                    selected = (uiState.transactionType == option), onClick = null
-                                )
-                                Text(
-                                    text = if (option == TransactionType.EXPENSE) stringResource(
-                                        Res.string.transaction_type_expense
-                                    ) else stringResource(
-                                        Res.string.transaction_type_income
-                                    ),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    modifier = Modifier.padding(start = 4.dp)
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.Top,
-                    ) {
-                        ExposedDropdownMenuBox(
-                            modifier = Modifier.weight(1f),
-                            expanded = expanded,
-                            onExpandedChange = { expanded = !expanded },
-                        ) {
-                            OutlinedTextField(
-                                modifier = Modifier
-                                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                                    .fillMaxWidth(),
-                                readOnly = true,
-                                value = if (uiState.transactionType == TransactionType.EXPENSE) mapCategory(
-                                    uiState.expenseCategory
-                                ) else mapCategory(uiState.incomeCategory),
-                                onValueChange = {},
-                                label = { Text(stringResource(Res.string.form_category_label)) },
-                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                                colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                            )
-                            ExposedDropdownMenu(
-                                expanded = expanded,
-                                onDismissRequest = { expanded = false },
-                            ) {
-                                if (uiState.transactionType == TransactionType.EXPENSE) {
-                                    ExpenseCategory.entries.forEach { selectionOption ->
-                                        DropdownMenuItem(
-                                            text = { Text(mapCategory(selectionOption)) },
-                                            onClick = {
-                                                viewModel.onExpenseCategoryChange(selectionOption)
-                                                expanded = false
-                                            },
-                                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
-                                        )
-                                    }
-                                } else {
-                                    IncomeCategory.entries.forEach { selectionOption ->
-                                        DropdownMenuItem(
-                                            text = { Text(mapCategory(selectionOption)) },
-                                            onClick = {
-                                                viewModel.onIncomeCategoryChange(selectionOption)
-                                                expanded = false
-                                            },
-                                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.width(8.dp))
-
-                        OutlinedTextField(
-                            modifier = Modifier.weight(1f),
-                            value = uiState.quantity,
-                            onValueChange = viewModel::onQuantityChange,
-                            label = { Text(stringResource(Res.string.form_quantity_label)) },
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Decimal
-                            ),
-                            singleLine = true,
-                            isError = uiState.isQuantityError,
-                            supportingText = {
-                                if (uiState.isQuantityError) {
-                                    Text(
-                                        text = stringResource(Res.string.label_invalid_number)
-                                    )
-                                }
-                            }
-                        )
-                    }
-
-                    OutlinedTextField(
-                        value = uiState.notes,
-                        onValueChange = viewModel::onNotesChange,
-                        label = { Text(stringResource(Res.string.form_notes_label)) },
-                        modifier = Modifier.fillMaxWidth().offset(y = -(8).dp)
-                    )
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(stringResource(Res.string.form_recurring_label))
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Switch(
-                                checked = uiState.isRecurring,
-                                onCheckedChange = viewModel::onRecurringChange
-                            )
-                        }
-                        Button(
-                            onClick = {
-                                viewModel.submit()
-                                onDismiss()
-                            },
-                            enabled = !uiState.isQuantityError
-                        ) {
-                            Text(stringResource(Res.string.form_submit_button))
-                        }
-                    }
-                }
-
-                IconButton(
-                    onClick = onDismiss,
-                    modifier = Modifier.align(Alignment.TopEnd).offset(x = (3).dp, y = -(2.5).dp)
-                ) {
-                    Icon(
-                        Icons.Default.Close, contentDescription = stringResource(
-                            Res.string.form_close_button_description
-                        )
-                    )
-                }
-            }
-        }
     }
 }
