@@ -103,7 +103,9 @@ fun TransactionalDialog(
                     modifier = Modifier.padding(14.dp)
                 ) {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .offset(x = -(8).dp, y = -(5).dp),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -236,7 +238,7 @@ fun TransactionalDialog(
                     onClick = onDismiss,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .offset(x = (3).dp, y = -(3).dp)
+                        .offset(x = (3).dp, y = -(2.5).dp)
                 ) {
                     Icon(
                         Icons.Default.Close,
