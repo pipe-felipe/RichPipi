@@ -222,7 +222,7 @@ fun TransactionalDialog(
                         modifier = Modifier.fillMaxWidth().offset(y = -(8).dp)
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
 
                     Button(
                         onClick = {
