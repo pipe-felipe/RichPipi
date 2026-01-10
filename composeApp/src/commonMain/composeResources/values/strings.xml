@@ -1,0 +1,29 @@
+<resources>
+    <string name="form_prompt">Preencha o campo abaixo:</string>
+    <string name="form_textfield_label">Campo de texto</string>
+    <string name="form_submit_button">Enviar</string>
+    <string name="form_close_button_description">Fechar</string>
+    <string name="form_date_label">Data</string>
+    <string name="form_category_label">Categoria</string>
+    <string name="form_quantity_label">R$ Valor</string>
+    <string name="form_notes_label">Notas</string>
+    <string name="form_recurring_label">Repete</string>
+
+    <string name="transaction_type_expense">Despesa</string>
+    <string name="transaction_type_income">Receita</string>
+
+    <string name="expense_category_transport">Transporte</string>
+    <string name="expense_category_gift">Presente</string>
+    <string name="expense_category_recurring">Recorrente</string>
+    <string name="expense_category_food">Comida</string>
+    <string name="expense_category_stuff">Coisas</string>
+    <string name="expense_category_medicine">Remédio</string>
+    <string name="expense_category_clothes">Roupas</string>
+
+    <string name="income_category_salary">Salário</string>
+    <string name="income_category_gift">Presente</string>
+    <string name="income_category_investment">Investimento</string>
+    <string name="income_category_other">Outro</string>
+
+    <string name="label_invalid_number">Número Inválido</string>
+</resources>
