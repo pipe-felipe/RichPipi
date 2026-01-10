@@ -34,7 +34,7 @@ fun App() {
             // O conteúdo principal da tela pode ser adicionado aqui
         }
 
-        if (!showDialog) {
+        if (showDialog) {
             TransactionalDialog(
                 viewModel = transactionalViewModel,
                 onDismiss = { showDialog = false }
