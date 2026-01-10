@@ -7,6 +7,7 @@
     <string name="form_category_label">Categoria</string>
     <string name="form_quantity_label">R$ Valor</string>
     <string name="form_notes_label">Notas</string>
+    <string name="form_recurring_label">Repete</string>
 
     <string name="transaction_type_expense">Despesa</string>
     <string name="transaction_type_income">Receita</string>

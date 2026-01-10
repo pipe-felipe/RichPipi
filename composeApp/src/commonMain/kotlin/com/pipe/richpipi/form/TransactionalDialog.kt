@@ -27,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -54,6 +55,7 @@ import richpipi.composeapp.generated.resources.form_category_label
 import richpipi.composeapp.generated.resources.form_close_button_description
 import richpipi.composeapp.generated.resources.form_notes_label
 import richpipi.composeapp.generated.resources.form_quantity_label
+import richpipi.composeapp.generated.resources.form_recurring_label
 import richpipi.composeapp.generated.resources.form_submit_button
 import richpipi.composeapp.generated.resources.income_category_gift
 import richpipi.composeapp.generated.resources.income_category_investment
@@ -224,15 +226,28 @@ fun TransactionalDialog(
 
                     Spacer(modifier = Modifier.height(6.dp))
 
-                    Button(
-                        onClick = {
-                            viewModel.submit()
-                            onDismiss()
-                        },
-                        modifier = Modifier.align(Alignment.End),
-                        enabled = !uiState.isQuantityError
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(stringResource(Res.string.form_submit_button))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(stringResource(Res.string.form_recurring_label))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Switch(
+                                checked = uiState.isRecurring,
+                                onCheckedChange = viewModel::onRecurringChange
+                            )
+                        }
+                        Button(
+                            onClick = {
+                                viewModel.submit()
+                                onDismiss()
+                            },
+                            enabled = !uiState.isQuantityError
+                        ) {
+                            Text(stringResource(Res.string.form_submit_button))
+                        }
                     }
                 }
 

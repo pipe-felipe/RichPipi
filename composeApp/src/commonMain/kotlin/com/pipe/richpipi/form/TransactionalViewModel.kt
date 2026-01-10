@@ -40,6 +40,7 @@ data class FormUiState(
     val incomeCategory: IncomeCategory = IncomeCategory.SALARY,
     val quantity: String = "",
     val notes: String = "",
+    val isRecurring: Boolean = false,
     val isQuantityError: Boolean = false
 )
 
@@ -112,6 +113,15 @@ class TransactionalViewModel : ViewModel() {
     fun onNotesChange(newText: String) {
         _uiState.update { currentState ->
             currentState.copy(notes = newText)
+        }
+    }
+
+    /**
+     * Called when the recurring switch is toggled.
+     */
+    fun onRecurringChange(isChecked: Boolean) {
+        _uiState.update { currentState ->
+            currentState.copy(isRecurring = isChecked)
         }
     }
 
