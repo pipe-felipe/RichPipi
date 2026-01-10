@@ -101,7 +101,7 @@ fun TransactionalDialog(
         ) {
             Box {
                 Column(
-                    modifier = Modifier.padding(14.dp)
+                    modifier = Modifier.padding(16.dp)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth().offset(x = -(8).dp, y = -(5).dp),
@@ -214,7 +214,7 @@ fun TransactionalDialog(
                         value = uiState.notes,
                         onValueChange = viewModel::onNotesChange,
                         label = { Text(stringResource(Res.string.form_notes_label)) },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth().offset(y = -(8).dp)
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
