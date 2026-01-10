@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -83,13 +84,13 @@ private fun mapCategory(category: Any): String {
 
         else -> ""
     }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionalDialog(
-    viewModel: TransactionalViewModel,
-    onDismiss: () -> Unit
+    viewModel: TransactionalViewModel, onDismiss: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var expanded by remember { mutableStateOf(false) }
@@ -103,32 +104,25 @@ fun TransactionalDialog(
                     modifier = Modifier.padding(14.dp)
                 ) {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .offset(x = -(8).dp, y = -(5).dp),
+                        modifier = Modifier.fillMaxWidth().offset(x = -(8).dp, y = -(5).dp),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         val radioOptions = listOf(TransactionType.EXPENSE, TransactionType.INCOME)
                         radioOptions.forEach { option ->
                             Row(
-                                Modifier
-                                    .selectable(
-                                        selected = (uiState.transactionType == option),
-                                        onClick = { viewModel.onTransactionTypeChange(option) },
-                                        role = Role.RadioButton
-                                    )
-                                    .padding(horizontal = 16.dp),
+                                Modifier.selectable(
+                                    selected = (uiState.transactionType == option),
+                                    onClick = { viewModel.onTransactionTypeChange(option) },
+                                    role = Role.RadioButton
+                                ).padding(horizontal = 16.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 RadioButton(
-                                    selected = (uiState.transactionType == option),
-                                    onClick = null
+                                    selected = (uiState.transactionType == option), onClick = null
                                 )
                                 Text(
-                                    text = if (
-                                        option == TransactionType.EXPENSE
-                                    ) stringResource(
+                                    text = if (option == TransactionType.EXPENSE) stringResource(
                                         Res.string.transaction_type_expense
                                     ) else stringResource(
                                         Res.string.transaction_type_income
@@ -142,77 +136,79 @@ fun TransactionalDialog(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Categoria
-                    ExposedDropdownMenuBox(
-                        expanded = expanded,
-                        onExpandedChange = { expanded = !expanded },
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.Top,
                     ) {
-                        OutlinedTextField(
-                            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                                .fillMaxWidth(),
-                            readOnly = true,
-                            value = if (uiState.transactionType == TransactionType.EXPENSE) mapCategory(
-                                uiState.expenseCategory
-                            ) else mapCategory(uiState.incomeCategory),
-                            onValueChange = {},
-                            label = { Text(stringResource(Res.string.form_category_label)) },
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                        )
-                        ExposedDropdownMenu(
+                        ExposedDropdownMenuBox(
+                            modifier = Modifier.weight(1f),
                             expanded = expanded,
-                            onDismissRequest = { expanded = false },
+                            onExpandedChange = { expanded = !expanded },
                         ) {
-                            if (uiState.transactionType == TransactionType.EXPENSE) {
-                                ExpenseCategory.entries.forEach { selectionOption ->
-                                    DropdownMenuItem(
-                                        text = { Text(mapCategory(selectionOption)) },
-                                        onClick = {
-                                            viewModel.onExpenseCategoryChange(selectionOption)
-                                            expanded = false
-                                        },
-                                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
-                                    )
-                                }
-                            } else {
-                                IncomeCategory.entries.forEach { selectionOption ->
-                                    DropdownMenuItem(
-                                        text = { Text(mapCategory(selectionOption)) },
-                                        onClick = {
-                                            viewModel.onIncomeCategoryChange(selectionOption)
-                                            expanded = false
-                                        },
-                                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
-                                    )
+                            OutlinedTextField(
+                                modifier = Modifier
+                                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                                    .fillMaxWidth(),
+                                readOnly = true,
+                                value = if (uiState.transactionType == TransactionType.EXPENSE) mapCategory(
+                                    uiState.expenseCategory
+                                ) else mapCategory(uiState.incomeCategory),
+                                onValueChange = {},
+                                label = { Text(stringResource(Res.string.form_category_label)) },
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                                colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                            )
+                            ExposedDropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false },
+                            ) {
+                                if (uiState.transactionType == TransactionType.EXPENSE) {
+                                    ExpenseCategory.entries.forEach { selectionOption ->
+                                        DropdownMenuItem(
+                                            text = { Text(mapCategory(selectionOption)) },
+                                            onClick = {
+                                                viewModel.onExpenseCategoryChange(selectionOption)
+                                                expanded = false
+                                            },
+                                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                                        )
+                                    }
+                                } else {
+                                    IncomeCategory.entries.forEach { selectionOption ->
+                                        DropdownMenuItem(
+                                            text = { Text(mapCategory(selectionOption)) },
+                                            onClick = {
+                                                viewModel.onIncomeCategoryChange(selectionOption)
+                                                expanded = false
+                                            },
+                                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                                        )
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
 
-                    OutlinedTextField(
-                        value = uiState.quantity,
-                        onValueChange = viewModel::onQuantityChange,
-                        label = { Text(stringResource(Res.string.form_quantity_label)) },
-                        modifier = Modifier.fillMaxWidth(),
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Decimal
-                        ),
-                        singleLine = true,
-                        isError = uiState.isQuantityError
-                    )
-
-
-                    if (uiState.isQuantityError) {
-                        Text(
-                            text = stringResource(Res.string.label_invalid_number),
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                        OutlinedTextField(
+                            modifier = Modifier.weight(1f),
+                            value = uiState.quantity,
+                            onValueChange = viewModel::onQuantityChange,
+                            label = { Text(stringResource(Res.string.form_quantity_label)) },
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Decimal
+                            ),
+                            singleLine = true,
+                            isError = uiState.isQuantityError,
+                            supportingText = {
+                                if (uiState.isQuantityError) {
+                                    Text(
+                                        text = stringResource(Res.string.label_invalid_number)
+                                    )
+                                }
+                            }
                         )
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
 
                     OutlinedTextField(
                         value = uiState.notes,
@@ -220,7 +216,8 @@ fun TransactionalDialog(
                         label = { Text(stringResource(Res.string.form_notes_label)) },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     Button(
                         onClick = {
@@ -236,13 +233,10 @@ fun TransactionalDialog(
 
                 IconButton(
                     onClick = onDismiss,
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .offset(x = (3).dp, y = -(2.5).dp)
+                    modifier = Modifier.align(Alignment.TopEnd).offset(x = (3).dp, y = -(2.5).dp)
                 ) {
                     Icon(
-                        Icons.Default.Close,
-                        contentDescription = stringResource(
+                        Icons.Default.Close, contentDescription = stringResource(
                             Res.string.form_close_button_description
                         )
                     )
