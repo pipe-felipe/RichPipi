@@ -40,6 +40,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import org.jetbrains.compose.resources.stringResource
 import richpipi.composeapp.generated.resources.Res
 import richpipi.composeapp.generated.resources.expense_category_clothes
@@ -95,9 +96,13 @@ fun TransactionalDialog(
     val uiState by viewModel.uiState.collectAsState()
     var expanded by remember { mutableStateOf(false) }
 
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
         Surface(
             shape = RoundedCornerShape(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(30.dp)
         ) {
             Box {
                 Column(
