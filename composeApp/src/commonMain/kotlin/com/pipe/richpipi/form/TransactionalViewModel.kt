@@ -1,12 +1,15 @@
 package com.pipe.richpipi.form
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.pipe.richpipi.domain.model.Transaction
+import com.pipe.richpipi.domain.usecase.InsertTransactionUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
 
 enum class TransactionType {
     EXPENSE,
@@ -47,7 +50,7 @@ data class FormUiState(
 /**
  * ViewModel to handle the business logic and state of the form.
  */
-class TransactionalViewModel : ViewModel() {
+class TransactionalViewModel(private val insertTransactionUseCase: InsertTransactionUseCase) : ViewModel() {
 
     // Private mutable state flow
     private val _uiState = MutableStateFlow(FormUiState())
@@ -60,15 +63,6 @@ class TransactionalViewModel : ViewModel() {
     fun onTransactionTypeChange(newType: TransactionType) {
         _uiState.update { currentState ->
             currentState.copy(transactionType = newType)
-        }
-    }
-
-    /**
-     * Called when the date field value changes.
-     */
-    fun onDateChange(newText: String) {
-        _uiState.update { currentState ->
-            currentState.copy(date = newText)
         }
     }
 
@@ -128,16 +122,15 @@ class TransactionalViewModel : ViewModel() {
     /**
      * Called when the form is submitted.
      */
-    @OptIn(ExperimentalTime::class)
     fun submit() {
-        // You can add your submission logic here.
-        val date = uiState.value.date.ifBlank {
-            val today = Clock.System.now()
-            today.toString()
+        viewModelScope.launch {
+            val state = _uiState.value
+            val transaction = Transaction(
+                name = state.notes,
+                amount = state.quantity.replace(",", ".").toDouble(),
+                date = Clock.System.now().toString().toLong()
+            )
+            insertTransactionUseCase(transaction)
         }
-        println("Submitted value: $date")
-
-        // You might want to reset the state after submission
-        // _uiState.value = FormUiState()
     }
 }
