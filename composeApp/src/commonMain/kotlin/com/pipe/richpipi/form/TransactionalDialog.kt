@@ -43,7 +43,27 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import org.jetbrains.compose.resources.stringResource
-import richpipi.composeapp.generated.resources.*
+import richpipi.composeapp.generated.resources.Res
+import richpipi.composeapp.generated.resources.expense_category_clothes
+import richpipi.composeapp.generated.resources.expense_category_food
+import richpipi.composeapp.generated.resources.expense_category_gift
+import richpipi.composeapp.generated.resources.expense_category_medicine
+import richpipi.composeapp.generated.resources.expense_category_recurring
+import richpipi.composeapp.generated.resources.expense_category_stuff
+import richpipi.composeapp.generated.resources.expense_category_transport
+import richpipi.composeapp.generated.resources.form_category_label
+import richpipi.composeapp.generated.resources.form_close_button_description
+import richpipi.composeapp.generated.resources.form_notes_label
+import richpipi.composeapp.generated.resources.form_quantity_label
+import richpipi.composeapp.generated.resources.form_recurring_label
+import richpipi.composeapp.generated.resources.form_submit_button
+import richpipi.composeapp.generated.resources.income_category_gift
+import richpipi.composeapp.generated.resources.income_category_investment
+import richpipi.composeapp.generated.resources.income_category_other
+import richpipi.composeapp.generated.resources.income_category_salary
+import richpipi.composeapp.generated.resources.label_invalid_number
+import richpipi.composeapp.generated.resources.transaction_type_expense
+import richpipi.composeapp.generated.resources.transaction_type_income
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,7 +79,7 @@ fun TransactionalDialog(
     ) {
         Surface(
             shape = RoundedCornerShape(16.dp),
-            modifier = Modifier.fillMaxWidth().padding(30.dp)
+            modifier = Modifier.fillMaxWidth().padding(15.dp)
         ) {
             Box {
                 Column(
