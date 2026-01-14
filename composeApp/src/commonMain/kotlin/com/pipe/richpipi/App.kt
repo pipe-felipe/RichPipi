@@ -10,6 +10,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pipe.richpipi.form.TransactionalViewModel
@@ -20,10 +21,12 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview
-fun App() {
+fun App(transactionalViewModel: TransactionalViewModel? = null) {
     var showDialog by remember { mutableStateOf(false) }
-    val transactionalViewModel: TransactionalViewModel = viewModel()
-    val items by transactionalViewModel.items.collectAsState()
+    val vm: TransactionalViewModel = transactionalViewModel ?: viewModel()
+
+    // Collect items Flow from VM using collectAsState with initial value
+    val itemsList by vm.items.collectAsState(initial = emptyList())
 
     RichPipiTheme {
         Scaffold(
@@ -35,10 +38,10 @@ fun App() {
             }
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
-                if (items.isEmpty()) {
+                if (itemsList.isEmpty()) {
                     Text("No items yet")
                 } else {
-                    items.forEach { item ->
+                    itemsList.forEach { item ->
                         Text("${item.id}: ${item.name} - ${item.description}")
                     }
                 }
@@ -47,7 +50,7 @@ fun App() {
 
         if (showDialog) {
             TransactionalDialog(
-                viewModel = transactionalViewModel,
+                viewModel = vm,
                 onDismiss = { showDialog = false }
             )
         }
