@@ -1,3 +1,7 @@
+# RichPipi
+
+RichPipi is a multiplatform personal finance tracking application built with Kotlin Multiplatform and Jetpack Compose. It allows users to record, categorize, and manage their income and expenses, supporting features like recurring transactions, notes, and category selection. The project targets Android and iOS platforms, leveraging Room for local data storage and Compose for a modern UI experience.
+
 This is a Kotlin Multiplatform project targeting Android, iOS.
 
 * [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.

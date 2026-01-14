@@ -1,12 +1,19 @@
 package com.pipe.richpipi.form
 
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
+import domain.model.Item
+import domain.usecase.AddItemUseCase
+import domain.usecase.GetAllItemsUseCase
 
 enum class TransactionType {
     EXPENSE,
@@ -47,12 +54,18 @@ data class FormUiState(
 /**
  * ViewModel to handle the business logic and state of the form.
  */
-class TransactionalViewModel : ViewModel() {
+class TransactionalViewModel(
+    private val addItemUseCase: AddItemUseCase,
+    private val getAllItemsUseCase: GetAllItemsUseCase
+) : ViewModel() {
 
     // Private mutable state flow
     private val _uiState = MutableStateFlow(FormUiState())
     // Public read-only state flow
     val uiState: StateFlow<FormUiState> = _uiState.asStateFlow()
+
+    // Items exposed to UI (as Flow from domain use case)
+    val items: Flow<List<Item>> = getAllItemsUseCase()
 
     /**
      * Called when the transaction type changes.
@@ -130,14 +143,26 @@ class TransactionalViewModel : ViewModel() {
      */
     @OptIn(ExperimentalTime::class)
     fun submit() {
-        // You can add your submission logic here.
+        // Build item from uiState
         val date = uiState.value.date.ifBlank {
             val today = Clock.System.now()
             today.toString()
         }
-        println("Submitted value: $date")
+        // create domain item
+        val item = Item(
+            name = "${uiState.value.transactionType} - ${uiState.value.quantity}",
+            description = "${uiState.value.notes} | date: $date",
+            createdAt = Clock.System.now().toEpochMilliseconds()
+        )
 
-        // You might want to reset the state after submission
-        // _uiState.value = FormUiState()
+        // Insert using domain use-case
+        CoroutineScope(Dispatchers.Default).launch {
+            try {
+                val id = addItemUseCase(item)
+                println("Inserted item id: $id")
+            } catch (t: Throwable) {
+                println("Error inserting item: ${t.message}")
+            }
+        }
     }
 }
