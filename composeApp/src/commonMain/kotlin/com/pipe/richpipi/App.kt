@@ -28,11 +28,17 @@ fun App(transactionalViewModel: TransactionalViewModel? = null) {
     val itemsList by mainVm.items.collectAsState()
     val incomeText by mainVm.totalIncomeText.collectAsState()
     val expenseText by mainVm.totalExpenseText.collectAsState()
+    val currentMonthYear by mainVm.currentMonthYearText.collectAsState()
+    val currentMonth by mainVm.currentMonth.collectAsState()
+    val currentYear by mainVm.currentYear.collectAsState()
 
     MainScreenContent(
         itemsList = itemsList,
         totalIncomeText = incomeText,
         totalExpenseText = expenseText,
+        currentMonthYear = currentMonthYear,
+        onPreviousMonth = { mainVm.goToPreviousMonth() },
+        onNextMonth = { mainVm.goToNextMonth() },
         onAddButtonClick = { showDialogState.value = true },
         onDeleteItem = { id -> mainVm.delete(id) }
     )
@@ -40,6 +46,8 @@ fun App(transactionalViewModel: TransactionalViewModel? = null) {
     if (showDialogState.value) {
         TransactionalDialog(
             viewModel = vm,
+            selectedMonth = currentMonth,
+            selectedYear = currentYear,
             onDismiss = { showDialogState.value = false }
         )
     }

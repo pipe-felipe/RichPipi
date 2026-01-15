@@ -70,7 +70,10 @@ import domain.model.TransactionType as DomainTransactionType
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionalDialog(
-    viewModel: TransactionalViewModel, onDismiss: () -> Unit
+    viewModel: TransactionalViewModel,
+    selectedMonth: Int,
+    selectedYear: Int,
+    onDismiss: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var expanded by remember { mutableStateOf(false) }
@@ -125,7 +128,7 @@ fun TransactionalDialog(
                             onRecurringChange = viewModel::onRecurringChange,
                             isSubmitEnabled = isSubmitEnabled,
                             onSubmit = {
-                                viewModel.submit()
+                                viewModel.submit(selectedMonth, selectedYear)
                                 onDismiss()
                             }
                         )

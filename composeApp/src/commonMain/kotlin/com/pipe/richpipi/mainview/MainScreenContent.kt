@@ -33,6 +33,9 @@ fun MainScreenContent(
     itemsList: List<Transaction>,
     totalIncomeText: String,
     totalExpenseText: String,
+    currentMonthYear: String,
+    onPreviousMonth: () -> Unit,
+    onNextMonth: () -> Unit,
     onAddButtonClick: () -> Unit,
     onDeleteItem: (Int) -> Unit
 ) {
@@ -42,7 +45,10 @@ fun MainScreenContent(
             topBar = {
                 MainTopBar(
                     totalIncomeText = totalIncomeText,
-                    totalExpenseText = totalExpenseText
+                    totalExpenseText = totalExpenseText,
+                    currentMonthYear = currentMonthYear,
+                    onPreviousMonth = onPreviousMonth,
+                    onNextMonth = onNextMonth
                 )
             },
             floatingActionButton = {

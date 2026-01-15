@@ -1,5 +1,6 @@
 package com.pipe.richpipi.mainview
 
+import com.pipe.richpipi.platform.currentMonthYear
 import domain.model.Transaction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,6 +27,16 @@ class MainScreenViewModel(
     val totalIncomeText: StateFlow<String> = _totalIncomeText.asStateFlow()
     val totalExpenseText: StateFlow<String> = _totalExpenseText.asStateFlow()
 
+    // Current month and year for navigation
+    private val initialMonthYear = currentMonthYear()
+    private val _currentMonth = MutableStateFlow(initialMonthYear.first)
+    private val _currentYear = MutableStateFlow(initialMonthYear.second)
+    val currentMonth: StateFlow<Int> = _currentMonth.asStateFlow()
+    val currentYear: StateFlow<Int> = _currentYear.asStateFlow()
+
+    private val _currentMonthYearText = MutableStateFlow(formatMonthYear(initialMonthYear.first, initialMonthYear.second))
+    val currentMonthYearText: StateFlow<String> = _currentMonthYearText.asStateFlow()
+
     private val scope = CoroutineScope(Dispatchers.Default)
 
     init {
@@ -45,6 +56,39 @@ class MainScreenViewModel(
 
     fun delete(id: Int) = onDeleteItem(id)
 
+    fun goToPreviousMonth() {
+        val month = _currentMonth.value
+        val year = _currentYear.value
+
+        if (month == 1) {
+            _currentMonth.value = 12
+            _currentYear.value = year - 1
+        } else {
+            _currentMonth.value = month - 1
+        }
+        _currentMonthYearText.value = formatMonthYear(_currentMonth.value, _currentYear.value)
+    }
+
+    fun goToNextMonth() {
+        val month = _currentMonth.value
+        val year = _currentYear.value
+
+        if (month == 12) {
+            _currentMonth.value = 1
+            _currentYear.value = year + 1
+        } else {
+            _currentMonth.value = month + 1
+        }
+        _currentMonthYearText.value = formatMonthYear(_currentMonth.value, _currentYear.value)
+    }
+
+    private fun formatMonthYear(month: Int, year: Int): String {
+        val monthNames = listOf(
+            "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+            "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+        )
+        return "${monthNames[month - 1]} $year"
+    }
 
     internal fun computeTotalsForTest(items: List<Transaction>): Pair<Double, Double> =
         computeTotals(items)

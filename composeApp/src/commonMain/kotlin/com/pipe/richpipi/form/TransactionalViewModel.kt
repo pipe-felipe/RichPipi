@@ -155,7 +155,7 @@ class TransactionalViewModel(
      * Called when the form is submitted.
      */
     @OptIn(ExperimentalTime::class)
-    fun submit() {
+    fun submit(month: Int, year: Int) {
         // Validate required fields: category and quantity
         val state = uiState.value
         val hasValidQuantity = state.quantity.isNotBlank() && !state.isQuantityError
@@ -171,9 +171,9 @@ class TransactionalViewModel(
         }
 
         // Build item from uiState
+        // Use the provided month and year for the transaction date
         val date = state.date.ifBlank {
-            val today = Clock.System.now()
-            today.toString()
+            "$year-${month.toString().padStart(2, '0')}-01"
         }
 
         // parse quantity into cents
