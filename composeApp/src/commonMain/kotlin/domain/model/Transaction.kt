@@ -1,7 +1,5 @@
 package domain.model
 
-import kotlin.jvm.JvmInline
-
 enum class TransactionType { INCOME, EXPENSE }
 
 data class Transaction(
@@ -10,5 +8,6 @@ data class Transaction(
     val type: TransactionType,
     val description: String? = null,
     val date: Long = 0L,
+    val isRecurring: Boolean = false,
     val createdAt: Long = 0L
 )

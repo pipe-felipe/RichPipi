@@ -9,7 +9,7 @@ import data.local.entity.RecurringTransactionEntity
 import data.local.entity.MonthlySummaryEntity
 import data.local.entity.Converters
 
-@Database(entities = [TransactionEntity::class, RecurringTransactionEntity::class, MonthlySummaryEntity::class], version = 2, exportSchema = true)
+@Database(entities = [TransactionEntity::class, RecurringTransactionEntity::class, MonthlySummaryEntity::class], version = 3, exportSchema = true)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun transactionDao(): TransactionDao

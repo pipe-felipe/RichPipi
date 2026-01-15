@@ -7,6 +7,10 @@ import kotlinx.coroutines.runBlocking
 class DeleteItemUseCaseTest {
     private class FakeRepo(var deletedId: Int? = null) : domain.repository.TransactionRepository {
         override fun getTransactions() = throw UnsupportedOperationException()
+
+        override fun getTransactionsForMonth(monthStartMillis: Long, monthEndExclusiveMillis: Long) =
+            throw UnsupportedOperationException()
+
         override suspend fun makeTransaction(item: domain.model.Transaction) = throw UnsupportedOperationException()
         override suspend fun deleteTransaction(id: Int): Int {
             deletedId = id
@@ -23,4 +27,3 @@ class DeleteItemUseCaseTest {
         assertEquals(42, fakeRepo.deletedId)
     }
 }
-

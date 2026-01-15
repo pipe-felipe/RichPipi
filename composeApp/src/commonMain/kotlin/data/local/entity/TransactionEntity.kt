@@ -13,6 +13,9 @@ data class TransactionEntity(
     val description: String? = null,
     // occurrence date (epoch millis)
     val date: Long,
+    // Marks whether this transaction should appear in every month.
+    // (Repeatable expenses/income)
+    val isRecurring: Boolean = false,
     // if this transaction was generated from a recurring rule, link to it
     val recurringId: Int? = null,
     // use 0L as default in commonMain; populate when creating instances

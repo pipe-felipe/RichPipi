@@ -1,5 +1,6 @@
 package com.pipe.richpipi.form
 
+import com.pipe.richpipi.platform.monthBoundsUtcMillis
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -171,8 +172,11 @@ class TransactionalViewModel(
         }
 
         // Build item from uiState
-        // Use the provided month and year for the transaction date
-        val date = state.date.ifBlank {
+        // Persist an actual occurrence date (epoch millis) for the selected month.
+        val (monthStartMillis, _) = monthBoundsUtcMillis(month = month, year = year)
+
+        // Keep the human-readable date string in the description for now (optional)
+        val dateText = state.date.ifBlank {
             "$year-${month.toString().padStart(2, '0')}-01"
         }
 
@@ -180,11 +184,12 @@ class TransactionalViewModel(
         val amountDouble = state.quantity.replace(",", ".").toDoubleOrNull() ?: 0.0
         val amountCents = round(amountDouble * 100).toLong()
 
-        // create domain item
         val item = Transaction(
             amountCents = amountCents,
             type = state.transactionType,
-            description = "${state.notes} | date: $date",
+            description = "${state.notes} | date: $dateText",
+            date = monthStartMillis,
+            isRecurring = state.isRecurring,
             createdAt = Clock.System.now().toEpochMilliseconds()
         )
 

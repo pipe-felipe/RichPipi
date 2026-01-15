@@ -11,13 +11,21 @@ class GetAllItemsUseCaseTest {
     private class FakeRepo : domain.repository.TransactionRepository {
         val items = mutableListOf<Transaction>()
         override fun getTransactions() = MutableStateFlow(items) as kotlinx.coroutines.flow.Flow<List<Transaction>>
-        override suspend fun makeTransaction(item: Transaction): Long {
-            items.add(item.copy(id = items.size + 1))
+
+        override fun getTransactionsForMonth(monthStartMillis: Long, monthEndExclusiveMillis: Long) =
+            getTransactions()
+
+        override suspend fun makeTransaction(transaction: Transaction): Long {
+            items.add(transaction.copy(id = items.size + 1))
             return items.size.toLong()
         }
+
         override suspend fun deleteTransaction(id: Int): Int {
             val idx = items.indexOfFirst { it.id == id }
-            return if (idx >= 0) { items.removeAt(idx); 1 } else 0
+            return if (idx >= 0) {
+                items.removeAt(idx)
+                1
+            } else 0
         }
     }
 
@@ -31,7 +39,14 @@ class GetAllItemsUseCaseTest {
         assertEquals(0, initial.size)
 
         // add item and verify
-        repo.makeTransaction(Transaction(amountCents = 100, type = domain.model.TransactionType.INCOME, description = "d", createdAt = 1L))
+        repo.makeTransaction(
+            Transaction(
+                amountCents = 100,
+                type = domain.model.TransactionType.INCOME,
+                description = "d",
+                createdAt = 1L
+            )
+        )
         val after = useCase().first()
         assertEquals(1, after.size)
         assertEquals(100, after[0].amountCents)

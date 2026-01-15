@@ -17,6 +17,26 @@ class TransactionRepositoryImpl(private val dao: TransactionDao) : TransactionRe
                     type = entity.type,
                     description = entity.description,
                     date = entity.date,
+                    isRecurring = entity.isRecurring,
+                    createdAt = entity.createdAt
+                )
+            }
+        }
+    }
+
+    override fun getTransactionsForMonth(
+        monthStartMillis: Long,
+        monthEndExclusiveMillis: Long
+    ): Flow<List<Transaction>> {
+        return dao.getTransactionsForMonth(monthStartMillis, monthEndExclusiveMillis).map { list ->
+            list.map { entity ->
+                Transaction(
+                    id = entity.id,
+                    amountCents = entity.amountCents,
+                    type = entity.type,
+                    description = entity.description,
+                    date = entity.date,
+                    isRecurring = entity.isRecurring,
                     createdAt = entity.createdAt
                 )
             }
@@ -29,6 +49,7 @@ class TransactionRepositoryImpl(private val dao: TransactionDao) : TransactionRe
             type = transaction.type,
             description = transaction.description,
             date = transaction.date,
+            isRecurring = transaction.isRecurring,
             createdAt = transaction.createdAt
         )
         return dao.addTransaction(entity)

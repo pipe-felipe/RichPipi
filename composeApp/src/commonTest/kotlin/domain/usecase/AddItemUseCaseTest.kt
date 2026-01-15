@@ -12,6 +12,10 @@ class AddItemUseCaseTest {
     private class FakeRepo : TransactionRepository {
         val items = mutableListOf<Transaction>()
         override fun getTransactions() = kotlinx.coroutines.flow.MutableStateFlow(items) as kotlinx.coroutines.flow.Flow<List<Transaction>>
+
+        override fun getTransactionsForMonth(monthStartMillis: Long, monthEndExclusiveMillis: Long) =
+            getTransactions()
+
         override suspend fun makeTransaction(item: Transaction): Long {
             items.add(item.copy(id = items.size + 1))
             return items.size.toLong()

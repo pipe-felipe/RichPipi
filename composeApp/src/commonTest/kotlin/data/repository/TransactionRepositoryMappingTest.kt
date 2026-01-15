@@ -37,6 +37,12 @@ class TransactionRepositoryMappingTest {
         val repo = TransactionRepositoryImpl(
             object : data.local.dao.TransactionDao {
                 override fun getAllTransactions() = fakeDao.getAllTransactions()
+
+                override fun getTransactionsForMonth(
+                    monthStartMillis: Long,
+                    monthEndExclusiveMillis: Long
+                ) = fakeDao.getAllTransactions()
+
                 override suspend fun getTransactionById(id: Int) = fakeDao.list.find { it.id == id }
                 override suspend fun addTransaction(item: TransactionEntity) = fakeDao.addTransaction(item)
                 override suspend fun deleteTransactionById(id: Int) = fakeDao.deleteTransactionById(id)

@@ -1,6 +1,7 @@
 package com.pipe.richpipi.mainview
 
 import com.pipe.richpipi.platform.currentMonthYear
+import com.pipe.richpipi.platform.monthBoundsUtcMillis
 import domain.model.Transaction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -8,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 
@@ -27,6 +29,8 @@ class MainScreenViewModel(
     val totalIncomeText: StateFlow<String> = _totalIncomeText.asStateFlow()
     val totalExpenseText: StateFlow<String> = _totalExpenseText.asStateFlow()
 
+    private val _allItems = MutableStateFlow<List<Transaction>>(emptyList())
+
     // Current month and year for navigation
     private val initialMonthYear = currentMonthYear()
     private val _currentMonth = MutableStateFlow(initialMonthYear.first)
@@ -41,15 +45,28 @@ class MainScreenViewModel(
 
     init {
         scope.launch {
+            // Keep the raw list up-to-date
             try {
                 itemsSource.collect { list ->
-                    _items.value = list
-                    val (inc, exp) = computeTotals(list)
-                    _totalIncomeText.value = "R$ ${formatTwoDecimals(inc)}"
-                    _totalExpenseText.value = "R$ ${formatTwoDecimals(exp)}"
+                    _allItems.value = list
                 }
             } catch (_: Throwable) {
                 // ignore
+            }
+        }
+
+        scope.launch {
+            // Recompute filtered list + totals whenever items or selected month/year changes
+            combine(_allItems, _currentMonth, _currentYear) { list, month, year ->
+                val (start, endExclusive) = monthBoundsUtcMillis(month = month, year = year)
+                list.filter { tx ->
+                    tx.isRecurring || (tx.date >= start && tx.date < endExclusive)
+                }
+            }.collect { filtered ->
+                _items.value = filtered
+                val (inc, exp) = computeTotals(filtered)
+                _totalIncomeText.value = "R$ ${formatTwoDecimals(inc)}"
+                _totalExpenseText.value = "R$ ${formatTwoDecimals(exp)}"
             }
         }
     }
