@@ -99,6 +99,13 @@ class MainScreenViewModel(
         _currentMonthYearText.value = formatMonthYear(_currentMonth.value, _currentYear.value)
     }
 
+    fun goToCurrentMonth() {
+        val (month, year) = currentMonthYear()
+        _currentMonth.value = month
+        _currentYear.value = year
+        _currentMonthYearText.value = formatMonthYear(month, year)
+    }
+
     private fun formatMonthYear(month: Int, year: Int): String {
         val monthNames = listOf(
             "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",

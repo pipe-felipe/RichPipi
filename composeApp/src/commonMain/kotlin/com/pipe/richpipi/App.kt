@@ -39,6 +39,7 @@ fun App(transactionalViewModel: TransactionalViewModel? = null) {
         currentMonthYear = currentMonthYear,
         onPreviousMonth = { mainVm.goToPreviousMonth() },
         onNextMonth = { mainVm.goToNextMonth() },
+        onCurrentMonthClick = { mainVm.goToCurrentMonth() },
         onAddButtonClick = { showDialogState.value = true },
         onDeleteItem = { id -> mainVm.delete(id) }
     )

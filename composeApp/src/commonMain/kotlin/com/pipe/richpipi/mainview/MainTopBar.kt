@@ -16,6 +16,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,6 +31,7 @@ fun MainTopBar(
     currentMonthYear: String,
     onPreviousMonth: () -> Unit,
     onNextMonth: () -> Unit,
+    onCurrentMonthClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -55,13 +57,17 @@ fun MainTopBar(
                     )
                 }
 
-                Text(
-                    text = currentMonthYear,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
+                TextButton(
+                    onClick = onCurrentMonthClick,
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp)
+                ) {
+                    Text(
+                        text = currentMonthYear,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
 
                 IconButton(onClick = onNextMonth) {
                     Icon(

@@ -36,6 +36,7 @@ fun MainScreenContent(
     currentMonthYear: String,
     onPreviousMonth: () -> Unit,
     onNextMonth: () -> Unit,
+    onCurrentMonthClick: () -> Unit,
     onAddButtonClick: () -> Unit,
     onDeleteItem: (Int) -> Unit
 ) {
@@ -48,7 +49,8 @@ fun MainScreenContent(
                     totalExpenseText = totalExpenseText,
                     currentMonthYear = currentMonthYear,
                     onPreviousMonth = onPreviousMonth,
-                    onNextMonth = onNextMonth
+                    onNextMonth = onNextMonth,
+                    onCurrentMonthClick = onCurrentMonthClick
                 )
             },
             floatingActionButton = {
