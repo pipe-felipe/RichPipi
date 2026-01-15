@@ -80,4 +80,7 @@ class MainScreenViewModel(
         val sign = if (negative) "-" else ""
         return "$sign$whole.$fraction"
     }
+
+    // Small internal helper for tests to call the computeTotals logic without reflection.
+    internal fun computeTotalsForTest(items: List<Item>): Pair<Double, Double> = computeTotals(items)
 }
