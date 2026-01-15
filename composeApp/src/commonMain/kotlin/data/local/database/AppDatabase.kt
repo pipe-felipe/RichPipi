@@ -2,10 +2,10 @@ package data.local.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import data.local.dao.ItemDao
-import data.local.entity.ItemEntity
+import data.local.dao.TransactionDao
+import data.local.entity.TransactionEntity
 
-@Database(entities = [ItemEntity::class], version = 1, exportSchema = true)
+@Database(entities = [TransactionEntity::class], version = 1, exportSchema = true)
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun itemDao(): ItemDao
+    abstract fun transactionDao(): TransactionDao
 }

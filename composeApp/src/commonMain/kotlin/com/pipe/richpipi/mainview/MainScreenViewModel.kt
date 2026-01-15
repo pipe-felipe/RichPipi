@@ -1,6 +1,6 @@
 package com.pipe.richpipi.mainview
 
-import domain.model.Item
+import domain.model.Transaction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -17,11 +17,11 @@ import kotlin.math.round
  * It is not an AndroidX ViewModel so it can be instantiated from common code easily.
  */
 class MainScreenViewModel(
-    itemsSource: Flow<List<Item>> = emptyFlow(),
+    itemsSource: Flow<List<Transaction>> = emptyFlow(),
     private val onDeleteItem: (Int) -> Unit = {}
 ) {
-    private val _items = MutableStateFlow<List<Item>>(emptyList())
-    val items: StateFlow<List<Item>> = _items.asStateFlow()
+    private val _items = MutableStateFlow<List<Transaction>>(emptyList())
+    val items: StateFlow<List<Transaction>> = _items.asStateFlow()
 
     private val _totalIncomeText = MutableStateFlow("R$ 0.00")
     private val _totalExpenseText = MutableStateFlow("R$ 0.00")
@@ -47,17 +47,17 @@ class MainScreenViewModel(
 
     fun delete(id: Int) = onDeleteItem(id)
 
-    private fun computeTotals(items: List<Item>): Pair<Double, Double> {
+    private fun computeTotals(items: List<Transaction>): Pair<Double, Double> {
         var income = 0.0
         var expense = 0.0
         for (item in items) {
-            val amt = parseAmountFromName(item.name) ?: continue
-            val prefix = item.name.trim().split(" ").firstOrNull()?.uppercase() ?: ""
+            val amt = parseAmountFromName(item.value) ?: continue
+            val prefix = item.value.trim().split(" ").firstOrNull()?.uppercase() ?: ""
             when {
                 prefix.startsWith("INCOME") -> income += amt
                 prefix.startsWith("EXPENSE") -> expense += amt
                 else -> {
-                    // Unknown prefix, ignore
+                    throw IllegalArgumentException("Unknown item prefix: '$prefix' in '${item.value}'")
                 }
             }
         }
@@ -81,6 +81,6 @@ class MainScreenViewModel(
         return "$sign$whole.$fraction"
     }
 
-    // Small internal helper for tests to call the computeTotals logic without reflection.
-    internal fun computeTotalsForTest(items: List<Item>): Pair<Double, Double> = computeTotals(items)
+    internal fun computeTotalsForTest(items: List<Transaction>): Pair<Double, Double> =
+        computeTotals(items)
 }

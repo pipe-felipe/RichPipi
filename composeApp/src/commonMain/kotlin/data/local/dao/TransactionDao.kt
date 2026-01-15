@@ -1,22 +1,22 @@
 package data.local.dao
 
-import data.local.entity.ItemEntity
+import data.local.entity.TransactionEntity
 import kotlinx.coroutines.flow.Flow
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 
 @Dao
-interface ItemDao {
+interface TransactionDao {
     @Query("SELECT * FROM transactions ORDER BY createdAt DESC")
-    fun getAllItems(): Flow<List<ItemEntity>>
+    fun getAllTransactions(): Flow<List<TransactionEntity>>
 
     @Query("SELECT * FROM transactions WHERE id = :id LIMIT 1")
-    suspend fun getItemById(id: Int): ItemEntity?
+    suspend fun getTransactionById(id: Int): TransactionEntity?
 
     @Insert
-    suspend fun addItem(item: ItemEntity): Long
+    suspend fun addTransaction(item: TransactionEntity): Long
 
     @Query("DELETE FROM transactions WHERE id = :id")
-    suspend fun deleteById(id: Int): Int
+    suspend fun deleteTransactionById(id: Int): Int
 }

@@ -11,10 +11,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
-import domain.model.Item
-import domain.usecase.AddItemUseCase
-import domain.usecase.GetAllItemsUseCase
-import domain.usecase.DeleteItemUseCase
+import domain.model.Transaction
+import domain.usecase.MakeTransactionUseCase
+import domain.usecase.GetTransactions
+import domain.usecase.DeleteTransactionUseCase
 
 enum class TransactionType {
     EXPENSE,
@@ -56,9 +56,9 @@ data class FormUiState(
  * ViewModel to handle the business logic and state of the form.
  */
 class TransactionalViewModel(
-    private val addItemUseCase: AddItemUseCase,
-    private val getAllItemsUseCase: GetAllItemsUseCase,
-    private val deleteItemUseCase: DeleteItemUseCase
+    private val addItemUseCase: MakeTransactionUseCase,
+    private val getAllItemsUseCase: GetTransactions,
+    private val deleteItemUseCase: DeleteTransactionUseCase
 ) : ViewModel() {
 
     // Private mutable state flow
@@ -67,7 +67,7 @@ class TransactionalViewModel(
     val uiState: StateFlow<FormUiState> = _uiState.asStateFlow()
 
     // Items exposed to UI (as Flow from domain use case)
-    val items: Flow<List<Item>> = getAllItemsUseCase()
+    val items: Flow<List<Transaction>> = getAllItemsUseCase()
 
     /**
      * Delete an item by id
@@ -179,8 +179,8 @@ class TransactionalViewModel(
             today.toString()
         }
         // create domain item
-        val item = Item(
-            name = "${state.transactionType} - ${state.quantity}",
+        val item = Transaction(
+            value = "${state.transactionType} - ${state.quantity}",
             description = "${state.notes} | date: $date",
             createdAt = Clock.System.now().toEpochMilliseconds()
         )

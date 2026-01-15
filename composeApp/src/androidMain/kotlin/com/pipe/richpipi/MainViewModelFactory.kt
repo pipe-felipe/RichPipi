@@ -4,19 +4,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.pipe.richpipi.form.TransactionalViewModel
 import data.local.database.DatabaseProvider
-import data.repository.ItemRepositoryImpl
-import domain.usecase.AddItemUseCase
-import domain.usecase.GetAllItemsUseCase
-import domain.usecase.DeleteItemUseCase
+import data.repository.TransactionRepositoryImpl
+import domain.usecase.MakeTransactionUseCase
+import domain.usecase.GetTransactions
+import domain.usecase.DeleteTransactionUseCase
 
 class MainViewModelFactory(private val dbProvider: DatabaseProvider) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         val db = dbProvider.provideDatabase(appContext())
-        val repo = ItemRepositoryImpl(db.itemDao())
-        val addItemUseCase = AddItemUseCase(repo)
-        val getAllItemsUseCase = GetAllItemsUseCase(repo)
-        val deleteItemUseCase = DeleteItemUseCase(repo)
+        val repo = TransactionRepositoryImpl(db.transactionDao())
+        val addItemUseCase = MakeTransactionUseCase(repo)
+        val getAllItemsUseCase = GetTransactions(repo)
+        val deleteItemUseCase = DeleteTransactionUseCase(repo)
         return TransactionalViewModel(addItemUseCase, getAllItemsUseCase, deleteItemUseCase) as T
     }
 

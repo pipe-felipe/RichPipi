@@ -1,8 +1,8 @@
 package domain.model
 
-data class Item(
+data class Transaction(
     val id: Int = 0,
-    val name: String,
+    val value: String,
     val description: String? = null,
     val createdAt: Long = 0L
 )

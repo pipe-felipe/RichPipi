@@ -25,7 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.pipe.richpipi.ui.theme.RichPipiTheme
-import domain.model.Item
+import domain.model.Transaction
 import org.jetbrains.compose.resources.stringResource
 import richpipi.composeapp.generated.resources.Res
 import richpipi.composeapp.generated.resources.no_transaction
@@ -33,7 +33,7 @@ import richpipi.composeapp.generated.resources.no_transaction
 
 @Composable
 fun MainScreenContent(
-    itemsList: List<Item>,
+    itemsList: List<Transaction>,
     totalIncomeText: String,
     totalExpenseText: String,
     onAddButtonClick: () -> Unit,
@@ -83,7 +83,7 @@ fun MainScreenContent(
 }
 
 @Composable
-private fun ItemRow(item: Item, onDelete: () -> Unit, modifier: Modifier = Modifier) {
+private fun ItemRow(item: Transaction, onDelete: () -> Unit, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -96,7 +96,7 @@ private fun ItemRow(item: Item, onDelete: () -> Unit, modifier: Modifier = Modif
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = item.name,
+                    text = item.value,
                     style = MaterialTheme.typography.titleMedium
                 )
                 Spacer(modifier = Modifier.height(4.dp))

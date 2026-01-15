@@ -1,21 +1,21 @@
 package domain.usecase
 
-import domain.model.Item
-import domain.repository.ItemRepository
+import domain.model.Transaction
+import domain.repository.TransactionRepository
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.first
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class AddItemUseCaseTest {
-    private class FakeRepo : ItemRepository {
-        val items = mutableListOf<Item>()
-        override fun getAllItems() = kotlinx.coroutines.flow.MutableStateFlow(items) as kotlinx.coroutines.flow.Flow<List<Item>>
-        override suspend fun addItem(item: Item): Long {
+    private class FakeRepo : TransactionRepository {
+        val items = mutableListOf<Transaction>()
+        override fun getTransactions() = kotlinx.coroutines.flow.MutableStateFlow(items) as kotlinx.coroutines.flow.Flow<List<Transaction>>
+        override suspend fun makeTransaction(item: Transaction): Long {
             items.add(item.copy(id = items.size + 1))
             return items.size.toLong()
         }
-        override suspend fun deleteItem(id: Int): Int {
+        override suspend fun deleteTransaction(id: Int): Int {
             val idx = items.indexOfFirst { it.id == id }
             return if (idx >= 0) { items.removeAt(idx); 1 } else 0
         }
@@ -24,15 +24,15 @@ class AddItemUseCaseTest {
     @Test
     fun `add item returns id and stores item`() = runBlocking {
         val repo = FakeRepo()
-        val useCase = AddItemUseCase(repo)
+        val useCase = MakeTransactionUseCase(repo)
 
-        val item = Item(name = "Test", description = "desc", createdAt = 123L)
+        val item = Transaction(value = "Test", description = "desc", createdAt = 123L)
         val id = useCase(item)
 
         assertEquals(1L, id)
-        val all = repo.getAllItems()
+        val all = repo.getTransactions()
         val first = all.first()
         assertEquals(1, first.size)
-        assertEquals("Test", first[0].name)
+        assertEquals("Test", first[0].value)
     }
 }

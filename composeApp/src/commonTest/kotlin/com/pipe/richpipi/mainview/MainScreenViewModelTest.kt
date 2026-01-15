@@ -1,6 +1,6 @@
 package com.pipe.richpipi.mainview
 
-import domain.model.Item
+import domain.model.Transaction
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -9,12 +9,12 @@ class MainScreenViewModelTest {
     @Test
     fun `compute totals sums income and expense correctly`() {
         val items = listOf(
-            Item(id = 1, name = "INCOME Salary - 1000"),
-            Item(id = 2, name = "INCOME Bonus - 250.5"),
-            Item(id = 3, name = "EXPENSE Food - 30"),
-            Item(id = 4, name = "EXPENSE Coffee - 4.75"),
-            Item(id = 5, name = "OTHER Note - 999"), // should be ignored
-            Item(id = 6, name = "INCOME Gift - 10,25") // comma as decimal
+            Transaction(id = 1, value = "INCOME Salary - 1000"),
+            Transaction(id = 2, value = "INCOME Bonus - 250.5"),
+            Transaction(id = 3, value = "EXPENSE Food - 30"),
+            Transaction(id = 4, value = "EXPENSE Coffee - 4.75"),
+            Transaction(id = 5, value = "OTHER Note - 999"), // should be ignored
+            Transaction(id = 6, value = "INCOME Gift - 10,25") // comma as decimal
         )
 
         val vm = MainScreenViewModel()
@@ -28,9 +28,9 @@ class MainScreenViewModelTest {
     @Test
     fun `compute totals handles invalid names gracefully`() {
         val items = listOf(
-            Item(id = 1, name = "INCOME - "),
-            Item(id = 2, name = "EXPENSE - abc"),
-            Item(id = 3, name = "INCOME Rent - 500.0")
+            Transaction(id = 1, value = "INCOME - "),
+            Transaction(id = 2, value = "EXPENSE - abc"),
+            Transaction(id = 3, value = "INCOME Rent - 500.0")
         )
 
         val vm = MainScreenViewModel()
