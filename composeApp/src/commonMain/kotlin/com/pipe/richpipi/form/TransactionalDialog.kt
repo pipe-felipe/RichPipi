@@ -73,6 +73,12 @@ fun TransactionalDialog(
     val uiState by viewModel.uiState.collectAsState()
     var expanded by remember { mutableStateOf(false) }
 
+    // Compute whether submit should be enabled: requires a selected category (based on type) and a valid quantity
+    val hasValidQuantity = uiState.quantity.isNotBlank() && !uiState.isQuantityError
+    val hasCategory = if (uiState.transactionType == TransactionType.EXPENSE) uiState.expenseCategory != null
+    else uiState.incomeCategory != null
+    val isSubmitEnabled = hasValidQuantity && hasCategory
+
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
@@ -112,7 +118,7 @@ fun TransactionalDialog(
                     ActionsBar(
                         isRecurring = uiState.isRecurring,
                         onRecurringChange = viewModel::onRecurringChange,
-                        isSubmitEnabled = !uiState.isQuantityError,
+                        isSubmitEnabled = isSubmitEnabled,
                         onSubmit = {
                             viewModel.submit()
                             onDismiss()
@@ -287,7 +293,7 @@ private fun ActionsBar(
 }
 
 @Composable
-private fun mapCategory(category: Any): String {
+private fun mapCategory(category: Any?): String {
     return when (category) {
         is ExpenseCategory -> when (category) {
             ExpenseCategory.TRANSPORT -> stringResource(Res.string.expense_category_transport)

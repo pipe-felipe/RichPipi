@@ -26,4 +26,6 @@
     <string name="income_category_other">Outro</string>
 
     <string name="label_invalid_number">Número Inválido</string>
+
+    <string name="no_transaction">Sem transações para mostrar</string>
 </resources>

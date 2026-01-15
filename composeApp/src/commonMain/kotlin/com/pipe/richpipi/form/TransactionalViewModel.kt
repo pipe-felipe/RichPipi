@@ -43,8 +43,8 @@ enum class IncomeCategory {
 data class FormUiState(
     val date: String = "",
     val transactionType: TransactionType = TransactionType.EXPENSE,
-    val expenseCategory: ExpenseCategory = ExpenseCategory.FOOD,
-    val incomeCategory: IncomeCategory = IncomeCategory.SALARY,
+    val expenseCategory: ExpenseCategory? = null,
+    val incomeCategory: IncomeCategory? = null,
     val quantity: String = "",
     val notes: String = "",
     val isRecurring: Boolean = false,
@@ -143,15 +143,29 @@ class TransactionalViewModel(
      */
     @OptIn(ExperimentalTime::class)
     fun submit() {
+        // Validate required fields: category and quantity
+        val state = uiState.value
+        val hasValidQuantity = state.quantity.isNotBlank() && !state.isQuantityError
+        val hasCategory = if (state.transactionType == TransactionType.EXPENSE) state.expenseCategory != null
+        else state.incomeCategory != null
+
+        if (!hasValidQuantity || !hasCategory) {
+            // If quantity invalid or missing, mark quantity error if applicable
+            _uiState.update { currentState ->
+                currentState.copy(isQuantityError = currentState.quantity.isNotBlank() && currentState.isQuantityError)
+            }
+            return
+        }
+
         // Build item from uiState
-        val date = uiState.value.date.ifBlank {
+        val date = state.date.ifBlank {
             val today = Clock.System.now()
             today.toString()
         }
         // create domain item
         val item = Item(
-            name = "${uiState.value.transactionType} - ${uiState.value.quantity}",
-            description = "${uiState.value.notes} | date: $date",
+            name = "${state.transactionType} - ${state.quantity}",
+            description = "${state.notes} | date: $date",
             createdAt = Clock.System.now().toEpochMilliseconds()
         )
 

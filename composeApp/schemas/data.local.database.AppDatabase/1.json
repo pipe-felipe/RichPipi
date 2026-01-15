@@ -2,10 +2,10 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "25212190a0ebf75d2378bcdd3df06fcd",
+    "identityHash": "e5770b68bf07087f04196cf4a03af02f",
     "entities": [
       {
-        "tableName": "items",
+        "tableName": "transactions",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `description` TEXT, `createdAt` INTEGER NOT NULL)",
         "fields": [
           {
@@ -42,7 +42,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '25212190a0ebf75d2378bcdd3df06fcd')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e5770b68bf07087f04196cf4a03af02f')"
     ]
   }
 }
