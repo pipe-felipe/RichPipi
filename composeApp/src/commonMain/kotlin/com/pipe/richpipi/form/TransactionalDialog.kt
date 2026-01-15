@@ -78,10 +78,10 @@ fun TransactionalDialog(
     val uiState by viewModel.uiState.collectAsState()
     var expanded by remember { mutableStateOf(false) }
 
-    // Compute whether submit should be enabled: requires a selected category (based on type) and a valid quantity
     val hasValidQuantity = uiState.quantity.isNotBlank() && !uiState.isQuantityError
-    val hasCategory = if (uiState.transactionType == DomainTransactionType.EXPENSE) uiState.expenseCategory != null
-    else uiState.incomeCategory != null
+    val hasCategory =
+        if (uiState.transactionType == DomainTransactionType.EXPENSE) uiState.expenseCategory != null
+        else uiState.incomeCategory != null
     val isSubmitEnabled = hasValidQuantity && hasCategory
 
     Dialog(
@@ -136,7 +136,8 @@ fun TransactionalDialog(
 
                     IconButton(
                         onClick = onDismiss,
-                        modifier = Modifier.align(Alignment.TopEnd).offset(x = (3).dp, y = -(2.5).dp)
+                        modifier = Modifier.align(Alignment.TopEnd)
+                            .offset(x = (3).dp, y = -(2.5).dp)
                     ) {
                         Icon(
                             Icons.Default.Close, contentDescription = stringResource(
@@ -206,7 +207,9 @@ private fun CategoryAndQuantityInput(
                     .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                     .fillMaxWidth(),
                 readOnly = true,
-                value = if (uiState.transactionType == DomainTransactionType.EXPENSE) mapCategory(uiState.expenseCategory)
+                value = if (uiState.transactionType == DomainTransactionType.EXPENSE) mapCategory(
+                    uiState.expenseCategory
+                )
                 else mapCategory(uiState.incomeCategory),
                 onValueChange = {},
                 label = { Text(stringResource(Res.string.form_category_label)) },
