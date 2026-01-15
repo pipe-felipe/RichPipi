@@ -33,6 +33,7 @@ fun MainScreenContent(
     itemsList: List<Transaction>,
     totalIncomeText: String,
     totalExpenseText: String,
+    totalSavingText: String,
     currentMonthYear: String,
     onPreviousMonth: () -> Unit,
     onNextMonth: () -> Unit,
@@ -47,6 +48,7 @@ fun MainScreenContent(
                 MainTopBar(
                     totalIncomeText = totalIncomeText,
                     totalExpenseText = totalExpenseText,
+                    totalSavingText = totalSavingText,
                     currentMonthYear = currentMonthYear,
                     onPreviousMonth = onPreviousMonth,
                     onNextMonth = onNextMonth,

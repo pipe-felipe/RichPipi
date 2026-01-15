@@ -14,16 +14,17 @@ class MainScreenViewModelTest {
             Transaction(id = 2, amountCents = 25050, type = TransactionType.INCOME),  // 250.50
             Transaction(id = 3, amountCents = 3000, type = TransactionType.EXPENSE),  // 30.00
             Transaction(id = 4, amountCents = 475, type = TransactionType.EXPENSE),   // 4.75
-            // OTHER should be ignored; create a transaction with an unrelated type? domain only has INCOME/EXPENSE so skip
             Transaction(id = 6, amountCents = 1025, type = TransactionType.INCOME)    // 10.25
         )
 
         val vm = MainScreenViewModel()
 
         val (income, expense) = vm.computeTotalsForTest(items)
+        val saving = income - expense
 
         assertEquals(1260.75, income)
         assertEquals(34.75, expense)
+        assertEquals(1226.0, saving)
     }
 
     @Test
@@ -38,8 +39,27 @@ class MainScreenViewModelTest {
         val vm = MainScreenViewModel()
 
         val (income, expense) = vm.computeTotalsForTest(items)
+        val saving = income - expense
 
         assertEquals(500.0, income)
         assertEquals(0.0, expense)
+        assertEquals(500.0, saving)
+    }
+
+    @Test
+    fun `saving can be negative when expenses exceed income`() {
+        val items = listOf(
+            Transaction(id = 1, amountCents = 1000, type = TransactionType.INCOME), // 10.00
+            Transaction(id = 2, amountCents = 2500, type = TransactionType.EXPENSE) // 25.00
+        )
+
+        val vm = MainScreenViewModel()
+
+        val (income, expense) = vm.computeTotalsForTest(items)
+        val saving = income - expense
+
+        assertEquals(10.0, income)
+        assertEquals(25.0, expense)
+        assertEquals(-15.0, saving)
     }
 }

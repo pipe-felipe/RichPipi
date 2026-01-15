@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 fun MainTopBar(
     totalIncomeText: String,
     totalExpenseText: String,
+    totalSavingText: String,
     currentMonthYear: String,
     onPreviousMonth: () -> Unit,
     onNextMonth: () -> Unit,
@@ -114,7 +115,7 @@ fun MainTopBar(
                         textAlign = TextAlign.Center
                     )
                     Text(
-                        text = "sup",
+                        text = totalSavingText,
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.primary,
                         textAlign = TextAlign.Center,

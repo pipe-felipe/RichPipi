@@ -26,8 +26,11 @@ class MainScreenViewModel(
 
     private val _totalIncomeText = MutableStateFlow("R$ 0.00")
     private val _totalExpenseText = MutableStateFlow("R$ 0.00")
+    private val _totalSavingText = MutableStateFlow("R$ 0.00")
+
     val totalIncomeText: StateFlow<String> = _totalIncomeText.asStateFlow()
     val totalExpenseText: StateFlow<String> = _totalExpenseText.asStateFlow()
+    val totalSavingText: StateFlow<String> = _totalSavingText.asStateFlow()
 
     private val _allItems = MutableStateFlow<List<Transaction>>(emptyList())
 
@@ -67,6 +70,7 @@ class MainScreenViewModel(
                 val (inc, exp) = computeTotals(filtered)
                 _totalIncomeText.value = "R$ ${formatTwoDecimals(inc)}"
                 _totalExpenseText.value = "R$ ${formatTwoDecimals(exp)}"
+                _totalSavingText.value = "R$ ${formatTwoDecimals(inc - exp)}"
             }
         }
     }

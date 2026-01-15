@@ -28,6 +28,7 @@ fun App(transactionalViewModel: TransactionalViewModel? = null) {
     val itemsList by mainVm.items.collectAsState()
     val incomeText by mainVm.totalIncomeText.collectAsState()
     val expenseText by mainVm.totalExpenseText.collectAsState()
+    val savingText by mainVm.totalSavingText.collectAsState()
     val currentMonthYear by mainVm.currentMonthYearText.collectAsState()
     val currentMonth by mainVm.currentMonth.collectAsState()
     val currentYear by mainVm.currentYear.collectAsState()
@@ -36,6 +37,7 @@ fun App(transactionalViewModel: TransactionalViewModel? = null) {
         itemsList = itemsList,
         totalIncomeText = incomeText,
         totalExpenseText = expenseText,
+        totalSavingText = savingText,
         currentMonthYear = currentMonthYear,
         onPreviousMonth = { mainVm.goToPreviousMonth() },
         onNextMonth = { mainVm.goToNextMonth() },
