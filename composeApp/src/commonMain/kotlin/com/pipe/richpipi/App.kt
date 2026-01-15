@@ -2,33 +2,45 @@ package com.pipe.richpipi
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pipe.richpipi.form.TransactionalDialog
 import com.pipe.richpipi.form.TransactionalViewModel
+import com.pipe.richpipi.mainview.MainScreenContent
+import com.pipe.richpipi.mainview.MainScreenViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun App(transactionalViewModel: TransactionalViewModel? = null) {
-    var showDialog by remember { mutableStateOf(false) }
-    val vm: TransactionalViewModel = transactionalViewModel ?: viewModel()
+    val showDialogState: MutableState<Boolean> = remember { mutableStateOf(false) }
 
-    val itemsList by vm.items.collectAsState(initial = emptyList())
+    val vm: TransactionalViewModel = transactionalViewModel ?: viewModel()
+    val mainVm = remember {
+        MainScreenViewModel(
+            itemsSource = vm.items,
+            onDeleteItem = { id -> vm.deleteItem(id) })
+    }
+
+    val itemsList by mainVm.items.collectAsState()
+    val incomeText by mainVm.totalIncomeText.collectAsState()
+    val expenseText by mainVm.totalExpenseText.collectAsState()
 
     MainScreenContent(
         itemsList = itemsList,
-        onAddButtonClick = { showDialog = true },
-        onDeleteItem = { id -> vm.deleteItem(id) }
+        totalIncomeText = incomeText,
+        totalExpenseText = expenseText,
+        onAddButtonClick = { showDialogState.value = true },
+        onDeleteItem = { id -> mainVm.delete(id) }
     )
 
-    if (showDialog) {
+    if (showDialogState.value) {
         TransactionalDialog(
             viewModel = vm,
-            onDismiss = { showDialog = false }
+            onDismiss = { showDialogState.value = false }
         )
     }
 }

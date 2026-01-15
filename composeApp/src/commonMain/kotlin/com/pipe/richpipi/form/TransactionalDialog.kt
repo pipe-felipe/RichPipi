@@ -2,6 +2,7 @@ package com.pipe.richpipi.form
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -83,58 +84,62 @@ fun TransactionalDialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
-        Surface(
-            shape = RoundedCornerShape(16.dp),
-            modifier = Modifier.fillMaxWidth().padding(15.dp)
-        ) {
-            Box {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    TransactionTypeSelector(
-                        selectedType = uiState.transactionType,
-                        onTypeSelected = viewModel::onTransactionTypeChange
-                    )
+        BoxWithConstraints {
+            val dialogPadding = if (maxWidth < 600.dp) 4.dp else 15.dp
 
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    CategoryAndQuantityInput(
-                        uiState = uiState,
-                        onExpenseCategoryChange = viewModel::onExpenseCategoryChange,
-                        onIncomeCategoryChange = viewModel::onIncomeCategoryChange,
-                        onQuantityChange = viewModel::onQuantityChange,
-                        expanded = expanded,
-                        onExpandedChange = { expanded = it },
-                    )
-
-                    NotesInput(
-                        notes = uiState.notes,
-                        onNotesChange = viewModel::onNotesChange
-                    )
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    ActionsBar(
-                        isRecurring = uiState.isRecurring,
-                        onRecurringChange = viewModel::onRecurringChange,
-                        isSubmitEnabled = isSubmitEnabled,
-                        onSubmit = {
-                            viewModel.submit()
-                            onDismiss()
-                        }
-                    )
-                }
-
-                IconButton(
-                    onClick = onDismiss,
-                    modifier = Modifier.align(Alignment.TopEnd).offset(x = (3).dp, y = -(2.5).dp)
-                ) {
-                    Icon(
-                        Icons.Default.Close, contentDescription = stringResource(
-                            Res.string.form_close_button_description
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.fillMaxWidth().padding(dialogPadding)
+            ) {
+                Box {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        TransactionTypeSelector(
+                            selectedType = uiState.transactionType,
+                            onTypeSelected = viewModel::onTransactionTypeChange
                         )
-                    )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        CategoryAndQuantityInput(
+                            uiState = uiState,
+                            onExpenseCategoryChange = viewModel::onExpenseCategoryChange,
+                            onIncomeCategoryChange = viewModel::onIncomeCategoryChange,
+                            onQuantityChange = viewModel::onQuantityChange,
+                            expanded = expanded,
+                            onExpandedChange = { expanded = it },
+                        )
+
+                        NotesInput(
+                            notes = uiState.notes,
+                            onNotesChange = viewModel::onNotesChange
+                        )
+
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        ActionsBar(
+                            isRecurring = uiState.isRecurring,
+                            onRecurringChange = viewModel::onRecurringChange,
+                            isSubmitEnabled = isSubmitEnabled,
+                            onSubmit = {
+                                viewModel.submit()
+                                onDismiss()
+                            }
+                        )
+                    }
+
+                    IconButton(
+                        onClick = onDismiss,
+                        modifier = Modifier.align(Alignment.TopEnd).offset(x = (3).dp, y = -(2.5).dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Close, contentDescription = stringResource(
+                                Res.string.form_close_button_description
+                            )
+                        )
+                    }
                 }
             }
         }

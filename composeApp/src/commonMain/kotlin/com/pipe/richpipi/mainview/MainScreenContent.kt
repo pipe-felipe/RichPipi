@@ -1,6 +1,7 @@
-package com.pipe.richpipi
+package com.pipe.richpipi.mainview
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,12 +34,20 @@ import richpipi.composeapp.generated.resources.no_transaction
 @Composable
 fun MainScreenContent(
     itemsList: List<Item>,
+    totalIncomeText: String,
+    totalExpenseText: String,
     onAddButtonClick: () -> Unit,
     onDeleteItem: (Int) -> Unit
 ) {
     RichPipiTheme {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
+            topBar = {
+                MainTopBar(
+                    totalIncomeText = totalIncomeText,
+                    totalExpenseText = totalExpenseText
+                )
+            },
             floatingActionButton = {
                 FloatingActionButton(onClick = onAddButtonClick) {
                     Icon(Icons.Default.Add, contentDescription = "Add")
@@ -62,7 +71,7 @@ fun MainScreenContent(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(innerPadding),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(8.dp)
+                    contentPadding = PaddingValues(8.dp)
                 ) {
                     items(itemsList) { item ->
                         ItemRow(item = item, onDelete = { onDeleteItem(item.id) })
