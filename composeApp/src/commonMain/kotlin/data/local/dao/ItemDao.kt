@@ -16,4 +16,7 @@ interface ItemDao {
 
     @Insert
     suspend fun addItem(item: ItemEntity): Long
+
+    @Query("DELETE FROM transactions WHERE id = :id")
+    suspend fun deleteById(id: Int): Int
 }

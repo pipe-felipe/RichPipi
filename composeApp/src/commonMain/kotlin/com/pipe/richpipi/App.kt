@@ -21,7 +21,8 @@ fun App(transactionalViewModel: TransactionalViewModel? = null) {
 
     MainScreenContent(
         itemsList = itemsList,
-        onAddButtonClick = { showDialog = true }
+        onAddButtonClick = { showDialog = true },
+        onDeleteItem = { id -> vm.deleteItem(id) }
     )
 
     if (showDialog) {
@@ -31,4 +32,3 @@ fun App(transactionalViewModel: TransactionalViewModel? = null) {
         )
     }
 }
-

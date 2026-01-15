@@ -14,6 +14,7 @@ import kotlin.time.ExperimentalTime
 import domain.model.Item
 import domain.usecase.AddItemUseCase
 import domain.usecase.GetAllItemsUseCase
+import domain.usecase.DeleteItemUseCase
 
 enum class TransactionType {
     EXPENSE,
@@ -56,7 +57,8 @@ data class FormUiState(
  */
 class TransactionalViewModel(
     private val addItemUseCase: AddItemUseCase,
-    private val getAllItemsUseCase: GetAllItemsUseCase
+    private val getAllItemsUseCase: GetAllItemsUseCase,
+    private val deleteItemUseCase: DeleteItemUseCase
 ) : ViewModel() {
 
     // Private mutable state flow
@@ -66,6 +68,20 @@ class TransactionalViewModel(
 
     // Items exposed to UI (as Flow from domain use case)
     val items: Flow<List<Item>> = getAllItemsUseCase()
+
+    /**
+     * Delete an item by id
+     */
+    fun deleteItem(id: Int) {
+        CoroutineScope(Dispatchers.Default).launch {
+            try {
+                val deleted = deleteItemUseCase(id)
+                println("Deleted rows: $deleted")
+            } catch (t: Throwable) {
+                println("Error deleting item: ${t.message}")
+            }
+        }
+    }
 
     /**
      * Called when the transaction type changes.

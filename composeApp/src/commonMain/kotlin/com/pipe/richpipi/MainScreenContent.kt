@@ -11,9 +11,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -31,7 +33,8 @@ import richpipi.composeapp.generated.resources.no_transaction
 @Composable
 fun MainScreenContent(
     itemsList: List<Item>,
-    onAddButtonClick: () -> Unit
+    onAddButtonClick: () -> Unit,
+    onDeleteItem: (Int) -> Unit
 ) {
     RichPipiTheme {
         Scaffold(
@@ -62,7 +65,7 @@ fun MainScreenContent(
                     contentPadding = androidx.compose.foundation.layout.PaddingValues(8.dp)
                 ) {
                     items(itemsList) { item ->
-                        ItemRow(item = item)
+                        ItemRow(item = item, onDelete = { onDeleteItem(item.id) })
                     }
                 }
             }
@@ -71,7 +74,7 @@ fun MainScreenContent(
 }
 
 @Composable
-private fun ItemRow(item: Item, modifier: Modifier = Modifier) {
+private fun ItemRow(item: Item, onDelete: () -> Unit, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -100,6 +103,12 @@ private fun ItemRow(item: Item, modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(start = 12.dp)
             )
+            IconButton(onClick = onDelete) {
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = "Delete",
+                )
+            }
         }
     }
 }

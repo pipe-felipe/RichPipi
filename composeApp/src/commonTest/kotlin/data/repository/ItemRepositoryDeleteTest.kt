@@ -1,14 +1,13 @@
 package data.repository
 
 import data.local.entity.ItemEntity
-import domain.model.Item
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class ItemRepositoryImplTest {
+class ItemRepositoryDeleteTest {
     private class FakeDao {
         val list = mutableListOf<ItemEntity>()
         val flow = MutableStateFlow<List<ItemEntity>>(list)
@@ -31,8 +30,12 @@ class ItemRepositoryImplTest {
     }
 
     @Test
-    fun `repository maps entity to domain and adds`() = runBlocking {
+    fun `repository delete delegates to dao`() = runBlocking {
         val fakeDao = FakeDao()
+        // pre-populate
+        fakeDao.addItem(ItemEntity(name = "a", description = "d", createdAt = 1L))
+        fakeDao.addItem(ItemEntity(name = "b", description = "d", createdAt = 2L))
+
         val repo = ItemRepositoryImpl(
             object : data.local.dao.ItemDao {
                 override fun getAllItems() = fakeDao.getAllItems()
@@ -42,10 +45,10 @@ class ItemRepositoryImplTest {
             }
         )
 
-        val id = repo.addItem(Item(name = "RepoTest", description = "d", createdAt = 1L))
-        assertEquals(1L, id)
+        val deleted = repo.deleteItem(1)
+        assertEquals(1, deleted)
         val all = repo.getAllItems().first()
         assertEquals(1, all.size)
-        assertEquals("RepoTest", all[0].name)
+        assertEquals("b", all[0].name)
     }
 }

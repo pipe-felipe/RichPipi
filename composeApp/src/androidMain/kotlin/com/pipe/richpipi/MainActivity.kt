@@ -10,6 +10,7 @@ import data.local.database.DatabaseProvider
 import data.repository.ItemRepositoryImpl
 import domain.usecase.AddItemUseCase
 import domain.usecase.GetAllItemsUseCase
+import domain.usecase.DeleteItemUseCase
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,11 +21,12 @@ class MainActivity : ComponentActivity() {
         val repo = ItemRepositoryImpl(db.itemDao())
         val addItemUseCase = AddItemUseCase(repo)
         val getAllItemsUseCase = GetAllItemsUseCase(repo)
+        val deleteItemUseCase = DeleteItemUseCase(repo)
 
         val factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
-                return TransactionalViewModel(addItemUseCase, getAllItemsUseCase) as T
+                return TransactionalViewModel(addItemUseCase, getAllItemsUseCase, deleteItemUseCase) as T
             }
         }
 

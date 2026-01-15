@@ -15,6 +15,10 @@ class GetAllItemsUseCaseTest {
             items.add(item.copy(id = items.size + 1))
             return items.size.toLong()
         }
+        override suspend fun deleteItem(id: Int): Int {
+            val idx = items.indexOfFirst { it.id == id }
+            return if (idx >= 0) { items.removeAt(idx); 1 } else 0
+        }
     }
 
     @Test
