@@ -53,11 +53,34 @@ fun MainTopBar(
                     )
                 }
 
-                Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
+                Column(
+                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Saving",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = "sup",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+
+                Column(
+                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                    horizontalAlignment = Alignment.End
+                ) {
                     Text(
                         text = "Expense",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        textAlign = TextAlign.End
                     )
                     Text(
                         text = totalExpenseText,
