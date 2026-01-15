@@ -18,8 +18,7 @@ import kotlinx.coroutines.launch
  * It is not an AndroidX ViewModel so it can be instantiated from common code easily.
  */
 class MainScreenViewModel(
-    itemsSource: Flow<List<Transaction>> = emptyFlow(),
-    private val onDeleteItem: (Int) -> Unit = {}
+    itemsSource: Flow<List<Transaction>> = emptyFlow(), private val onDeleteItem: (Int) -> Unit = {}
 ) {
     private val _items = MutableStateFlow<List<Transaction>>(emptyList())
     val items: StateFlow<List<Transaction>> = _items.asStateFlow()
@@ -41,7 +40,8 @@ class MainScreenViewModel(
     val currentMonth: StateFlow<Int> = _currentMonth.asStateFlow()
     val currentYear: StateFlow<Int> = _currentYear.asStateFlow()
 
-    private val _currentMonthYearText = MutableStateFlow(formatMonthYear(initialMonthYear.first, initialMonthYear.second))
+    private val _currentMonthYearText =
+        MutableStateFlow(formatMonthYear(initialMonthYear.first, initialMonthYear.second))
     val currentMonthYearText: StateFlow<String> = _currentMonthYearText.asStateFlow()
 
     private val scope = CoroutineScope(Dispatchers.Default)
@@ -112,8 +112,18 @@ class MainScreenViewModel(
 
     private fun formatMonthYear(month: Int, year: Int): String {
         val monthNames = listOf(
-            "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-            "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+            "Janeiro",
+            "Fevereiro",
+            "Março",
+            "Abril",
+            "Maio",
+            "Junho",
+            "Julho",
+            "Agosto",
+            "Setembro",
+            "Outubro",
+            "Novembro",
+            "Dezembro"
         )
         return "${monthNames[month - 1]} $year"
     }

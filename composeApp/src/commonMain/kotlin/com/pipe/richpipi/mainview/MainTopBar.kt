@@ -23,6 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.pipe.richpipi.ui.theme.golden
+import com.pipe.richpipi.ui.theme.money
 
 @Composable
 fun MainTopBar(
@@ -42,11 +44,9 @@ fun MainTopBar(
         shape = RoundedCornerShape(bottomStart = 14.dp, bottomEnd = 14.dp)
     ) {
         Column {
-            // Month/Year Navigation
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 8.dp),
+                    .fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -54,17 +54,15 @@ fun MainTopBar(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                         contentDescription = "Previous Month",
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = MaterialTheme.colorScheme.tertiary
                     )
                 }
 
                 TextButton(
-                    onClick = onCurrentMonthClick,
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp)
+                    onClick = onCurrentMonthClick
                 ) {
                     Text(
                         text = currentMonthYear,
-                        style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -74,18 +72,15 @@ fun MainTopBar(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                         contentDescription = "Next Month",
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = MaterialTheme.colorScheme.tertiary
                     )
                 }
             }
 
-            HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
-
-            // Income/Saving/Expense Row
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 12.dp),
+                    .padding(horizontal = 20.dp, vertical = 4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -97,8 +92,8 @@ fun MainTopBar(
                     )
                     Text(
                         text = totalIncomeText,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.money,
                         textAlign = TextAlign.Start,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -116,8 +111,8 @@ fun MainTopBar(
                     )
                     Text(
                         text = totalSavingText,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.golden,
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -135,7 +130,7 @@ fun MainTopBar(
                     )
                     Text(
                         text = totalExpenseText,
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.error,
                         textAlign = TextAlign.End,
                         fontWeight = FontWeight.SemiBold
