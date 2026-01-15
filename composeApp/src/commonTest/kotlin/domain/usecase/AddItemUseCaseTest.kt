@@ -1,6 +1,7 @@
 package domain.usecase
 
 import domain.model.Transaction
+import domain.model.TransactionType
 import domain.repository.TransactionRepository
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.first
@@ -26,13 +27,13 @@ class AddItemUseCaseTest {
         val repo = FakeRepo()
         val useCase = MakeTransactionUseCase(repo)
 
-        val item = Transaction(value = "Test", description = "desc", createdAt = 123L)
+        val item = Transaction(amountCents = 1000, type = TransactionType.INCOME, description = "desc", createdAt = 123L)
         val id = useCase(item)
 
         assertEquals(1L, id)
         val all = repo.getTransactions()
         val first = all.first()
         assertEquals(1, first.size)
-        assertEquals("Test", first[0].value)
+        assertEquals(1000, first[0].amountCents)
     }
 }

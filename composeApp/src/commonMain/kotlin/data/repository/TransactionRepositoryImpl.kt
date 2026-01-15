@@ -13,8 +13,10 @@ class TransactionRepositoryImpl(private val dao: TransactionDao) : TransactionRe
             list.map { entity ->
                 Transaction(
                     id = entity.id,
-                    value = entity.name,
+                    amountCents = entity.amountCents,
+                    type = entity.type,
                     description = entity.description,
+                    date = entity.date,
                     createdAt = entity.createdAt
                 )
             }
@@ -23,8 +25,10 @@ class TransactionRepositoryImpl(private val dao: TransactionDao) : TransactionRe
 
     override suspend fun makeTransaction(transaction: Transaction): Long {
         val entity = TransactionEntity(
-            name = transaction.value,
+            amountCents = transaction.amountCents,
+            type = transaction.type,
             description = transaction.description,
+            date = transaction.date,
             createdAt = transaction.createdAt
         )
         return dao.addTransaction(entity)

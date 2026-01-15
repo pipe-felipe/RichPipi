@@ -31,9 +31,9 @@ class GetAllItemsUseCaseTest {
         assertEquals(0, initial.size)
 
         // add item and verify
-        repo.makeTransaction(Transaction(value = "A", description = "d", createdAt = 1L))
+        repo.makeTransaction(Transaction(amountCents = 100, type = domain.model.TransactionType.INCOME, description = "d", createdAt = 1L))
         val after = useCase().first()
         assertEquals(1, after.size)
-        assertEquals("A", after[0].value)
+        assertEquals(100, after[0].amountCents)
     }
 }

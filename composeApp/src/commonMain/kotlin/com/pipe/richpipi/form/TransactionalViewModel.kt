@@ -11,15 +11,12 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
+import kotlin.math.round
 import domain.model.Transaction
+import domain.model.TransactionType as DomainTransactionType
 import domain.usecase.MakeTransactionUseCase
 import domain.usecase.GetTransactions
 import domain.usecase.DeleteTransactionUseCase
-
-enum class TransactionType {
-    EXPENSE,
-    INCOME
-}
 
 enum class ExpenseCategory {
     TRANSPORT,
@@ -43,7 +40,7 @@ enum class IncomeCategory {
  */
 data class FormUiState(
     val date: String = "",
-    val transactionType: TransactionType = TransactionType.EXPENSE,
+    val transactionType: DomainTransactionType = DomainTransactionType.EXPENSE,
     val expenseCategory: ExpenseCategory? = null,
     val incomeCategory: IncomeCategory? = null,
     val quantity: String = "",
@@ -86,7 +83,7 @@ class TransactionalViewModel(
     /**
      * Called when the transaction type changes.
      */
-    fun onTransactionTypeChange(newType: TransactionType) {
+    fun onTransactionTypeChange(newType: DomainTransactionType) {
         _uiState.update { currentState ->
             currentState.copy(transactionType = newType)
         }
@@ -162,7 +159,7 @@ class TransactionalViewModel(
         // Validate required fields: category and quantity
         val state = uiState.value
         val hasValidQuantity = state.quantity.isNotBlank() && !state.isQuantityError
-        val hasCategory = if (state.transactionType == TransactionType.EXPENSE) state.expenseCategory != null
+        val hasCategory = if (state.transactionType == DomainTransactionType.EXPENSE) state.expenseCategory != null
         else state.incomeCategory != null
 
         if (!hasValidQuantity || !hasCategory) {
@@ -178,9 +175,15 @@ class TransactionalViewModel(
             val today = Clock.System.now()
             today.toString()
         }
+
+        // parse quantity into cents
+        val amountDouble = state.quantity.replace(",", ".").toDoubleOrNull() ?: 0.0
+        val amountCents = round(amountDouble * 100).toLong()
+
         // create domain item
         val item = Transaction(
-            value = "${state.transactionType} - ${state.quantity}",
+            amountCents = amountCents,
+            type = state.transactionType,
             description = "${state.notes} | date: $date",
             createdAt = Clock.System.now().toEpochMilliseconds()
         )

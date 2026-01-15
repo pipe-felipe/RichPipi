@@ -2,11 +2,19 @@ package data.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import domain.model.TransactionType
 
 @Entity(tableName = "transactions")
 data class TransactionEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val name: String,
+    // store money as cents to avoid floating point issues
+    val amountCents: Long,
+    val type: TransactionType = TransactionType.EXPENSE,
     val description: String? = null,
+    // occurrence date (epoch millis)
+    val date: Long,
+    // if this transaction was generated from a recurring rule, link to it
+    val recurringId: Int? = null,
+    // use 0L as default in commonMain; populate when creating instances
     val createdAt: Long = 0L
 )

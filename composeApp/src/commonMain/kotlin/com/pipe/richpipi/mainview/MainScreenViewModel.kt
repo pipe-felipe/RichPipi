@@ -9,8 +9,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
-import kotlin.math.abs
-import kotlin.math.round
 
 /**
  * Lightweight view-model-like class for the main screen UI.
@@ -47,39 +45,6 @@ class MainScreenViewModel(
 
     fun delete(id: Int) = onDeleteItem(id)
 
-    private fun computeTotals(items: List<Transaction>): Pair<Double, Double> {
-        var income = 0.0
-        var expense = 0.0
-        for (item in items) {
-            val amt = parseAmountFromName(item.value) ?: continue
-            val prefix = item.value.trim().split(" ").firstOrNull()?.uppercase() ?: ""
-            when {
-                prefix.startsWith("INCOME") -> income += amt
-                prefix.startsWith("EXPENSE") -> expense += amt
-                else -> {
-                    throw IllegalArgumentException("Unknown item prefix: '$prefix' in '${item.value}'")
-                }
-            }
-        }
-        return Pair(income, expense)
-    }
-
-    private fun parseAmountFromName(name: String): Double? {
-        val parts = name.split(" - ")
-        if (parts.size < 2) return null
-        val qtyStr = parts.last().trim().replace(",", ".")
-        return qtyStr.toDoubleOrNull()
-    }
-
-    private fun formatTwoDecimals(value: Double): String {
-        val negative = value < 0
-        val cents = round(value * 100).toLong()
-        val absCents = abs(cents)
-        val whole = absCents / 100
-        val fraction = (absCents % 100).toString().padStart(2, '0')
-        val sign = if (negative) "-" else ""
-        return "$sign$whole.$fraction"
-    }
 
     internal fun computeTotalsForTest(items: List<Transaction>): Pair<Double, Double> =
         computeTotals(items)

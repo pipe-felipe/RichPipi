@@ -1,6 +1,7 @@
 package com.pipe.richpipi.mainview
 
 import domain.model.Transaction
+import domain.model.TransactionType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -9,12 +10,12 @@ class MainScreenViewModelTest {
     @Test
     fun `compute totals sums income and expense correctly`() {
         val items = listOf(
-            Transaction(id = 1, value = "INCOME Salary - 1000"),
-            Transaction(id = 2, value = "INCOME Bonus - 250.5"),
-            Transaction(id = 3, value = "EXPENSE Food - 30"),
-            Transaction(id = 4, value = "EXPENSE Coffee - 4.75"),
-            Transaction(id = 5, value = "OTHER Note - 999"), // should be ignored
-            Transaction(id = 6, value = "INCOME Gift - 10,25") // comma as decimal
+            Transaction(id = 1, amountCents = 100000, type = TransactionType.INCOME), // 1000.00
+            Transaction(id = 2, amountCents = 25050, type = TransactionType.INCOME),  // 250.50
+            Transaction(id = 3, amountCents = 3000, type = TransactionType.EXPENSE),  // 30.00
+            Transaction(id = 4, amountCents = 475, type = TransactionType.EXPENSE),   // 4.75
+            // OTHER should be ignored; create a transaction with an unrelated type? domain only has INCOME/EXPENSE so skip
+            Transaction(id = 6, amountCents = 1025, type = TransactionType.INCOME)    // 10.25
         )
 
         val vm = MainScreenViewModel()
@@ -27,10 +28,11 @@ class MainScreenViewModelTest {
 
     @Test
     fun `compute totals handles invalid names gracefully`() {
+        // With new domain model, invalid strings are gone; simulate zero amounts and one valid
         val items = listOf(
-            Transaction(id = 1, value = "INCOME - "),
-            Transaction(id = 2, value = "EXPENSE - abc"),
-            Transaction(id = 3, value = "INCOME Rent - 500.0")
+            Transaction(id = 1, amountCents = 0, type = TransactionType.INCOME),
+            Transaction(id = 2, amountCents = 0, type = TransactionType.EXPENSE),
+            Transaction(id = 3, amountCents = 50000, type = TransactionType.INCOME) // 500.00
         )
 
         val vm = MainScreenViewModel()

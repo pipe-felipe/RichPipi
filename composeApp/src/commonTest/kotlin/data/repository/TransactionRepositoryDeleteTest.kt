@@ -1,6 +1,7 @@
 package data.repository
 
 import data.local.entity.TransactionEntity
+import domain.model.TransactionType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -33,9 +34,9 @@ class TransactionRepositoryDeleteTest {
     @Test
     fun `repository delete delegates to dao`() = runBlocking {
         val fakeDao = FakeDao()
-        // pre-populate
-        fakeDao.addTransaction(TransactionEntity(name = "a", description = "d", createdAt = 1L))
-        fakeDao.addTransaction(TransactionEntity(name = "b", description = "d", createdAt = 2L))
+        // pre-populate -- now use amountCents, type, date, createdAt
+        fakeDao.addTransaction(TransactionEntity(amountCents = 100, type = TransactionType.EXPENSE, description = "d", date = 1L, createdAt = 1L))
+        fakeDao.addTransaction(TransactionEntity(amountCents = 200, type = TransactionType.EXPENSE, description = "d", date = 2L, createdAt = 2L))
 
         val repo = TransactionRepositoryImpl(
             object : data.local.dao.TransactionDao {
@@ -50,6 +51,6 @@ class TransactionRepositoryDeleteTest {
         assertEquals(1, deleted)
         val all = repo.getTransactions().first()
         assertEquals(1, all.size)
-        assertEquals("b", all[0].value)
+        assertEquals(2, all[0].id)
     }
 }

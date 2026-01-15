@@ -65,6 +65,7 @@ import richpipi.composeapp.generated.resources.income_category_salary
 import richpipi.composeapp.generated.resources.label_invalid_number
 import richpipi.composeapp.generated.resources.transaction_type_expense
 import richpipi.composeapp.generated.resources.transaction_type_income
+import domain.model.TransactionType as DomainTransactionType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,7 +77,7 @@ fun TransactionalDialog(
 
     // Compute whether submit should be enabled: requires a selected category (based on type) and a valid quantity
     val hasValidQuantity = uiState.quantity.isNotBlank() && !uiState.isQuantityError
-    val hasCategory = if (uiState.transactionType == TransactionType.EXPENSE) uiState.expenseCategory != null
+    val hasCategory = if (uiState.transactionType == DomainTransactionType.EXPENSE) uiState.expenseCategory != null
     else uiState.incomeCategory != null
     val isSubmitEnabled = hasValidQuantity && hasCategory
 
@@ -148,15 +149,15 @@ fun TransactionalDialog(
 
 @Composable
 private fun TransactionTypeSelector(
-    selectedType: TransactionType,
-    onTypeSelected: (TransactionType) -> Unit
+    selectedType: DomainTransactionType,
+    onTypeSelected: (DomainTransactionType) -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val radioOptions = listOf(TransactionType.EXPENSE, TransactionType.INCOME)
+        val radioOptions = listOf(DomainTransactionType.EXPENSE, DomainTransactionType.INCOME)
         radioOptions.forEach { option ->
             Row(
                 Modifier.selectable(
@@ -168,7 +169,7 @@ private fun TransactionTypeSelector(
             ) {
                 RadioButton(selected = (selectedType == option), onClick = null)
                 Text(
-                    text = if (option == TransactionType.EXPENSE) stringResource(Res.string.transaction_type_expense)
+                    text = if (option == DomainTransactionType.EXPENSE) stringResource(Res.string.transaction_type_expense)
                     else stringResource(Res.string.transaction_type_income),
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(start = 4.dp)
@@ -202,7 +203,7 @@ private fun CategoryAndQuantityInput(
                     .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                     .fillMaxWidth(),
                 readOnly = true,
-                value = if (uiState.transactionType == TransactionType.EXPENSE) mapCategory(uiState.expenseCategory)
+                value = if (uiState.transactionType == DomainTransactionType.EXPENSE) mapCategory(uiState.expenseCategory)
                 else mapCategory(uiState.incomeCategory),
                 onValueChange = {},
                 label = { Text(stringResource(Res.string.form_category_label)) },
@@ -213,7 +214,7 @@ private fun CategoryAndQuantityInput(
                 expanded = expanded,
                 onDismissRequest = { onExpandedChange(false) },
             ) {
-                if (uiState.transactionType == TransactionType.EXPENSE) {
+                if (uiState.transactionType == DomainTransactionType.EXPENSE) {
                     ExpenseCategory.entries.forEach { selectionOption ->
                         DropdownMenuItem(
                             text = { Text(mapCategory(selectionOption)) },
