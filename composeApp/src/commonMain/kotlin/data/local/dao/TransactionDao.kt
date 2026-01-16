@@ -1,0 +1,35 @@
+package data.local.dao
+
+import data.local.entity.TransactionEntity
+import kotlinx.coroutines.flow.Flow
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.Query
+
+@Dao
+interface TransactionDao {
+    @Query("SELECT * FROM transactions ORDER BY createdAt DESC")
+    fun getAllTransactions(): Flow<List<TransactionEntity>>
+
+    @Query(
+        """
+        SELECT * FROM transactions
+        WHERE isRecurring = 1
+           OR (date >= :monthStartMillis AND date < :monthEndExclusiveMillis)
+        ORDER BY createdAt DESC
+        """
+    )
+    fun getTransactionsForMonth(
+        monthStartMillis: Long,
+        monthEndExclusiveMillis: Long
+    ): Flow<List<TransactionEntity>>
+
+    @Query("SELECT * FROM transactions WHERE id = :id LIMIT 1")
+    suspend fun getTransactionById(id: Int): TransactionEntity?
+
+    @Insert
+    suspend fun addTransaction(item: TransactionEntity): Long
+
+    @Query("DELETE FROM transactions WHERE id = :id")
+    suspend fun deleteTransactionById(id: Int): Int
+}

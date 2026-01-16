@@ -4,18 +4,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.pipe.richpipi.form.TransactionalViewModel
 import data.local.database.DatabaseProvider
-import data.repository.ItemRepositoryImpl
-import domain.usecase.AddItemUseCase
-import domain.usecase.GetAllItemsUseCase
+import data.repository.TransactionRepositoryImpl
+import domain.usecase.MakeTransactionUseCase
+import domain.usecase.GetTransactions
+import domain.usecase.DeleteTransactionUseCase
 
 class MainViewModelFactory(private val dbProvider: DatabaseProvider) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         val db = dbProvider.provideDatabase(appContext())
-        val repo = ItemRepositoryImpl(db.itemDao())
-        val addItemUseCase = AddItemUseCase(repo)
-        val getAllItemsUseCase = GetAllItemsUseCase(repo)
-        return TransactionalViewModel(addItemUseCase, getAllItemsUseCase) as T
+        val repo = TransactionRepositoryImpl(db.transactionDao())
+        val addItemUseCase = MakeTransactionUseCase(repo)
+        val getAllItemsUseCase = GetTransactions(repo)
+        val deleteItemUseCase = DeleteTransactionUseCase(repo)
+        return TransactionalViewModel(addItemUseCase, getAllItemsUseCase, deleteItemUseCase) as T
     }
 
     // Since this factory is in Activity scope, we need a way to obtain a Context; we'll provide a helper
@@ -25,4 +27,3 @@ class MainViewModelFactory(private val dbProvider: DatabaseProvider) : ViewModel
         throw IllegalStateException("Use the constructor that supplies a Context-aware provider from Activity")
     }
 }
-

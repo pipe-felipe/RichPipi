@@ -1,7 +1,8 @@
 package data.repository
 
-import data.local.entity.ItemEntity
-import domain.model.Item
+import data.local.entity.TransactionEntity
+import domain.model.Transaction
+import domain.model.TransactionType as DomainTransactionType
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
@@ -10,31 +11,132 @@ import kotlin.test.assertEquals
 
 class ItemRepositoryImplTest {
     private class FakeDao {
-        val list = mutableListOf<ItemEntity>()
-        val flow = MutableStateFlow<List<ItemEntity>>(list)
-        fun getAllItems() = flow as kotlinx.coroutines.flow.Flow<List<ItemEntity>>
-        fun addItem(entity: ItemEntity): Long {
+        val list = mutableListOf<TransactionEntity>()
+        val flow = MutableStateFlow<List<TransactionEntity>>(list)
+        fun getAllItems() = flow as kotlinx.coroutines.flow.Flow<List<TransactionEntity>>
+
+        var lastMonthStart: Long? = null
+        var lastMonthEndExclusive: Long? = null
+
+        fun getForMonth(start: Long, endExclusive: Long) = flow.also {
+            lastMonthStart = start
+            lastMonthEndExclusive = endExclusive
+        } as kotlinx.coroutines.flow.Flow<List<TransactionEntity>>
+
+        fun addItem(entity: TransactionEntity): Long {
             list.add(entity.copy(id = list.size + 1))
             flow.value = list
             return list.size.toLong()
+        }
+
+        var lastDeletedId: Int? = null
+
+        fun deleteById(id: Int): Int {
+            lastDeletedId = id
+            val idx = list.indexOfFirst { it.id == id }
+            val removed = if (idx >= 0) {
+                list.removeAt(idx)
+                true
+            } else false
+            flow.value = list
+            return if (removed) 1 else 0
         }
     }
 
     @Test
     fun `repository maps entity to domain and adds`() = runBlocking {
         val fakeDao = FakeDao()
-        val repo = ItemRepositoryImpl(
-            object : data.local.dao.ItemDao {
-                override fun getAllItems() = fakeDao.getAllItems()
-                override suspend fun getItemById(id: Int) = fakeDao.list.find { it.id == id }
-                override suspend fun addItem(item: ItemEntity) = fakeDao.addItem(item)
+        val repo = TransactionRepositoryImpl(
+            object : data.local.dao.TransactionDao {
+                override fun getAllTransactions() = fakeDao.getAllItems()
+
+                override fun getTransactionsForMonth(
+                    monthStartMillis: Long,
+                    monthEndExclusiveMillis: Long
+                ) = fakeDao.getAllItems()
+
+                override suspend fun getTransactionById(id: Int) = fakeDao.list.find { it.id == id }
+                override suspend fun addTransaction(item: TransactionEntity) = fakeDao.addItem(item)
+                override suspend fun deleteTransactionById(id: Int) = fakeDao.deleteById(id)
             }
         )
 
-        val id = repo.addItem(Item(name = "RepoTest", description = "d", createdAt = 1L))
+        val id = repo.makeTransaction(Transaction(amountCents = 12345, type = DomainTransactionType.INCOME, description = "d", createdAt = 1L))
         assertEquals(1L, id)
-        val all = repo.getAllItems().first()
+        val all = repo.getTransactions().first()
         assertEquals(1, all.size)
-        assertEquals("RepoTest", all[0].name)
+        assertEquals(1, all[0].id)
+        assertEquals(12345, all[0].amountCents)
+        assertEquals(DomainTransactionType.INCOME, all[0].type)
+    }
+
+    @Test
+    fun `repository maps entity to domain for month query`() = runBlocking {
+        val fakeDao = FakeDao()
+        // seed 1 entity
+        fakeDao.addItem(
+            TransactionEntity(
+                amountCents = 999,
+                type = DomainTransactionType.EXPENSE,
+                description = "m",
+                date = 10L,
+                isRecurring = false,
+                createdAt = 5L
+            )
+        )
+
+        val repo = TransactionRepositoryImpl(
+            object : data.local.dao.TransactionDao {
+                override fun getAllTransactions() = fakeDao.getAllItems()
+
+                override fun getTransactionsForMonth(monthStartMillis: Long, monthEndExclusiveMillis: Long) =
+                    fakeDao.getForMonth(monthStartMillis, monthEndExclusiveMillis)
+
+                override suspend fun getTransactionById(id: Int) = fakeDao.list.find { it.id == id }
+                override suspend fun addTransaction(item: TransactionEntity) = fakeDao.addItem(item)
+                override suspend fun deleteTransactionById(id: Int) = fakeDao.deleteById(id)
+            }
+        )
+
+        val result = repo.getTransactionsForMonth(monthStartMillis = 1L, monthEndExclusiveMillis = 100L).first()
+        assertEquals(1L, fakeDao.lastMonthStart)
+        assertEquals(100L, fakeDao.lastMonthEndExclusive)
+        assertEquals(1, result.size)
+        assertEquals(999, result[0].amountCents)
+        assertEquals(DomainTransactionType.EXPENSE, result[0].type)
+        assertEquals("m", result[0].description)
+    }
+
+    @Test
+    fun `repository delete delegates to dao`() = runBlocking {
+        val fakeDao = FakeDao()
+        // insert so delete returns 1
+        fakeDao.addItem(
+            TransactionEntity(
+                amountCents = 1,
+                type = DomainTransactionType.INCOME,
+                description = null,
+                date = 0L,
+                isRecurring = false,
+                createdAt = 1L
+            )
+        )
+
+        val repo = TransactionRepositoryImpl(
+            object : data.local.dao.TransactionDao {
+                override fun getAllTransactions() = fakeDao.getAllItems()
+
+                override fun getTransactionsForMonth(monthStartMillis: Long, monthEndExclusiveMillis: Long) =
+                    fakeDao.getAllItems()
+
+                override suspend fun getTransactionById(id: Int) = fakeDao.list.find { it.id == id }
+                override suspend fun addTransaction(item: TransactionEntity) = fakeDao.addItem(item)
+                override suspend fun deleteTransactionById(id: Int) = fakeDao.deleteById(id)
+            }
+        )
+
+        val rows = repo.deleteTransaction(1)
+        assertEquals(1, rows)
+        assertEquals(1, fakeDao.lastDeletedId)
     }
 }

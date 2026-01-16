@@ -9,13 +9,17 @@ import androidx.compose.runtime.Composable
 private val DarkColorScheme = darkColorScheme(
     primary = DarkPiPrimary,
     secondary = DarkPiSecondary,
-    tertiary = DarkPiTertiary
+    tertiary = DarkPiTertiary,
+    surfaceBright = PiGolden,
+    surfaceDim = DarkPiMoney
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = LightPiPrimary,
     secondary = LightPiSecondary,
-    tertiary = LightPiTertiary
+    tertiary = LightPiTertiary,
+    surfaceBright = PiGolden,
+    surfaceDim = LightPiMoney
 )
 
 @Composable

@@ -1,6 +1,11 @@
 package com.pipe.richpipi.form
 
 import androidx.lifecycle.ViewModel
+import com.pipe.richpipi.platform.monthBoundsUtcMillis
+import domain.model.Transaction
+import domain.usecase.DeleteTransactionUseCase
+import domain.usecase.GetTransactions
+import domain.usecase.MakeTransactionUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -9,32 +14,17 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.math.round
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
-import domain.model.Item
-import domain.usecase.AddItemUseCase
-import domain.usecase.GetAllItemsUseCase
-
-enum class TransactionType {
-    EXPENSE,
-    INCOME
-}
+import domain.model.TransactionType as DomainTransactionType
 
 enum class ExpenseCategory {
-    TRANSPORT,
-    GIFT,
-    RECURRING,
-    FOOD,
-    STUFF,
-    MEDICINE,
-    CLOTHES
+    TRANSPORT, GIFT, RECURRING, FOOD, STUFF, MEDICINE, CLOTHES
 }
 
 enum class IncomeCategory {
-    SALARY,
-    GIFT,
-    INVESTMENT,
-    OTHER
+    SALARY, GIFT, INVESTMENT, OTHER
 }
 
 /**
@@ -42,9 +32,9 @@ enum class IncomeCategory {
  */
 data class FormUiState(
     val date: String = "",
-    val transactionType: TransactionType = TransactionType.EXPENSE,
-    val expenseCategory: ExpenseCategory = ExpenseCategory.FOOD,
-    val incomeCategory: IncomeCategory = IncomeCategory.SALARY,
+    val transactionType: DomainTransactionType = DomainTransactionType.EXPENSE,
+    val expenseCategory: ExpenseCategory? = null,
+    val incomeCategory: IncomeCategory? = null,
     val quantity: String = "",
     val notes: String = "",
     val isRecurring: Boolean = false,
@@ -55,33 +45,37 @@ data class FormUiState(
  * ViewModel to handle the business logic and state of the form.
  */
 class TransactionalViewModel(
-    private val addItemUseCase: AddItemUseCase,
-    private val getAllItemsUseCase: GetAllItemsUseCase
+    private val addItemUseCase: MakeTransactionUseCase,
+    getAllItemsUseCase: GetTransactions,
+    private val deleteItemUseCase: DeleteTransactionUseCase
 ) : ViewModel() {
 
-    // Private mutable state flow
     private val _uiState = MutableStateFlow(FormUiState())
-    // Public read-only state flow
+
     val uiState: StateFlow<FormUiState> = _uiState.asStateFlow()
 
-    // Items exposed to UI (as Flow from domain use case)
-    val items: Flow<List<Item>> = getAllItemsUseCase()
+    val items: Flow<List<Transaction>> = getAllItemsUseCase()
 
     /**
-     * Called when the transaction type changes.
+     * Delete an item by id
      */
-    fun onTransactionTypeChange(newType: TransactionType) {
-        _uiState.update { currentState ->
-            currentState.copy(transactionType = newType)
+    fun deleteItem(id: Int) {
+        CoroutineScope(Dispatchers.Default).launch {
+            try {
+                val deleted = deleteItemUseCase(id)
+                println("Deleted rows: $deleted")
+            } catch (t: Throwable) {
+                println("Error deleting item: ${t.message}")
+            }
         }
     }
 
     /**
-     * Called when the date field value changes.
+     * Called when the transaction type changes.
      */
-    fun onDateChange(newText: String) {
+    fun onTransactionTypeChange(newType: DomainTransactionType) {
         _uiState.update { currentState ->
-            currentState.copy(date = newText)
+            currentState.copy(transactionType = newType)
         }
     }
 
@@ -107,14 +101,11 @@ class TransactionalViewModel(
      * Called when the quantity field value changes.
      */
     fun onQuantityChange(input: String) {
-        val isValid = input
-            .replace(",", ".")
-            .toFloatOrNull() != null
+        val isValid = input.replace(",", ".").toFloatOrNull() != null
 
         _uiState.update { currentState ->
             currentState.copy(
-                quantity = input,
-                isQuantityError = input.isNotBlank() && !isValid
+                quantity = input, isQuantityError = input.isNotBlank() && !isValid
             )
         }
     }
@@ -142,20 +133,42 @@ class TransactionalViewModel(
      * Called when the form is submitted.
      */
     @OptIn(ExperimentalTime::class)
-    fun submit() {
-        // Build item from uiState
-        val date = uiState.value.date.ifBlank {
-            val today = Clock.System.now()
-            today.toString()
+    fun submit(month: Int, year: Int) {
+        // Validate required fields: category and quantity
+        val state = uiState.value
+        val hasValidQuantity = state.quantity.isNotBlank() && !state.isQuantityError
+        val hasCategory =
+            if (state.transactionType == DomainTransactionType.EXPENSE) state.expenseCategory != null
+            else state.incomeCategory != null
+
+        if (!hasValidQuantity || !hasCategory) {
+            _uiState.update { currentState ->
+                currentState.copy(
+                    isQuantityError = currentState.quantity.isNotBlank() && currentState.isQuantityError
+                )
+            }
+            return
         }
-        // create domain item
-        val item = Item(
-            name = "${uiState.value.transactionType} - ${uiState.value.quantity}",
-            description = "${uiState.value.notes} | date: $date",
+
+
+        val (monthStartMillis, _) = monthBoundsUtcMillis(month = month, year = year)
+
+        val dateText = state.date.ifBlank {
+            "$year-${month.toString().padStart(2, '0')}-01"
+        }
+
+        val amountDouble = state.quantity.replace(",", ".").toDoubleOrNull() ?: 0.0
+        val amountCents = round(amountDouble * 100).toLong()
+
+        val item = Transaction(
+            amountCents = amountCents,
+            type = state.transactionType,
+            description = "${state.notes} | date: $dateText",
+            date = monthStartMillis,
+            isRecurring = state.isRecurring,
             createdAt = Clock.System.now().toEpochMilliseconds()
         )
 
-        // Insert using domain use-case
         CoroutineScope(Dispatchers.Default).launch {
             try {
                 val id = addItemUseCase(item)

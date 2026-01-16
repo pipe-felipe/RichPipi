@@ -7,9 +7,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.lifecycle.ViewModelProvider
 import com.pipe.richpipi.form.TransactionalViewModel
 import data.local.database.DatabaseProvider
-import data.repository.ItemRepositoryImpl
-import domain.usecase.AddItemUseCase
-import domain.usecase.GetAllItemsUseCase
+import data.repository.TransactionRepositoryImpl
+import domain.usecase.MakeTransactionUseCase
+import domain.usecase.GetTransactions
+import domain.usecase.DeleteTransactionUseCase
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -17,14 +18,15 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val db = DatabaseProvider.provideDatabase(this)
-        val repo = ItemRepositoryImpl(db.itemDao())
-        val addItemUseCase = AddItemUseCase(repo)
-        val getAllItemsUseCase = GetAllItemsUseCase(repo)
+        val repo = TransactionRepositoryImpl(db.transactionDao())
+        val addItemUseCase = MakeTransactionUseCase(repo)
+        val getAllItemsUseCase = GetTransactions(repo)
+        val deleteItemUseCase = DeleteTransactionUseCase(repo)
 
         val factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
-                return TransactionalViewModel(addItemUseCase, getAllItemsUseCase) as T
+                return TransactionalViewModel(addItemUseCase, getAllItemsUseCase, deleteItemUseCase) as T
             }
         }
 
