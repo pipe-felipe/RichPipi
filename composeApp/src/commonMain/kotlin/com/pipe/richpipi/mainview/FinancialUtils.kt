@@ -19,7 +19,8 @@ fun formatMoneyFromCents(amountCents: Long): String {
 
 /**
  * Keep backward-compatible name used by viewmodels: formatTwoDecimals (accepts Double previously).
- * Provide a function that formats a double by converting to cents then delegating to formatMoneyFromCents.
+ * Provide a function that formats a double by converting to cents then delegating to
+ * formatMoneyFromCents.
  */
 fun formatTwoDecimals(value: Double): String {
     val cents = round(value * 100).toLong()

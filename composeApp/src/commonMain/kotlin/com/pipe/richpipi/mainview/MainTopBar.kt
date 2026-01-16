@@ -63,6 +63,7 @@ fun MainTopBar(
                 ) {
                     Text(
                         text = currentMonthYear,
+                        style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.SemiBold
                     )

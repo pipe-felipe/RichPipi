@@ -5,14 +5,12 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import data.local.dao.TransactionDao
 import data.local.entity.Converters
-import data.local.entity.MonthlySummaryEntity
-import data.local.entity.RecurringTransactionEntity
 import data.local.entity.TransactionEntity
 
 @Database(
-    entities = [TransactionEntity::class,
-        RecurringTransactionEntity::class,
-        MonthlySummaryEntity::class],
+    entities = [
+        TransactionEntity::class
+    ],
     version = 3,
     exportSchema = true
 )

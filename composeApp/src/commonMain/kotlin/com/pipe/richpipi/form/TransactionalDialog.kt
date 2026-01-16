@@ -80,7 +80,8 @@ fun TransactionalDialog(
 
     val hasValidQuantity = uiState.quantity.isNotBlank() && !uiState.isQuantityError
     val hasCategory =
-        if (uiState.transactionType == DomainTransactionType.EXPENSE) uiState.expenseCategory != null
+        if (uiState.transactionType == DomainTransactionType.EXPENSE)
+            uiState.expenseCategory != null
         else uiState.incomeCategory != null
     val isSubmitEnabled = hasValidQuantity && hasCategory
 
@@ -89,7 +90,7 @@ fun TransactionalDialog(
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         BoxWithConstraints {
-            val dialogPadding = if (maxWidth < 600.dp) 4.dp else 15.dp
+            val dialogPadding = if (maxWidth < 400.dp) 4.dp else 15.dp
 
             Surface(
                 shape = RoundedCornerShape(16.dp),

@@ -50,13 +50,10 @@ class TransactionalViewModel(
     private val deleteItemUseCase: DeleteTransactionUseCase
 ) : ViewModel() {
 
-    // Private mutable state flow
     private val _uiState = MutableStateFlow(FormUiState())
 
-    // Public read-only state flow
     val uiState: StateFlow<FormUiState> = _uiState.asStateFlow()
 
-    // Items exposed to UI (as Flow from domain use case)
     val items: Flow<List<Transaction>> = getAllItemsUseCase()
 
     /**
@@ -79,15 +76,6 @@ class TransactionalViewModel(
     fun onTransactionTypeChange(newType: DomainTransactionType) {
         _uiState.update { currentState ->
             currentState.copy(transactionType = newType)
-        }
-    }
-
-    /**
-     * Called when the date field value changes.
-     */
-    fun onDateChange(newText: String) {
-        _uiState.update { currentState ->
-            currentState.copy(date = newText)
         }
     }
 
@@ -156,8 +144,8 @@ class TransactionalViewModel(
         if (!hasValidQuantity || !hasCategory) {
             _uiState.update { currentState ->
                 currentState.copy(
-                        isQuantityError = currentState.quantity.isNotBlank() && currentState.isQuantityError
-                    )
+                    isQuantityError = currentState.quantity.isNotBlank() && currentState.isQuantityError
+                )
             }
             return
         }

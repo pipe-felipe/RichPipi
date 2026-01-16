@@ -23,19 +23,4 @@ class ConvertersTest {
         assertNull(converters.fromTransactionType(null))
         assertNull(converters.toTransactionType(null))
     }
-
-    @Test
-    fun `recurrence rule converters round trip`() {
-        for (rule in RecurrenceRule.entries) {
-            val encoded = converters.fromRecurrenceRule(rule)
-            val decoded = converters.toRecurrenceRule(encoded)
-            assertEquals(rule, decoded)
-        }
-    }
-
-    @Test
-    fun `recurrence rule converters handle null`() {
-        assertNull(converters.fromRecurrenceRule(null))
-        assertNull(converters.toRecurrenceRule(null))
-    }
 }

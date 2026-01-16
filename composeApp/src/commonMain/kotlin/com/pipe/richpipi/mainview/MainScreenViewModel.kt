@@ -33,7 +33,6 @@ class MainScreenViewModel(
 
     private val _allItems = MutableStateFlow<List<Transaction>>(emptyList())
 
-    // Current month and year for navigation
     private val initialMonthYear = currentMonthYear()
     private val _currentMonth = MutableStateFlow(initialMonthYear.first)
     private val _currentYear = MutableStateFlow(initialMonthYear.second)
@@ -41,14 +40,15 @@ class MainScreenViewModel(
     val currentYear: StateFlow<Int> = _currentYear.asStateFlow()
 
     private val _currentMonthYearText =
-        MutableStateFlow(formatMonthYear(initialMonthYear.first, initialMonthYear.second))
+        MutableStateFlow(
+            formatMonthYear(initialMonthYear.first, initialMonthYear.second)
+        )
     val currentMonthYearText: StateFlow<String> = _currentMonthYearText.asStateFlow()
 
     private val scope = CoroutineScope(Dispatchers.Default)
 
     init {
         scope.launch {
-            // Keep the raw list up-to-date
             try {
                 itemsSource.collect { list ->
                     _allItems.value = list
@@ -59,18 +59,34 @@ class MainScreenViewModel(
         }
 
         scope.launch {
-            // Recompute filtered list + totals whenever items or selected month/year changes
             combine(_allItems, _currentMonth, _currentYear) { list, month, year ->
                 val (start, endExclusive) = monthBoundsUtcMillis(month = month, year = year)
                 list.filter { tx ->
-                    tx.isRecurring || (tx.date >= start && tx.date < endExclusive)
+                    // Recurring items should only be considered once the month reaches their start date
+                    // (date is stored as the month start millis).
+                    if (tx.isRecurring) tx.date < endExclusive
+                    else tx.date in start..<endExclusive
                 }
             }.collect { filtered ->
                 _items.value = filtered
+
+                // Month-scoped totals
                 val (inc, exp) = computeTotals(filtered)
                 _totalIncomeText.value = "R$ ${formatTwoDecimals(inc)}"
                 _totalExpenseText.value = "R$ ${formatTwoDecimals(exp)}"
-                _totalSavingText.value = "R$ ${formatTwoDecimals(inc - exp)}"
+
+                // Accumulated saving up to the end of the selected month:
+                // - Non-recurring: count if tx.date < selectedMonthEndExclusive
+                // - Recurring: only counts once the month reaches its start month, so also require tx.date < selectedMonthEndExclusive
+                val (_, selectedMonthEndExclusive) =
+                    monthBoundsUtcMillis(month = _currentMonth.value, year = _currentYear.value)
+
+                val accumulatedItems = _allItems.value.filter { tx ->
+                    tx.date < selectedMonthEndExclusive
+                }
+
+                val (allInc, allExp) = computeTotals(accumulatedItems)
+                _totalSavingText.value = "R$ ${formatTwoDecimals(allInc - allExp)}"
             }
         }
     }
