@@ -25,6 +25,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.pipe.richpipi.ui.theme.golden
 import com.pipe.richpipi.ui.theme.money
+import org.jetbrains.compose.resources.stringResource
+import richpipi.composeapp.generated.resources.Res
+import richpipi.composeapp.generated.resources.income
+import richpipi.composeapp.generated.resources.outgoing
+import richpipi.composeapp.generated.resources.saving
 
 @Composable
 fun MainTopBar(
@@ -87,7 +92,7 @@ fun MainTopBar(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Income",
+                        text = stringResource(Res.string.income),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
@@ -105,7 +110,7 @@ fun MainTopBar(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Saving",
+                        text = stringResource(Res.string.saving),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                         textAlign = TextAlign.Center
@@ -124,7 +129,7 @@ fun MainTopBar(
                     horizontalAlignment = Alignment.End
                 ) {
                     Text(
-                        text = "Expense",
+                        text = stringResource(Res.string.outgoing),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                         textAlign = TextAlign.End

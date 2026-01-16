@@ -20,6 +20,10 @@
     <string name="expense_category_medicine">Remédio</string>
     <string name="expense_category_clothes">Roupas</string>
 
+    <string name="income">Renda</string>
+    <string name="saving">Economia</string>
+    <string name="outgoing">Economia</string>
+
     <string name="income_category_salary">Salário</string>
     <string name="income_category_gift">Presente</string>
     <string name="income_category_investment">Investimento</string>

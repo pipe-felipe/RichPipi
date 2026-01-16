@@ -26,6 +26,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.pipe.richpipi.ui.theme.RichPipiTheme
 import domain.model.Transaction
+import org.jetbrains.compose.resources.stringResource
+import richpipi.composeapp.generated.resources.Res
+import richpipi.composeapp.generated.resources.no_transaction
 
 
 @Composable
@@ -68,7 +71,7 @@ fun MainScreenContent(
                         .padding(innerPadding),
                 ) {
                     Text(
-                        text = "Sem transações para mostrar",
+                        text = stringResource(Res.string.no_transaction),
                         modifier = Modifier.padding(16.dp),
                         style = MaterialTheme.typography.bodyMedium
                     )

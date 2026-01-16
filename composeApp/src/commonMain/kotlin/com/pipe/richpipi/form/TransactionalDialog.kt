@@ -174,8 +174,11 @@ private fun TransactionTypeSelector(
             ) {
                 RadioButton(selected = (selectedType == option), onClick = null)
                 Text(
-                    text = if (option == DomainTransactionType.EXPENSE) stringResource(Res.string.transaction_type_expense)
-                    else stringResource(Res.string.transaction_type_income),
+                    text =
+                        if (option == DomainTransactionType.EXPENSE)
+                            stringResource(Res.string.transaction_type_expense)
+                        else
+                            stringResource(Res.string.transaction_type_income),
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(start = 4.dp)
                 )
