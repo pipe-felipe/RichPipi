@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 3,
-    "identityHash": "5da2a8d22570600e5c5df4f9c57a7114",
+    "identityHash": "33b0d03616b00582d517461003bdbe02",
     "entities": [
       {
         "tableName": "transactions",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `amountCents` INTEGER NOT NULL, `type` TEXT NOT NULL, `description` TEXT, `date` INTEGER NOT NULL, `isRecurring` INTEGER NOT NULL, `recurringId` INTEGER, `createdAt` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `amountCents` INTEGER NOT NULL, `type` TEXT NOT NULL, `description` TEXT, `humanDate` TEXT, `isRecurring` INTEGER NOT NULL, `recurringId` INTEGER, `createdAt` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -32,10 +32,9 @@
             "affinity": "TEXT"
           },
           {
-            "fieldPath": "date",
-            "columnName": "date",
-            "affinity": "INTEGER",
-            "notNull": true
+            "fieldPath": "humanDate",
+            "columnName": "humanDate",
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "isRecurring",
@@ -65,7 +64,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5da2a8d22570600e5c5df4f9c57a7114')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '33b0d03616b00582d517461003bdbe02')"
     ]
   }
 }

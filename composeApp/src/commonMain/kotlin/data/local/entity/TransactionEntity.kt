@@ -12,7 +12,7 @@ data class TransactionEntity(
     val type: TransactionType = TransactionType.EXPENSE,
     val description: String? = null,
     // occurrence date (epoch millis)
-    val date: Long,
+    val humanDate: String? = null,
     // Marks whether this transaction should appear in every month.
     // (Repeatable expenses/income)
     val isRecurring: Boolean = false,

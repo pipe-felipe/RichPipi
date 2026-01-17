@@ -7,6 +7,7 @@ data class Transaction(
     val amountCents: Long,
     val type: TransactionType,
     val description: String? = null,
+    val humanDate: String,
     val date: Long = 0L,
     val isRecurring: Boolean = false,
     val createdAt: Long = 0L

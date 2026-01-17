@@ -59,7 +59,7 @@ class TransactionalViewModelAndroidTest {
         val year = 2026
         val (monthStartMillis, _) = monthBoundsUtcMillis(month = month, year = year)
 
-        vm.submit(month = month, year = year)
+        vm.submit()
 
         val deadline = System.currentTimeMillis() + 2_000
         while (!repo.makeCalled && System.currentTimeMillis() < deadline) {
@@ -72,7 +72,7 @@ class TransactionalViewModelAndroidTest {
 
         assertEquals(1050L, tx!!.amountCents)
         assertEquals(TransactionType.INCOME, tx.type)
-        assertEquals(monthStartMillis, tx.date)
+        assertEquals(monthStartMillis, tx.humanDate)
         assertTrue(tx.isRecurring)
     }
 }

@@ -1,7 +1,6 @@
 package com.pipe.richpipi.form
 
 import androidx.lifecycle.ViewModel
-import com.pipe.richpipi.platform.monthBoundsUtcMillis
 import domain.model.Transaction
 import domain.usecase.DeleteTransactionUseCase
 import domain.usecase.GetTransactions
@@ -150,21 +149,17 @@ class TransactionalViewModel(
             return
         }
 
-
-        val (monthStartMillis, _) = monthBoundsUtcMillis(month = month, year = year)
-
+        val amountDouble = state.quantity.replace(",", ".").toDoubleOrNull() ?: 0.0
+        val amountCents = round(amountDouble * 100).toLong()
         val dateText = state.date.ifBlank {
             "$year-${month.toString().padStart(2, '0')}-01"
         }
 
-        val amountDouble = state.quantity.replace(",", ".").toDoubleOrNull() ?: 0.0
-        val amountCents = round(amountDouble * 100).toLong()
-
         val item = Transaction(
             amountCents = amountCents,
             type = state.transactionType,
-            description = "${state.notes} | date: $dateText",
-            date = monthStartMillis,
+            description = state.notes,
+            humanDate = dateText,
             isRecurring = state.isRecurring,
             createdAt = Clock.System.now().toEpochMilliseconds()
         )

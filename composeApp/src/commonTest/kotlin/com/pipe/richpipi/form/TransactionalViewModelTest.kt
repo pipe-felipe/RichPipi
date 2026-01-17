@@ -65,7 +65,7 @@ class TransactionalViewModelTest {
         vm.onTransactionTypeChange(TransactionType.EXPENSE)
         vm.onQuantityChange("10")
 
-        vm.submit(month = 1, year = 2026)
+        vm.submit()
 
         // submit should early-return synchronously
         assertFalse(repo.makeCalled)

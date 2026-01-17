@@ -15,7 +15,7 @@ interface TransactionDao {
         """
         SELECT * FROM transactions
         WHERE isRecurring = 1
-           OR (date >= :monthStartMillis AND date < :monthEndExclusiveMillis)
+           OR (createdAt >= :monthStartMillis AND createdAt < :monthEndExclusiveMillis)
         ORDER BY createdAt DESC
         """
     )

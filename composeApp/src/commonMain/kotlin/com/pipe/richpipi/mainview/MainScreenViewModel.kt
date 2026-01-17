@@ -64,8 +64,8 @@ class MainScreenViewModel(
                 list.filter { tx ->
                     // Recurring items should only be considered once the month reaches their start date
                     // (date is stored as the month start millis).
-                    if (tx.isRecurring) tx.date < endExclusive
-                    else tx.date in start..<endExclusive
+                    if (tx.isRecurring) tx.humanDate < endExclusive
+                    else tx.humanDate in start..<endExclusive
                 }
             }.collect { filtered ->
                 _items.value = filtered
@@ -82,7 +82,7 @@ class MainScreenViewModel(
                     monthBoundsUtcMillis(month = _currentMonth.value, year = _currentYear.value)
 
                 val accumulatedItems = _allItems.value.filter { tx ->
-                    tx.date < selectedMonthEndExclusive
+                    tx.humanDate < selectedMonthEndExclusive
                 }
 
                 val (allInc, allExp) = computeTotals(accumulatedItems)
