@@ -108,16 +108,18 @@ class MainScreenViewModelTest {
                     id = 1,
                     amountCents = 100_00,
                     type = TransactionType.INCOME,
-                    humanDate = febStart,
-                    isRecurring = true
+                    humanDate = "2026-02-01",
+                    isRecurring = true,
+                    createdAt = febStart
                 ),
                 // One expense in Jan/2026.
                 Transaction(
                     id = 2,
                     amountCents = 50_00,
                     type = TransactionType.EXPENSE,
-                    humanDate = janStart,
-                    isRecurring = false
+                    humanDate = "2026-01-01",
+                    isRecurring = false,
+                    createdAt = janStart
                 )
             )
         )

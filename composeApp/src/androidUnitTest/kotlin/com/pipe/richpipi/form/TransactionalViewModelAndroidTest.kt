@@ -1,6 +1,5 @@
 package com.pipe.richpipi.form
 
-import com.pipe.richpipi.platform.monthBoundsUtcMillis
 import domain.model.Transaction
 import domain.model.TransactionType
 import domain.repository.TransactionRepository
@@ -57,9 +56,9 @@ class TransactionalViewModelAndroidTest {
 
         val month = 2
         val year = 2026
-        val (monthStartMillis, _) = monthBoundsUtcMillis(month = month, year = year)
+        val expectedHumanDate = "$year-${month.toString().padStart(2, '0')}-01"
 
-        vm.submit()
+        vm.submit(month = month, year = year)
 
         val deadline = System.currentTimeMillis() + 2_000
         while (!repo.makeCalled && System.currentTimeMillis() < deadline) {
@@ -72,7 +71,7 @@ class TransactionalViewModelAndroidTest {
 
         assertEquals(1050L, tx!!.amountCents)
         assertEquals(TransactionType.INCOME, tx.type)
-        assertEquals(monthStartMillis, tx.humanDate)
+        assertEquals(expectedHumanDate, tx.humanDate)
         assertTrue(tx.isRecurring)
     }
 }

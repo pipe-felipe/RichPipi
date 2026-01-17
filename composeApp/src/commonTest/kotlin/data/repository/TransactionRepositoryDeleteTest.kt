@@ -34,9 +34,9 @@ class TransactionRepositoryDeleteTest {
     @Test
     fun `repository delete delegates to dao`() = runBlocking {
         val fakeDao = FakeDao()
-        // pre-populate -- now use amountCents, type, date, createdAt
-        fakeDao.addTransaction(TransactionEntity(amountCents = 100, type = TransactionType.EXPENSE, description = "d", date = 1L, createdAt = 1L))
-        fakeDao.addTransaction(TransactionEntity(amountCents = 200, type = TransactionType.EXPENSE, description = "d", date = 2L, createdAt = 2L))
+        // pre-populate -- now use amountCents, type, humanDate, createdAt
+        fakeDao.addTransaction(TransactionEntity(amountCents = 100, type = TransactionType.EXPENSE, description = "d", humanDate = "2026-01-01", createdAt = 1L))
+        fakeDao.addTransaction(TransactionEntity(amountCents = 200, type = TransactionType.EXPENSE, description = "d", humanDate = "2026-01-02", createdAt = 2L))
 
         val repo = TransactionRepositoryImpl(
             object : data.local.dao.TransactionDao {

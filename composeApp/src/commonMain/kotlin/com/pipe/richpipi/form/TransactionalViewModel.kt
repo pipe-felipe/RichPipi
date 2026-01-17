@@ -158,6 +158,7 @@ class TransactionalViewModel(
         val item = Transaction(
             amountCents = amountCents,
             type = state.transactionType,
+            category = (state.expenseCategory ?: state.incomeCategory).toString(),
             description = state.notes,
             humanDate = dateText,
             isRecurring = state.isRecurring,

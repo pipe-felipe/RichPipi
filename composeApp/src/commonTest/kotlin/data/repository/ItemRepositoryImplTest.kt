@@ -79,7 +79,7 @@ class ItemRepositoryImplTest {
                 amountCents = 999,
                 type = DomainTransactionType.EXPENSE,
                 description = "m",
-                date = 10L,
+                humanDate = "2026-01-10",
                 isRecurring = false,
                 createdAt = 5L
             )
@@ -116,7 +116,7 @@ class ItemRepositoryImplTest {
                 amountCents = 1,
                 type = DomainTransactionType.INCOME,
                 description = null,
-                date = 0L,
+                humanDate = "2026-01-01",
                 isRecurring = false,
                 createdAt = 1L
             )

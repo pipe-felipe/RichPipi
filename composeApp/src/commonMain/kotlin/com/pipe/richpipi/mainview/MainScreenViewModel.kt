@@ -63,9 +63,9 @@ class MainScreenViewModel(
                 val (start, endExclusive) = monthBoundsUtcMillis(month = month, year = year)
                 list.filter { tx ->
                     // Recurring items should only be considered once the month reaches their start date
-                    // (date is stored as the month start millis).
-                    if (tx.isRecurring) tx.humanDate < endExclusive
-                    else tx.humanDate in start..<endExclusive
+                    // (createdAt is stored as epoch millis).
+                    if (tx.isRecurring) tx.createdAt < endExclusive
+                    else tx.createdAt in start..<endExclusive
                 }
             }.collect { filtered ->
                 _items.value = filtered
@@ -76,13 +76,13 @@ class MainScreenViewModel(
                 _totalExpenseText.value = "R$ ${formatTwoDecimals(exp)}"
 
                 // Accumulated saving up to the end of the selected month:
-                // - Non-recurring: count if tx.date < selectedMonthEndExclusive
-                // - Recurring: only counts once the month reaches its start month, so also require tx.date < selectedMonthEndExclusive
+                // - Non-recurring: count if tx.createdAt < selectedMonthEndExclusive
+                // - Recurring: only counts once the month reaches its start month, so also require tx.createdAt < selectedMonthEndExclusive
                 val (_, selectedMonthEndExclusive) =
                     monthBoundsUtcMillis(month = _currentMonth.value, year = _currentYear.value)
 
                 val accumulatedItems = _allItems.value.filter { tx ->
-                    tx.humanDate < selectedMonthEndExclusive
+                    tx.createdAt < selectedMonthEndExclusive
                 }
 
                 val (allInc, allExp) = computeTotals(accumulatedItems)

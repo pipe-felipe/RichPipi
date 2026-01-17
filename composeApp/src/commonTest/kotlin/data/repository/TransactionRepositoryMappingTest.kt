@@ -49,7 +49,7 @@ class TransactionRepositoryMappingTest {
             }
         )
 
-        fakeDao.addTransaction(TransactionEntity(amountCents = 9999, type = domain.model.TransactionType.INCOME, description = "d", date = 1L, createdAt = 1L))
+        fakeDao.addTransaction(TransactionEntity(amountCents = 9999, type = domain.model.TransactionType.INCOME, description = "d", humanDate = "2026-01-01", createdAt = 1L))
         val all = repo.getTransactions().first()
         assertEquals(1, all.size)
         assertEquals(9999, all[0].amountCents)

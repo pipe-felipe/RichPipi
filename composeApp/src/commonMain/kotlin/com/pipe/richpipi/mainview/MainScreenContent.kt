@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.pipe.richpipi.ui.theme.RichPipiTheme
 import domain.model.Transaction
+import domain.model.TransactionType
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import richpipi.composeapp.generated.resources.Res
@@ -109,7 +110,7 @@ private fun ItemRow(item: Transaction, onDelete: () -> Unit, modifier: Modifier 
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp),
+            .padding(vertical = 4.dp),
     ) {
         Row(
             modifier = Modifier
@@ -117,22 +118,25 @@ private fun ItemRow(item: Transaction, onDelete: () -> Unit, modifier: Modifier 
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "${item.description} - ${formatMoneyFromCents(item.amountCents)}",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Spacer(modifier = Modifier.height(4.dp))
                 item.description?.let {
                     Text(
                         text = it,
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.titleMedium
                     )
                 }
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = item.humanDate,
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
             Text(
-                text = item.id.toString(),
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(start = 12.dp)
+                text = if (item.type == TransactionType.INCOME)
+                    "R$${formatMoneyFromCents(item.amountCents)}"
+                else
+                    "-R$${formatMoneyFromCents(item.amountCents)}",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(start = 8.dp)
             )
             IconButton(onClick = onDelete) {
                 Icon(

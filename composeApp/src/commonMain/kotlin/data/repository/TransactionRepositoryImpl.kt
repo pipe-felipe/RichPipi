@@ -16,7 +16,7 @@ class TransactionRepositoryImpl(private val dao: TransactionDao) : TransactionRe
                     amountCents = entity.amountCents,
                     type = entity.type,
                     description = entity.description,
-                    humanDate = entity.date,
+                    humanDate = entity.humanDate ?: "",
                     isRecurring = entity.isRecurring,
                     createdAt = entity.createdAt
                 )
@@ -35,7 +35,7 @@ class TransactionRepositoryImpl(private val dao: TransactionDao) : TransactionRe
                     amountCents = entity.amountCents,
                     type = entity.type,
                     description = entity.description,
-                    humanDate = entity.date,
+                    humanDate = entity.humanDate ?: "",
                     isRecurring = entity.isRecurring,
                     createdAt = entity.createdAt
                 )
@@ -47,8 +47,9 @@ class TransactionRepositoryImpl(private val dao: TransactionDao) : TransactionRe
         val entity = TransactionEntity(
             amountCents = transaction.amountCents,
             type = transaction.type,
+            category = transaction.category,
             description = transaction.description,
-            date = transaction.humanDate,
+            humanDate = transaction.humanDate,
             isRecurring = transaction.isRecurring,
             createdAt = transaction.createdAt
         )
