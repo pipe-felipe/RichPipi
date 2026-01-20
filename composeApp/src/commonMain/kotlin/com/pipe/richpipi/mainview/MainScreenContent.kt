@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -26,6 +27,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.pipe.richpipi.ui.theme.RichPipiTheme
+import com.pipe.richpipi.ui.theme.expenseBackground
+import com.pipe.richpipi.ui.theme.incomeBackground
 import domain.model.Transaction
 import domain.model.TransactionType
 import org.jetbrains.compose.resources.painterResource
@@ -111,6 +114,12 @@ private fun ItemRow(item: Transaction, onDelete: () -> Unit, modifier: Modifier 
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (item.type == TransactionType.INCOME)
+                MaterialTheme.colorScheme.incomeBackground
+            else
+                MaterialTheme.colorScheme.expenseBackground
+        )
     ) {
         Row(
             modifier = Modifier
