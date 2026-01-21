@@ -1,6 +1,7 @@
 package com.pipe.richpipi.form
 
 import androidx.lifecycle.ViewModel
+import com.pipe.richpipi.platform.currentDateString
 import domain.model.Transaction
 import domain.usecase.DeleteTransactionUseCase
 import domain.usecase.GetTransactions
@@ -151,8 +152,10 @@ class TransactionalViewModel(
 
         val amountDouble = state.quantity.replace(",", ".").toDoubleOrNull() ?: 0.0
         val amountCents = round(amountDouble * 100).toLong()
+
+        // Use current date if not provided by user
         val dateText = state.date.ifBlank {
-            "$year-${month.toString().padStart(2, '0')}-01"
+            currentDateString()
         }
 
         val item = Transaction(

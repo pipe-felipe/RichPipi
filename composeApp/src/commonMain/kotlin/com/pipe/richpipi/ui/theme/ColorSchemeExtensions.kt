@@ -27,4 +27,13 @@ val ColorScheme.expenseBackground
     @Composable get() =
         if (isSystemInDarkTheme())
             DarkContainerExpenseBackground
-        else LightContainerExpenseBackground
+        else
+            LightContainerExpenseBackground
+
+val ColorScheme.dockBackground
+    @Composable get() =
+        if (isSystemInDarkTheme())
+            DarkDockBackground
+        else
+            LightDockBackground
+

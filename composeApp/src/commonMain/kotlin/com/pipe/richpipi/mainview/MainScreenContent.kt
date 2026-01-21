@@ -1,6 +1,6 @@
 package com.pipe.richpipi.mainview
 
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -9,14 +9,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -31,14 +29,13 @@ import com.pipe.richpipi.ui.theme.expenseBackground
 import com.pipe.richpipi.ui.theme.incomeBackground
 import domain.model.Transaction
 import domain.model.TransactionType
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import richpipi.composeapp.generated.resources.Res
-import richpipi.composeapp.generated.resources.add_item
 import richpipi.composeapp.generated.resources.no_transaction
 
 // TODO fazer as cores
 // TODO fazer os itens adicionado, deixar arrumadinho
+// TODO o human date está errado, está sempre com a mesma data 1/1/2026
 @Composable
 fun MainScreenContent(
     itemsList: List<Transaction>,
@@ -53,57 +50,57 @@ fun MainScreenContent(
     onDeleteItem: (Int) -> Unit
 ) {
     RichPipiTheme {
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            topBar = {
-                MainTopBar(
-                    totalIncomeText = totalIncomeText,
-                    totalExpenseText = totalExpenseText,
-                    totalSavingText = totalSavingText,
-                    currentMonthYear = currentMonthYear,
-                    onPreviousMonth = onPreviousMonth,
-                    onNextMonth = onNextMonth,
-                    onCurrentMonthClick = onCurrentMonthClick
-                )
-            },
-            floatingActionButton = {
-                FloatingActionButton(
-                    onClick = onAddButtonClick,
-                    modifier = Modifier.size(70.dp),
-                    contentColor = MaterialTheme.colorScheme.primary
-                ) {
-                    Image(
-                        painter = painterResource(Res.drawable.add_item),
-                        contentDescription = "Add",
-                        modifier = Modifier.fillMaxSize().padding(0.dp)
+        Box(modifier = Modifier.fillMaxSize()) {
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                topBar = {
+                    MainTopBar(
+                        totalIncomeText = totalIncomeText,
+                        totalExpenseText = totalExpenseText,
+                        totalSavingText = totalSavingText,
+                        currentMonthYear = currentMonthYear,
+                        onPreviousMonth = onPreviousMonth,
+                        onNextMonth = onNextMonth,
+                        onCurrentMonthClick = onCurrentMonthClick
                     )
                 }
-            }
-        ) { innerPadding ->
-            if (itemsList.isEmpty()) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding),
-                ) {
-                    Text(
-                        text = stringResource(Res.string.no_transaction),
-                        modifier = Modifier.padding(16.dp),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding),
-                    contentPadding = PaddingValues(8.dp)
-                ) {
-                    items(itemsList) { item ->
-                        ItemRow(item = item, onDelete = { onDeleteItem(item.id) })
+            ) { innerPadding ->
+                if (itemsList.isEmpty()) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding),
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.no_transaction),
+                            modifier = Modifier.padding(16.dp),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding),
+                        contentPadding = PaddingValues(
+                            start = 8.dp,
+                            end = 8.dp,
+                            top = 8.dp,
+                            bottom = 88.dp
+                        )
+                    ) {
+                        items(itemsList) { item ->
+                            ItemRow(item = item, onDelete = { onDeleteItem(item.id) })
+                        }
                     }
                 }
             }
+
+            // Floating macOS-style dock
+            MainBottomBar(
+                onAddButtonClick = onAddButtonClick,
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
         }
     }
 }
