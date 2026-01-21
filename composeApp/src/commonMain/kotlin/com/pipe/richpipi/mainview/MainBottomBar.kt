@@ -31,6 +31,7 @@ import com.pipe.richpipi.ui.theme.dockBackground
 import org.jetbrains.compose.resources.painterResource
 import richpipi.composeapp.generated.resources.Res
 import richpipi.composeapp.generated.resources.add_item
+import richpipi.composeapp.generated.resources.save_icon
 
 @Composable
 fun MainBottomBar(
@@ -66,6 +67,11 @@ fun MainBottomBar(
                     painter = painterResource(Res.drawable.add_item),
                     contentDescription = "Add",
                     onClick = onAddButtonClick
+                )
+                DockIcon(
+                    painter = painterResource(Res.drawable.save_icon),
+                    contentDescription = "Save",
+                    onClick = { /* TODO: Implement save functionality */ }
                 )
                 // Add more DockIcon items here as needed
             }
