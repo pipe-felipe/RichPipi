@@ -62,7 +62,6 @@ fun App(transactionalViewModel: TransactionalViewModel? = null) {
         SaveDialog(
             onDismiss = { showSaveDialogState.value = false },
             onSave = { /* TODO: Implement local save */ },
-            onBackup = { /* TODO: Implement Google Sheets backup */ }
         )
     }
 }
