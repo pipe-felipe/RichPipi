@@ -9,6 +9,12 @@
     <string name="form_notes_label">Notas</string>
     <string name="form_recurring_label">Repete</string>
 
+    <string name="save_dialog_title">Salvar Dados</string>
+    <string name="save_dialog_description">Aqui você pode salvar seus dados em uma planilha no Google Sheets ☁️
+Fique tranquilo: os dados são apenas seus e não temos acesso a eles 🔒🐶
+E por que fazer isso? Caso queira instalar este aplicativo em outro celular,
+você pode continuar com seus dados sem perder nada 😊🐶</string>
+
     <string name="transaction_type_expense">Despesa</string>
     <string name="transaction_type_income">Receita</string>
 

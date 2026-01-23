@@ -36,6 +36,7 @@ import richpipi.composeapp.generated.resources.save_icon
 @Composable
 fun MainBottomBar(
     onAddButtonClick: () -> Unit,
+    onSaveButtonClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -64,16 +65,15 @@ fun MainBottomBar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 DockIcon(
+                    painter = painterResource(Res.drawable.save_icon),
+                    contentDescription = "Save",
+                    onClick = onSaveButtonClick
+                )
+                DockIcon(
                     painter = painterResource(Res.drawable.add_item),
                     contentDescription = "Add",
                     onClick = onAddButtonClick
                 )
-                DockIcon(
-                    painter = painterResource(Res.drawable.save_icon),
-                    contentDescription = "Save",
-                    onClick = { /* TODO: Implement save functionality */ }
-                )
-                // Add more DockIcon items here as needed
             }
         }
     }

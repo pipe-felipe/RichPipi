@@ -47,6 +47,7 @@ fun MainScreenContent(
     onNextMonth: () -> Unit,
     onCurrentMonthClick: () -> Unit,
     onAddButtonClick: () -> Unit,
+    onSaveButtonClick: () -> Unit,
     onDeleteItem: (Int) -> Unit
 ) {
     RichPipiTheme {
@@ -99,6 +100,7 @@ fun MainScreenContent(
             // Floating macOS-style dock
             MainBottomBar(
                 onAddButtonClick = onAddButtonClick,
+                onSaveButtonClick = onSaveButtonClick,
                 modifier = Modifier.align(Alignment.BottomCenter)
             )
         }

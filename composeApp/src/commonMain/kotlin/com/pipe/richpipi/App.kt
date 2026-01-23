@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.pipe.richpipi.form.SaveDialog
 import com.pipe.richpipi.form.TransactionalDialog
 import com.pipe.richpipi.form.TransactionalViewModel
 import com.pipe.richpipi.mainview.MainScreenContent
@@ -17,6 +18,7 @@ import com.pipe.richpipi.mainview.MainScreenViewModel
 @Composable
 fun App(transactionalViewModel: TransactionalViewModel? = null) {
     val showDialogState: MutableState<Boolean> = remember { mutableStateOf(false) }
+    val showSaveDialogState: MutableState<Boolean> = remember { mutableStateOf(false) }
 
     val vm: TransactionalViewModel = transactionalViewModel ?: viewModel()
     val mainVm = remember {
@@ -43,6 +45,7 @@ fun App(transactionalViewModel: TransactionalViewModel? = null) {
         onNextMonth = { mainVm.goToNextMonth() },
         onCurrentMonthClick = { mainVm.goToCurrentMonth() },
         onAddButtonClick = { showDialogState.value = true },
+        onSaveButtonClick = { showSaveDialogState.value = true },
         onDeleteItem = { id -> mainVm.delete(id) }
     )
 
@@ -52,6 +55,14 @@ fun App(transactionalViewModel: TransactionalViewModel? = null) {
             selectedMonth = currentMonth,
             selectedYear = currentYear,
             onDismiss = { showDialogState.value = false }
+        )
+    }
+
+    if (showSaveDialogState.value) {
+        SaveDialog(
+            onDismiss = { showSaveDialogState.value = false },
+            onSave = { /* TODO: Implement local save */ },
+            onBackup = { /* TODO: Implement Google Sheets backup */ }
         )
     }
 }
