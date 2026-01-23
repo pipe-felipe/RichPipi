@@ -112,7 +112,8 @@ No new feature, integration, or business logic should be added without correspon
 ## 💻 Terminal & Environment Rules
 
 - Development is done on Windows (Microsoft)
-- All terminal commands must be PowerShell-compatible
+- All terminal commands must be git bash-compatible
+- Example: Use cd /c/User ... instead of cd C:\\
 - Avoid Bash-specific commands
 - Prefer PowerShell-native syntax
 
