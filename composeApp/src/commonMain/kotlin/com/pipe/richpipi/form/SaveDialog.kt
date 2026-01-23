@@ -34,7 +34,6 @@ import richpipi.composeapp.generated.resources.save_dialog_title
 fun SaveDialog(
     onDismiss: () -> Unit,
     onSave: () -> Unit = { /* TODO: Implement local save */ },
-    onBackup: () -> Unit = { /* TODO: Implement Google Sheets backup */ }
 ) {
     Dialog(
         onDismissRequest = onDismiss,
@@ -43,7 +42,6 @@ fun SaveDialog(
         SaveDialogContent(
             onDismiss = onDismiss,
             onSave = onSave,
-            onBackup = onBackup
         )
     }
 }
@@ -52,7 +50,6 @@ fun SaveDialog(
 private fun SaveDialogContent(
     onDismiss: () -> Unit,
     onSave: () -> Unit,
-    onBackup: () -> Unit
 ) {
     BoxWithConstraints {
         Surface(
@@ -124,4 +121,3 @@ private fun CloseButton(onDismiss: () -> Unit, modifier: Modifier = Modifier) {
         )
     }
 }
-

@@ -36,4 +36,3 @@ val ColorScheme.dockBackground
             DarkDockBackground
         else
             LightDockBackground
-
