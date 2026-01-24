@@ -9,10 +9,10 @@ import data.local.entity.TransactionEntity
 
 @Database(
     entities = [
-        TransactionEntity::class
+        TransactionEntity::class,
     ],
     version = 3,
-    exportSchema = true
+    exportSchema = true,
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {

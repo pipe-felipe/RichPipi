@@ -9,7 +9,7 @@ object DatabaseProvider {
     private val MIGRATION_2_3 = object : Migration(2, 3) {
         override fun migrate(db: SupportSQLiteDatabase) {
             db.execSQL(
-                "ALTER TABLE `transactions` ADD COLUMN `isRecurring` INTEGER NOT NULL DEFAULT 0"
+                "ALTER TABLE `transactions` ADD COLUMN `isRecurring` INTEGER NOT NULL DEFAULT 0",
             )
         }
     }
@@ -18,7 +18,7 @@ object DatabaseProvider {
         return Room.databaseBuilder(
             context.applicationContext,
             AppDatabase::class.java,
-            "richpipi-db"
+            "richpipi-db",
         ).addMigrations(MIGRATION_2_3).build()
     }
 }

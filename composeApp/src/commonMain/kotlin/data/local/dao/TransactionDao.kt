@@ -1,10 +1,10 @@
 package data.local.dao
 
-import data.local.entity.TransactionEntity
-import kotlinx.coroutines.flow.Flow
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import data.local.entity.TransactionEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TransactionDao {
@@ -15,13 +15,13 @@ interface TransactionDao {
         """
         SELECT * FROM transactions
         WHERE isRecurring = 1
-           OR (date >= :monthStartMillis AND date < :monthEndExclusiveMillis)
+           OR (createdAt >= :monthStartMillis AND createdAt < :monthEndExclusiveMillis)
         ORDER BY createdAt DESC
-        """
+        """,
     )
     fun getTransactionsForMonth(
         monthStartMillis: Long,
-        monthEndExclusiveMillis: Long
+        monthEndExclusiveMillis: Long,
     ): Flow<List<TransactionEntity>>
 
     @Query("SELECT * FROM transactions WHERE id = :id LIMIT 1")

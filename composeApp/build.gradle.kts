@@ -1,5 +1,6 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -23,7 +24,7 @@ kotlin {
 
     listOf(
         iosArm64(),
-        iosSimulatorArm64()
+        iosSimulatorArm64(),
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
@@ -38,6 +39,19 @@ kotlin {
             implementation(libs.androidx.room.runtime)
             implementation(libs.androidx.sqlite)
             implementation(libs.androidx.sqlite.bundled)
+
+            // Google Drive API
+            implementation(libs.google.api.client.android)
+            implementation(libs.google.api.services.drive)
+            implementation(libs.google.http.client.android)
+            implementation(libs.androidx.credentials)
+            implementation(libs.androidx.credentials.auth)
+            implementation(libs.googleid)
+            implementation(libs.play.services.auth)
+            implementation(libs.kotlinx.coroutines.play.services)
+
+            // Security
+            implementation(libs.androidx.security.crypto)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -53,6 +67,18 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+        }
+
+        // Instrumented Android tests source set (androidInstrumentedTest)
+        val androidInstrumentedTest by getting {
+            dependencies {
+                implementation(libs.androidx.core.v150)
+                implementation(libs.androidx.core.ktx.v150)
+                implementation(libs.androidx.junit.v115)
+                implementation(libs.androidx.runner.v152)
+                implementation(libs.kotlin.test)
+            }
         }
     }
 }
@@ -67,17 +93,52 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary = true
+        }
+
+        // Read Google Web Client ID from local.properties
+        val localProperties = Properties()
+        val localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            localPropertiesFile.inputStream().use { localProperties.load(it) }
+        }
+
+        buildConfigField(
+            "String",
+            "GOOGLE_WEB_CLIENT_ID",
+            "\"${localProperties.getProperty("google.web.client.id", "")}\"",
+        )
     }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "/META-INF/INDEX.LIST"
+            excludes += "/META-INF/DEPENDENCIES"
         }
     }
+
+    buildFeatures {
+        compose = true
+        buildConfig = true // Enable BuildConfig to access credentials
+        aidl = false
+        resValues = false
+        shaders = false
+    }
+
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -89,4 +150,11 @@ dependencies {
     add("kspAndroid", libs.androidx.room.compiler)
     add("kspIosArm64", libs.androidx.room.compiler)
     add("kspIosSimulatorArm64", libs.androidx.room.compiler)
+
+    // Instrumented test dependencies
+    androidTestImplementation(libs.core)
+    androidTestImplementation(libs.core.ktx)
+    androidTestImplementation(libs.junit)
+    androidTestImplementation(libs.runner)
+    androidTestImplementation(libs.kotlin.test)
 }

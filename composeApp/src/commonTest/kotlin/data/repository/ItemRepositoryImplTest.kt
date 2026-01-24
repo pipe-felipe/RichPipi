@@ -2,12 +2,12 @@ package data.repository
 
 import data.local.entity.TransactionEntity
 import domain.model.Transaction
-import domain.model.TransactionType as DomainTransactionType
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import domain.model.TransactionType as DomainTransactionType
 
 class ItemRepositoryImplTest {
     private class FakeDao {
@@ -37,7 +37,9 @@ class ItemRepositoryImplTest {
             val removed = if (idx >= 0) {
                 list.removeAt(idx)
                 true
-            } else false
+            } else {
+                false
+            }
             flow.value = list
             return if (removed) 1 else 0
         }
@@ -52,13 +54,13 @@ class ItemRepositoryImplTest {
 
                 override fun getTransactionsForMonth(
                     monthStartMillis: Long,
-                    monthEndExclusiveMillis: Long
+                    monthEndExclusiveMillis: Long,
                 ) = fakeDao.getAllItems()
 
                 override suspend fun getTransactionById(id: Int) = fakeDao.list.find { it.id == id }
                 override suspend fun addTransaction(item: TransactionEntity) = fakeDao.addItem(item)
                 override suspend fun deleteTransactionById(id: Int) = fakeDao.deleteById(id)
-            }
+            },
         )
 
         val id = repo.makeTransaction(Transaction(amountCents = 12345, type = DomainTransactionType.INCOME, description = "d", createdAt = 1L))
@@ -79,10 +81,10 @@ class ItemRepositoryImplTest {
                 amountCents = 999,
                 type = DomainTransactionType.EXPENSE,
                 description = "m",
-                date = 10L,
+                humanDate = "2026-01-10",
                 isRecurring = false,
-                createdAt = 5L
-            )
+                createdAt = 5L,
+            ),
         )
 
         val repo = TransactionRepositoryImpl(
@@ -95,7 +97,7 @@ class ItemRepositoryImplTest {
                 override suspend fun getTransactionById(id: Int) = fakeDao.list.find { it.id == id }
                 override suspend fun addTransaction(item: TransactionEntity) = fakeDao.addItem(item)
                 override suspend fun deleteTransactionById(id: Int) = fakeDao.deleteById(id)
-            }
+            },
         )
 
         val result = repo.getTransactionsForMonth(monthStartMillis = 1L, monthEndExclusiveMillis = 100L).first()
@@ -116,10 +118,10 @@ class ItemRepositoryImplTest {
                 amountCents = 1,
                 type = DomainTransactionType.INCOME,
                 description = null,
-                date = 0L,
+                humanDate = "2026-01-01",
                 isRecurring = false,
-                createdAt = 1L
-            )
+                createdAt = 1L,
+            ),
         )
 
         val repo = TransactionRepositoryImpl(
@@ -132,7 +134,7 @@ class ItemRepositoryImplTest {
                 override suspend fun getTransactionById(id: Int) = fakeDao.list.find { it.id == id }
                 override suspend fun addTransaction(item: TransactionEntity) = fakeDao.addItem(item)
                 override suspend fun deleteTransactionById(id: Int) = fakeDao.deleteById(id)
-            }
+            },
         )
 
         val rows = repo.deleteTransaction(1)

@@ -3,8 +3,8 @@ package domain.usecase
 import domain.model.Transaction
 import domain.model.TransactionType
 import domain.repository.TransactionRepository
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

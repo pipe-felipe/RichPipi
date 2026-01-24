@@ -16,9 +16,9 @@ class TransactionRepositoryImpl(private val dao: TransactionDao) : TransactionRe
                     amountCents = entity.amountCents,
                     type = entity.type,
                     description = entity.description,
-                    date = entity.date,
+                    humanDate = entity.humanDate ?: "",
                     isRecurring = entity.isRecurring,
-                    createdAt = entity.createdAt
+                    createdAt = entity.createdAt,
                 )
             }
         }
@@ -26,7 +26,7 @@ class TransactionRepositoryImpl(private val dao: TransactionDao) : TransactionRe
 
     override fun getTransactionsForMonth(
         monthStartMillis: Long,
-        monthEndExclusiveMillis: Long
+        monthEndExclusiveMillis: Long,
     ): Flow<List<Transaction>> {
         return dao.getTransactionsForMonth(monthStartMillis, monthEndExclusiveMillis).map { list ->
             list.map { entity ->
@@ -35,9 +35,9 @@ class TransactionRepositoryImpl(private val dao: TransactionDao) : TransactionRe
                     amountCents = entity.amountCents,
                     type = entity.type,
                     description = entity.description,
-                    date = entity.date,
+                    humanDate = entity.humanDate ?: "",
                     isRecurring = entity.isRecurring,
-                    createdAt = entity.createdAt
+                    createdAt = entity.createdAt,
                 )
             }
         }
@@ -47,10 +47,11 @@ class TransactionRepositoryImpl(private val dao: TransactionDao) : TransactionRe
         val entity = TransactionEntity(
             amountCents = transaction.amountCents,
             type = transaction.type,
+            category = transaction.category,
             description = transaction.description,
-            date = transaction.date,
+            humanDate = transaction.humanDate,
             isRecurring = transaction.isRecurring,
-            createdAt = transaction.createdAt
+            createdAt = transaction.createdAt,
         )
         return dao.addTransaction(entity)
     }

@@ -1,5 +1,6 @@
 package com.pipe.richpipi.mainview
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -11,10 +12,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -25,9 +25,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.pipe.richpipi.ui.theme.RichPipiTheme
+import com.pipe.richpipi.ui.theme.expenseBackground
+import com.pipe.richpipi.ui.theme.incomeBackground
 import domain.model.Transaction
+import domain.model.TransactionType
+import org.jetbrains.compose.resources.stringResource
+import richpipi.composeapp.generated.resources.Res
+import richpipi.composeapp.generated.resources.no_transaction
 
-
+// TODO fazer as cores
+// TODO fazer os itens adicionado, deixar arrumadinho
 @Composable
 fun MainScreenContent(
     itemsList: List<Transaction>,
@@ -39,52 +46,62 @@ fun MainScreenContent(
     onNextMonth: () -> Unit,
     onCurrentMonthClick: () -> Unit,
     onAddButtonClick: () -> Unit,
-    onDeleteItem: (Int) -> Unit
+    onSaveButtonClick: () -> Unit,
+    onDeleteItem: (Int) -> Unit,
 ) {
     RichPipiTheme {
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            topBar = {
-                MainTopBar(
-                    totalIncomeText = totalIncomeText,
-                    totalExpenseText = totalExpenseText,
-                    totalSavingText = totalSavingText,
-                    currentMonthYear = currentMonthYear,
-                    onPreviousMonth = onPreviousMonth,
-                    onNextMonth = onNextMonth,
-                    onCurrentMonthClick = onCurrentMonthClick
-                )
-            },
-            floatingActionButton = {
-                FloatingActionButton(onClick = onAddButtonClick) {
-                    Icon(Icons.Default.Add, contentDescription = "Add")
-                }
-            }
-        ) { innerPadding ->
-            if (itemsList.isEmpty()) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding),
-                ) {
-                    Text(
-                        text = "Sem transações para mostrar",
-                        modifier = Modifier.padding(16.dp),
-                        style = MaterialTheme.typography.bodyMedium
+        Box(modifier = Modifier.fillMaxSize()) {
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                topBar = {
+                    MainTopBar(
+                        totalIncomeText = totalIncomeText,
+                        totalExpenseText = totalExpenseText,
+                        totalSavingText = totalSavingText,
+                        currentMonthYear = currentMonthYear,
+                        onPreviousMonth = onPreviousMonth,
+                        onNextMonth = onNextMonth,
+                        onCurrentMonthClick = onCurrentMonthClick,
                     )
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding),
-                    contentPadding = PaddingValues(8.dp)
-                ) {
-                    items(itemsList) { item ->
-                        ItemRow(item = item, onDelete = { onDeleteItem(item.id) })
+                },
+            ) { innerPadding ->
+                if (itemsList.isEmpty()) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding),
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.no_transaction),
+                            modifier = Modifier.padding(16.dp),
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding),
+                        contentPadding = PaddingValues(
+                            start = 8.dp,
+                            end = 8.dp,
+                            top = 8.dp,
+                            bottom = 88.dp,
+                        ),
+                    ) {
+                        items(itemsList) { item ->
+                            ItemRow(item = item, onDelete = { onDeleteItem(item.id) })
+                        }
                     }
                 }
             }
+
+            // Floating macOS-style dock
+            MainBottomBar(
+                onAddButtonClick = onAddButtonClick,
+                onSaveButtonClick = onSaveButtonClick,
+                modifier = Modifier.align(Alignment.BottomCenter),
+            )
         }
     }
 }
@@ -94,30 +111,41 @@ private fun ItemRow(item: Transaction, onDelete: () -> Unit, modifier: Modifier 
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp),
+            .padding(vertical = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (item.type == TransactionType.INCOME) {
+                MaterialTheme.colorScheme.incomeBackground
+            } else {
+                MaterialTheme.colorScheme.expenseBackground
+            },
+        ),
     ) {
         Row(
             modifier = Modifier
                 .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "${item.type.name} - ${formatMoneyFromCents(item.amountCents)}",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Spacer(modifier = Modifier.height(4.dp))
                 item.description?.let {
                     Text(
                         text = it,
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.titleMedium,
                     )
                 }
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = item.humanDate,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
             }
             Text(
-                text = item.id.toString(),
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(start = 12.dp)
+                text = if (item.type == TransactionType.INCOME) {
+                    "R$${formatMoneyFromCents(item.amountCents)}"
+                } else {
+                    "-R$${formatMoneyFromCents(item.amountCents)}"
+                },
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(start = 8.dp),
             )
             IconButton(onClick = onDelete) {
                 Icon(

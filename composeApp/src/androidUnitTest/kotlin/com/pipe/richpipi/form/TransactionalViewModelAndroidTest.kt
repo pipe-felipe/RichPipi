@@ -1,6 +1,5 @@
 package com.pipe.richpipi.form
 
-import com.pipe.richpipi.platform.monthBoundsUtcMillis
 import domain.model.Transaction
 import domain.model.TransactionType
 import domain.repository.TransactionRepository
@@ -11,10 +10,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
-import org.junit.Test
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
+import org.junit.Test
 
 class TransactionalViewModelAndroidTest {
 
@@ -46,7 +45,7 @@ class TransactionalViewModelAndroidTest {
         val vm = TransactionalViewModel(
             addItemUseCase = MakeTransactionUseCase(repo),
             getAllItemsUseCase = GetTransactions(repo),
-            deleteItemUseCase = DeleteTransactionUseCase(repo)
+            deleteItemUseCase = DeleteTransactionUseCase(repo),
         )
 
         vm.onTransactionTypeChange(TransactionType.INCOME)
@@ -57,7 +56,7 @@ class TransactionalViewModelAndroidTest {
 
         val month = 2
         val year = 2026
-        val (monthStartMillis, _) = monthBoundsUtcMillis(month = month, year = year)
+        val expectedHumanDate = "$year-${month.toString().padStart(2, '0')}-01"
 
         vm.submit(month = month, year = year)
 
@@ -72,7 +71,7 @@ class TransactionalViewModelAndroidTest {
 
         assertEquals(1050L, tx!!.amountCents)
         assertEquals(TransactionType.INCOME, tx.type)
-        assertEquals(monthStartMillis, tx.date)
+        assertEquals(expectedHumanDate, tx.humanDate)
         assertTrue(tx.isRecurring)
     }
 }

@@ -8,21 +8,28 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.pipe.richpipi.form.SaveDialog
 import com.pipe.richpipi.form.TransactionalDialog
 import com.pipe.richpipi.form.TransactionalViewModel
 import com.pipe.richpipi.mainview.MainScreenContent
 import com.pipe.richpipi.mainview.MainScreenViewModel
+import domain.model.BackupResult
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun App(transactionalViewModel: TransactionalViewModel? = null) {
+fun App(
+    transactionalViewModel: TransactionalViewModel? = null,
+    onSignInRequired: () -> Unit = {},
+) {
     val showDialogState: MutableState<Boolean> = remember { mutableStateOf(false) }
+    val showSaveDialogState: MutableState<Boolean> = remember { mutableStateOf(false) }
 
     val vm: TransactionalViewModel = transactionalViewModel ?: viewModel()
     val mainVm = remember {
         MainScreenViewModel(
             itemsSource = vm.items,
-            onDeleteItem = { id -> vm.deleteItem(id) })
+            onDeleteItem = { id -> vm.deleteItem(id) },
+        )
     }
 
     val itemsList by mainVm.items.collectAsState()
@@ -43,7 +50,8 @@ fun App(transactionalViewModel: TransactionalViewModel? = null) {
         onNextMonth = { mainVm.goToNextMonth() },
         onCurrentMonthClick = { mainVm.goToCurrentMonth() },
         onAddButtonClick = { showDialogState.value = true },
-        onDeleteItem = { id -> mainVm.delete(id) }
+        onSaveButtonClick = { showSaveDialogState.value = true },
+        onDeleteItem = { id -> mainVm.delete(id) },
     )
 
     if (showDialogState.value) {
@@ -51,7 +59,25 @@ fun App(transactionalViewModel: TransactionalViewModel? = null) {
             viewModel = vm,
             selectedMonth = currentMonth,
             selectedYear = currentYear,
-            onDismiss = { showDialogState.value = false }
+            onDismiss = { showDialogState.value = false },
+        )
+    }
+
+    if (showSaveDialogState.value) {
+        SaveDialog(
+            onDismiss = { showSaveDialogState.value = false },
+            onSave = { onResult ->
+                mainVm.createBackupFolder { result ->
+                    when (result) {
+                        is BackupResult.SignInRequired -> {
+                            // Trigger sign-in flow, then retry after sign-in
+                            onSignInRequired()
+                        }
+                        else -> onResult(result)
+                    }
+                }
+            },
+            onSignInRequired = onSignInRequired,
         )
     }
 }

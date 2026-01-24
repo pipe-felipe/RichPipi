@@ -5,9 +5,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.pipe.richpipi.form.TransactionalViewModel
 import data.local.database.DatabaseProvider
 import data.repository.TransactionRepositoryImpl
-import domain.usecase.MakeTransactionUseCase
-import domain.usecase.GetTransactions
 import domain.usecase.DeleteTransactionUseCase
+import domain.usecase.GetTransactions
+import domain.usecase.MakeTransactionUseCase
 
 class MainViewModelFactory(private val dbProvider: DatabaseProvider) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")

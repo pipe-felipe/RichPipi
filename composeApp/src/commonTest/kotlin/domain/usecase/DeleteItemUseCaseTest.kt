@@ -1,8 +1,8 @@
 package domain.usecase
 
+import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlinx.coroutines.runBlocking
 
 class DeleteItemUseCaseTest {
     private class FakeRepo(var deletedId: Int? = null) : domain.repository.TransactionRepository {

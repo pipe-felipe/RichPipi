@@ -2,6 +2,8 @@ package com.pipe.richpipi.mainview
 
 import com.pipe.richpipi.platform.currentMonthYear
 import com.pipe.richpipi.platform.monthBoundsUtcMillis
+import di.BackupModule
+import domain.model.BackupResult
 import domain.model.Transaction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,7 +20,8 @@ import kotlinx.coroutines.launch
  * It is not an AndroidX ViewModel so it can be instantiated from common code easily.
  */
 class MainScreenViewModel(
-    itemsSource: Flow<List<Transaction>> = emptyFlow(), private val onDeleteItem: (Int) -> Unit = {}
+    itemsSource: Flow<List<Transaction>> = emptyFlow(),
+    private val onDeleteItem: (Int) -> Unit = {},
 ) {
     private val _items = MutableStateFlow<List<Transaction>>(emptyList())
     val items: StateFlow<List<Transaction>> = _items.asStateFlow()
@@ -41,7 +44,7 @@ class MainScreenViewModel(
 
     private val _currentMonthYearText =
         MutableStateFlow(
-            formatMonthYear(initialMonthYear.first, initialMonthYear.second)
+            formatMonthYear(initialMonthYear.first, initialMonthYear.second),
         )
     val currentMonthYearText: StateFlow<String> = _currentMonthYearText.asStateFlow()
 
@@ -63,9 +66,12 @@ class MainScreenViewModel(
                 val (start, endExclusive) = monthBoundsUtcMillis(month = month, year = year)
                 list.filter { tx ->
                     // Recurring items should only be considered once the month reaches their start date
-                    // (date is stored as the month start millis).
-                    if (tx.isRecurring) tx.date < endExclusive
-                    else tx.date in start..<endExclusive
+                    // (createdAt is stored as epoch millis).
+                    if (tx.isRecurring) {
+                        tx.createdAt < endExclusive
+                    } else {
+                        tx.createdAt in start..<endExclusive
+                    }
                 }
             }.collect { filtered ->
                 _items.value = filtered
@@ -76,13 +82,13 @@ class MainScreenViewModel(
                 _totalExpenseText.value = "R$ ${formatTwoDecimals(exp)}"
 
                 // Accumulated saving up to the end of the selected month:
-                // - Non-recurring: count if tx.date < selectedMonthEndExclusive
-                // - Recurring: only counts once the month reaches its start month, so also require tx.date < selectedMonthEndExclusive
+                // - Non-recurring: count if tx.createdAt < selectedMonthEndExclusive
+                // - Recurring: only counts once the month reaches its start month, so also require tx.createdAt < selectedMonthEndExclusive
                 val (_, selectedMonthEndExclusive) =
                     monthBoundsUtcMillis(month = _currentMonth.value, year = _currentYear.value)
 
                 val accumulatedItems = _allItems.value.filter { tx ->
-                    tx.date < selectedMonthEndExclusive
+                    tx.createdAt < selectedMonthEndExclusive
                 }
 
                 val (allInc, allExp) = computeTotals(accumulatedItems)
@@ -126,6 +132,21 @@ class MainScreenViewModel(
         _currentMonthYearText.value = formatMonthYear(month, year)
     }
 
+    /**
+     * Creates a backup folder in Google Drive.
+     * @param onResult Callback to handle the result of the backup operation
+     */
+    fun createBackupFolder(onResult: (BackupResult) -> Unit) {
+        scope.launch {
+            try {
+                val result = BackupModule.createBackupFolderUseCase.execute()
+                onResult(result)
+            } catch (e: Exception) {
+                onResult(BackupResult.Error("Failed to create backup", e))
+            }
+        }
+    }
+
     private fun formatMonthYear(month: Int, year: Int): String {
         val monthNames = listOf(
             "Janeiro",
@@ -139,7 +160,7 @@ class MainScreenViewModel(
             "Setembro",
             "Outubro",
             "Novembro",
-            "Dezembro"
+            "Dezembro",
         )
         return "${monthNames[month - 1]} $year"
     }
