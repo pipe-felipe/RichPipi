@@ -73,10 +73,10 @@ kotlin {
         // Instrumented Android tests source set (androidInstrumentedTest)
         val androidInstrumentedTest by getting {
             dependencies {
-                implementation("androidx.test:core:1.5.0")
-                implementation("androidx.test:core-ktx:1.5.0")
-                implementation("androidx.test.ext:junit:1.1.5")
-                implementation("androidx.test:runner:1.5.2")
+                implementation(libs.androidx.core.v150)
+                implementation(libs.androidx.core.ktx.v150)
+                implementation(libs.androidx.junit.v115)
+                implementation(libs.androidx.runner.v152)
                 implementation(libs.kotlin.test)
             }
         }
