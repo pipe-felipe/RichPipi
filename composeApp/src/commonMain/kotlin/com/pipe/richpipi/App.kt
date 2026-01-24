@@ -61,7 +61,9 @@ fun App(transactionalViewModel: TransactionalViewModel? = null) {
     if (showSaveDialogState.value) {
         SaveDialog(
             onDismiss = { showSaveDialogState.value = false },
-            onSave = { /* TODO: Implement local save */ },
+            onSave = { onResult ->
+                mainVm.createBackupFolder(onResult)
+            }
         )
     }
 }

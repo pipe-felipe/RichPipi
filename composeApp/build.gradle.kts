@@ -38,6 +38,14 @@ kotlin {
             implementation(libs.androidx.room.runtime)
             implementation(libs.androidx.sqlite)
             implementation(libs.androidx.sqlite.bundled)
+
+            // Google Drive API
+            implementation(libs.google.api.client.android)
+            implementation(libs.google.api.services.drive)
+            implementation(libs.google.http.client.android)
+            implementation(libs.androidx.credentials)
+            implementation(libs.androidx.credentials.auth)
+            implementation(libs.googleid)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -53,6 +61,7 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
         }
     }
 }
@@ -77,6 +86,8 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "/META-INF/INDEX.LIST"
+            excludes += "/META-INF/DEPENDENCIES"
         }
     }
 

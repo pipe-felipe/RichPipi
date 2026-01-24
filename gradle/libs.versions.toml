@@ -7,12 +7,14 @@ androidx-activity = "1.12.2"
 androidx-lifecycle = "2.9.6"
 composeMultiplatform = "1.10.0"
 kotlin = "2.3.0"
+kotlinxCoroutines = "1.10.1"
 sqlite = "2.6.2"
 ksp = "2.3.3"
 room = "2.8.4"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
 androidx-lifecycle-viewmodelCompose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-runtimeCompose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
@@ -24,6 +26,14 @@ androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref =
 # SQLite Driver
 androidx-sqlite = { module = "androidx.sqlite:sqlite", version.ref = "sqlite" }
 androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
+
+# Google Drive API
+google-api-client-android = { module = "com.google.api-client:google-api-client-android", version = "2.7.0" }
+google-api-services-drive = { module = "com.google.apis:google-api-services-drive", version = "v3-rev20240914-2.0.0" }
+google-http-client-android = { module = "com.google.http-client:google-http-client-android", version = "1.45.1" }
+androidx-credentials = { module = "androidx.credentials:credentials", version = "1.5.0" }
+androidx-credentials-auth = { module = "androidx.credentials:credentials-play-services-auth", version = "1.5.0" }
+googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version = "1.1.1" }
 
 
 

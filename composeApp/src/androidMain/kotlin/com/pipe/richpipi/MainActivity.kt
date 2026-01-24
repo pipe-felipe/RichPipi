@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.lifecycle.ViewModelProvider
 import com.pipe.richpipi.form.TransactionalViewModel
 import data.local.database.DatabaseProvider
+import data.remote.initializeGoogleDriveService
 import data.repository.TransactionRepositoryImpl
 import domain.usecase.MakeTransactionUseCase
 import domain.usecase.GetTransactions
@@ -16,6 +17,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+
+        // Initialize Google Drive service
+        initializeGoogleDriveService(this)
 
         val db = DatabaseProvider.provideDatabase(this)
         val repo = TransactionRepositoryImpl(db.transactionDao())

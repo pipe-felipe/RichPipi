@@ -2,6 +2,8 @@ package com.pipe.richpipi.mainview
 
 import com.pipe.richpipi.platform.currentMonthYear
 import com.pipe.richpipi.platform.monthBoundsUtcMillis
+import di.BackupModule
+import domain.model.BackupResult
 import domain.model.Transaction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -124,6 +126,21 @@ class MainScreenViewModel(
         _currentMonth.value = month
         _currentYear.value = year
         _currentMonthYearText.value = formatMonthYear(month, year)
+    }
+
+    /**
+     * Creates a backup folder in Google Drive.
+     * @param onResult Callback to handle the result of the backup operation
+     */
+    fun createBackupFolder(onResult: (BackupResult) -> Unit) {
+        scope.launch {
+            try {
+                val result = BackupModule.createBackupFolderUseCase.execute()
+                onResult(result)
+            } catch (e: Exception) {
+                onResult(BackupResult.Error("Failed to create backup", e))
+            }
+        }
     }
 
     private fun formatMonthYear(month: Int, year: Int): String {

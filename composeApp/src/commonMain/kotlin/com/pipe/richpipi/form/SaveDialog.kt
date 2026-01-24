@@ -12,18 +12,24 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import domain.model.BackupResult
 import org.jetbrains.compose.resources.stringResource
 import richpipi.composeapp.generated.resources.Res
 import richpipi.composeapp.generated.resources.form_close_button_description
@@ -33,7 +39,7 @@ import richpipi.composeapp.generated.resources.save_dialog_title
 @Composable
 fun SaveDialog(
     onDismiss: () -> Unit,
-    onSave: () -> Unit = { /* TODO: Implement local save */ },
+    onSave: (onResult: (BackupResult) -> Unit) -> Unit,
 ) {
     Dialog(
         onDismissRequest = onDismiss,
@@ -49,8 +55,12 @@ fun SaveDialog(
 @Composable
 private fun SaveDialogContent(
     onDismiss: () -> Unit,
-    onSave: () -> Unit,
+    onSave: (onResult: (BackupResult) -> Unit) -> Unit,
 ) {
+    var isLoading by remember { mutableStateOf(false) }
+    var resultMessage by remember { mutableStateOf<String?>(null) }
+    var isSuccess by remember { mutableStateOf(false) }
+
     BoxWithConstraints {
         Surface(
             shape = RoundedCornerShape(16.dp),
@@ -64,7 +74,41 @@ private fun SaveDialogContent(
                 ) {
                     SaveDialogHeader()
 
-                    SaveButton(onClick = onSave)
+                    // Show result message if available
+                    resultMessage?.let { message ->
+                        Text(
+                            text = message,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = if (isSuccess) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                    }
+
+                    if (isLoading) {
+                        CircularProgressIndicator(modifier = Modifier.padding(16.dp))
+                    } else {
+                        SaveButton(
+                            onClick = {
+                                isLoading = true
+                                resultMessage = null
+                                onSave { result ->
+                                    isLoading = false
+                                    when (result) {
+                                        is BackupResult.Success -> {
+                                            isSuccess = true
+                                            resultMessage = "Pasta criada com sucesso no Google Drive!"
+                                        }
+                                        is BackupResult.Error -> {
+                                            isSuccess = false
+                                            resultMessage = "Erro: ${result.message}"
+                                        }
+                                    }
+                                }
+                            },
+                            enabled = !isLoading
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(8.dp))
                 }
@@ -96,9 +140,10 @@ private fun SaveDialogHeader() {
 }
 
 @Composable
-private fun SaveButton(onClick: () -> Unit) {
+private fun SaveButton(onClick: () -> Unit, enabled: Boolean = true) {
     Button(
         onClick = onClick,
+        enabled = enabled,
     ) {
         Icon(
             imageVector = Icons.Default.Save,
