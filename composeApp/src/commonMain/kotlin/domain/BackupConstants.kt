@@ -1,16 +1,12 @@
 package domain
 
-import kotlin.time.Clock
-
 object BackupConstants {
 
     const val DEFAULT_FOLDER_NAME = "rich-pipi-backup"
-    const val DEFAULT_SPREADSHEET_NAME = "rich-pipi-backup-sheet"
+    private const val DEFAULT_SPREADSHEET_NAME = "rich-pipi-backup-sheet"
 
-    fun getCurrentDateTime(): String {
-        val currentTimeMillis = Clock.System.now().toEpochMilliseconds()
-
-        val totalSeconds = currentTimeMillis / 1000
+    fun getCurrentDateTime(clockEpoch: Long): String {
+        val totalSeconds = clockEpoch / 1000
         val totalMinutes = totalSeconds / 60
         val totalHours = totalMinutes / 60
         val totalDays = totalHours / 24
@@ -27,16 +23,8 @@ object BackupConstants {
         return "${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/$year ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}"
     }
 
-    fun getBackupFolderWithTimestamp(): String {
-        val timestamp = getCurrentDateTime()
-            .replace("/", "-")
-            .replace(":", "-")
-            .replace(" ", "_")
-        return "${DEFAULT_FOLDER_NAME}_$timestamp"
-    }
-
-    fun getBackupSpreadsheetWithTimestamp(): String {
-        val timestamp = getCurrentDateTime()
+    fun getBackupSpreadsheetWithTimestamp(clockEpoch: Long): String {
+        val timestamp = getCurrentDateTime(clockEpoch)
             .replace("/", "-")
             .replace(":", "-")
             .replace(" ", "_")

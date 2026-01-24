@@ -12,6 +12,10 @@ import kotlin.test.assertTrue
 
 class CreateSpreadSheetUseCaseTest {
 
+    companion object {
+        private const val EPOCH_TEST = 1760272740000L
+    }
+
     @Test
     fun `execute should create spreadsheet when authenticated`() = runTest {
         val mockRepository = TestMockBackupRepository(
@@ -21,60 +25,75 @@ class CreateSpreadSheetUseCaseTest {
         )
         val useCase = CreateSpreadSheetUseCase(mockRepository)
 
-        val result = useCase.execute()
+        val result = useCase.execute(EPOCH_TEST)
 
         assertEquals(BackupResult.Success, result)
-        assertEquals(BackupConstants.getBackupSpreadsheetWithTimestamp(), mockRepository.lastCreatedSpreadsheetName)
-        assertEquals(BackupConstants.getBackupFolderWithTimestamp(), mockRepository.lastSpreadsheetFolderName)
+        assertEquals(
+            BackupConstants.getBackupSpreadsheetWithTimestamp(
+                EPOCH_TEST,
+            ),
+            mockRepository.lastCreatedSpreadsheetName,
+        )
+        assertEquals(
+            BackupConstants.DEFAULT_FOLDER_NAME,
+            mockRepository.lastSpreadsheetFolderName,
+        )
     }
 
     @Test
-    fun `execute should return SignInRequired when not authenticated`() = runTest {
-        val mockRepository = TestMockBackupRepository(
-            isAuthenticatedResult = false,
-            authenticateResult = BackupResult.SignInRequired,
-        )
-        val useCase = CreateSpreadSheetUseCase(mockRepository)
+    fun `execute should return SignInRequired when not authenticated`() =
+        runTest {
+            val mockRepository = TestMockBackupRepository(
+                isAuthenticatedResult = false,
+                authenticateResult = BackupResult.SignInRequired,
+            )
+            val useCase = CreateSpreadSheetUseCase(mockRepository)
 
-        val result = useCase.execute()
+            val result = useCase.execute(EPOCH_TEST)
 
-        assertEquals(BackupResult.SignInRequired, result)
-    }
+            assertEquals(BackupResult.SignInRequired, result)
+        }
 
     @Test
-    fun `execute should use valid timestamp formats for file and folder names`() = runTest {
-        val mockRepository = TestMockBackupRepository(
-            isAuthenticatedResult = true,
-            createFolderResult = BackupResult.Success,
-            createSpreadsheetResult = BackupResult.Success,
-        )
-        val useCase = CreateSpreadSheetUseCase(mockRepository)
+    fun `execute should use valid timestamp formats for file and folder names`() =
+        runTest {
+            val mockRepository = TestMockBackupRepository(
+                isAuthenticatedResult = true,
+                createFolderResult = BackupResult.Success,
+                createSpreadsheetResult = BackupResult.Success,
+            )
+            val useCase = CreateSpreadSheetUseCase(mockRepository)
 
-        val result = useCase.execute()
+            val fixedEpoch = 1760272740000L
+            val result = useCase.execute(fixedEpoch)
 
-        assertEquals(BackupResult.Success, result)
+            assertEquals(BackupResult.Success, result)
 
-        // Verifica se os nomes gerados são válidos
-        val folderName = mockRepository.lastSpreadsheetFolderName
-        val spreadsheetName = mockRepository.lastCreatedSpreadsheetName
+            // Verifica se os nomes gerados são válidos
+            val folderName = mockRepository.lastSpreadsheetFolderName
+            val spreadsheetName = mockRepository.lastCreatedSpreadsheetName
 
-        assertNotNull(folderName)
-        assertNotNull(spreadsheetName)
+            assertNotNull(folderName)
+            assertNotNull(spreadsheetName)
 
-        // Verifica se não contém caracteres problemáticos
-        assertTrue(
-            !folderName.contains("/") && !folderName.contains(":") && !folderName.contains(" "),
-            "Nome da pasta contém caracteres inválidos: $folderName"
-        )
-        assertTrue(
-            !spreadsheetName.contains("/") && !spreadsheetName.contains(":") && !spreadsheetName.contains(" "),
-            "Nome da planilha contém caracteres inválidos: $spreadsheetName"
-        )
+            // Verifica se não contém caracteres problemáticos
+            assertTrue(
+                !folderName.contains("/") && !folderName.contains(":") && !folderName.contains(" "),
+                "Nome da pasta contém caracteres inválidos: $folderName",
+            )
+            assertTrue(
+                !spreadsheetName.contains("/") && !spreadsheetName.contains(":") && !spreadsheetName.contains(" "),
+                "Nome da planilha contém caracteres inválidos: $spreadsheetName",
+            )
 
-        // Verifica se seguem o padrão esperado
-        assertTrue(folderName.startsWith("rich-pipi-backup_"))
-        assertTrue(spreadsheetName.startsWith("rich-pipi-backup-sheet_"))
-    }
+            // Verifica se seguem o padrão esperado
+            assertTrue(folderName.startsWith("rich-pipi-backup"))
+            assertTrue(spreadsheetName.startsWith("rich-pipi-backup-sheet_"))
+
+            // Verifica se o timestamp está correto para o epoch fornecido
+            val expectedTimestamp = "29-10-2025_12-39"
+            assertEquals("rich-pipi-backup-sheet_" + expectedTimestamp, spreadsheetName)
+        }
 }
 
 class TestMockBackupRepository(
@@ -90,7 +109,10 @@ class TestMockBackupRepository(
     var lastCreatedSpreadsheetName: String? = null
     var lastSpreadsheetFolderName: String? = null
 
-    override suspend fun createBackupFolder(service: BackupService, folderName: String): BackupResult {
+    override suspend fun createBackupFolder(
+        service: BackupService,
+        folderName: String,
+    ): BackupResult {
         lastCreatedFolderName = folderName
         return createFolderResult
     }

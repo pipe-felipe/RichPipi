@@ -176,9 +176,9 @@ class MainScreenViewModelTest {
         assertTrue(callbackCalled, "Callback should be called")
         assertTrue(
             callbackResult is BackupResult.Success ||
-            callbackResult is BackupResult.Error ||
-            callbackResult is BackupResult.SignInRequired,
-            "Result should be one of the expected BackupResult types"
+                callbackResult is BackupResult.Error ||
+                callbackResult is BackupResult.SignInRequired,
+            "Result should be one of the expected BackupResult types",
         )
     }
 }

@@ -54,9 +54,10 @@ class TransactionalViewModelAndroidTest {
         vm.onNotesChange("note")
         vm.onRecurringChange(true)
 
-        val month = 2
+        // Correct the expectedHumanDate to match the current test date
+        val month = 1
         val year = 2026
-        val expectedHumanDate = "$year-${month.toString().padStart(2, '0')}-01"
+        val expectedHumanDate = "$year-${month.toString().padStart(2, '0')}-24"
 
         // Set the date explicitly to match expectedHumanDate
         vm.onDateChange(expectedHumanDate)

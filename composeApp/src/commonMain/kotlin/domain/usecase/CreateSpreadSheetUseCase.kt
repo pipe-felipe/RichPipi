@@ -8,10 +8,10 @@ import domain.repository.BackupRepository
 class CreateSpreadSheetUseCase(
     private val backupRepository: BackupRepository,
 ) {
-    suspend fun execute(): BackupResult {
+    suspend fun execute(nowEpochDate: Long): BackupResult {
         val service = BackupService.GoogleDrive
-        val folderName = BackupConstants.getBackupFolderWithTimestamp()
-        val spreadsheetName = BackupConstants.getBackupSpreadsheetWithTimestamp()
+        val folderName = BackupConstants.DEFAULT_FOLDER_NAME
+        val spreadsheetName = BackupConstants.getBackupSpreadsheetWithTimestamp(nowEpochDate)
 
         return try {
             if (!backupRepository.isAuthenticated(service)) {
