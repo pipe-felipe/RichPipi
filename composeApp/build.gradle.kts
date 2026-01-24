@@ -1,5 +1,6 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -23,7 +24,7 @@ kotlin {
 
     listOf(
         iosArm64(),
-        iosSimulatorArm64()
+        iosSimulatorArm64(),
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
@@ -46,6 +47,11 @@ kotlin {
             implementation(libs.androidx.credentials)
             implementation(libs.androidx.credentials.auth)
             implementation(libs.googleid)
+            implementation(libs.play.services.auth)
+            implementation(libs.kotlinx.coroutines.play.services)
+
+            // Security
+            implementation(libs.androidx.security.crypto)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -62,6 +68,17 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
+        }
+
+        // Instrumented Android tests source set (androidInstrumentedTest)
+        val androidInstrumentedTest by getting {
+            dependencies {
+                implementation("androidx.test:core:1.5.0")
+                implementation("androidx.test:core-ktx:1.5.0")
+                implementation("androidx.test.ext:junit:1.1.5")
+                implementation("androidx.test:runner:1.5.2")
+                implementation(libs.kotlin.test)
+            }
         }
     }
 }
@@ -81,6 +98,19 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        // Read Google Web Client ID from local.properties
+        val localProperties = Properties()
+        val localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            localPropertiesFile.inputStream().use { localProperties.load(it) }
+        }
+
+        buildConfigField(
+            "String",
+            "GOOGLE_WEB_CLIENT_ID",
+            "\"${localProperties.getProperty("google.web.client.id", "")}\"",
+        )
     }
 
     packaging {
@@ -93,7 +123,7 @@ android {
 
     buildFeatures {
         compose = true
-        buildConfig = false
+        buildConfig = true // Enable BuildConfig to access credentials
         aidl = false
         resValues = false
         shaders = false
@@ -104,7 +134,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -120,4 +150,11 @@ dependencies {
     add("kspAndroid", libs.androidx.room.compiler)
     add("kspIosArm64", libs.androidx.room.compiler)
     add("kspIosSimulatorArm64", libs.androidx.room.compiler)
+
+    // Instrumented test dependencies
+    androidTestImplementation(libs.core)
+    androidTestImplementation(libs.core.ktx)
+    androidTestImplementation(libs.junit)
+    androidTestImplementation(libs.runner)
+    androidTestImplementation(libs.kotlin.test)
 }

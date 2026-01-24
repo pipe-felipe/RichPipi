@@ -35,7 +35,6 @@ import richpipi.composeapp.generated.resources.no_transaction
 
 // TODO fazer as cores
 // TODO fazer os itens adicionado, deixar arrumadinho
-// TODO o human date está errado, está sempre com a mesma data 1/1/2026
 @Composable
 fun MainScreenContent(
     itemsList: List<Transaction>,
@@ -48,7 +47,7 @@ fun MainScreenContent(
     onCurrentMonthClick: () -> Unit,
     onAddButtonClick: () -> Unit,
     onSaveButtonClick: () -> Unit,
-    onDeleteItem: (Int) -> Unit
+    onDeleteItem: (Int) -> Unit,
 ) {
     RichPipiTheme {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -62,9 +61,9 @@ fun MainScreenContent(
                         currentMonthYear = currentMonthYear,
                         onPreviousMonth = onPreviousMonth,
                         onNextMonth = onNextMonth,
-                        onCurrentMonthClick = onCurrentMonthClick
+                        onCurrentMonthClick = onCurrentMonthClick,
                     )
-                }
+                },
             ) { innerPadding ->
                 if (itemsList.isEmpty()) {
                     Column(
@@ -75,7 +74,7 @@ fun MainScreenContent(
                         Text(
                             text = stringResource(Res.string.no_transaction),
                             modifier = Modifier.padding(16.dp),
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyMedium,
                         )
                     }
                 } else {
@@ -87,8 +86,8 @@ fun MainScreenContent(
                             start = 8.dp,
                             end = 8.dp,
                             top = 8.dp,
-                            bottom = 88.dp
-                        )
+                            bottom = 88.dp,
+                        ),
                     ) {
                         items(itemsList) { item ->
                             ItemRow(item = item, onDelete = { onDeleteItem(item.id) })
@@ -101,7 +100,7 @@ fun MainScreenContent(
             MainBottomBar(
                 onAddButtonClick = onAddButtonClick,
                 onSaveButtonClick = onSaveButtonClick,
-                modifier = Modifier.align(Alignment.BottomCenter)
+                modifier = Modifier.align(Alignment.BottomCenter),
             )
         }
     }
@@ -114,37 +113,39 @@ private fun ItemRow(item: Transaction, onDelete: () -> Unit, modifier: Modifier 
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (item.type == TransactionType.INCOME)
+            containerColor = if (item.type == TransactionType.INCOME) {
                 MaterialTheme.colorScheme.incomeBackground
-            else
+            } else {
                 MaterialTheme.colorScheme.expenseBackground
-        )
+            },
+        ),
     ) {
         Row(
             modifier = Modifier
                 .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 item.description?.let {
                     Text(
                         text = it,
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
                     )
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = item.humanDate,
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
                 )
             }
             Text(
-                text = if (item.type == TransactionType.INCOME)
+                text = if (item.type == TransactionType.INCOME) {
                     "R$${formatMoneyFromCents(item.amountCents)}"
-                else
-                    "-R$${formatMoneyFromCents(item.amountCents)}",
+                } else {
+                    "-R$${formatMoneyFromCents(item.amountCents)}"
+                },
                 style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(start = 8.dp)
+                modifier = Modifier.padding(start = 8.dp),
             )
             IconButton(onClick = onDelete) {
                 Icon(

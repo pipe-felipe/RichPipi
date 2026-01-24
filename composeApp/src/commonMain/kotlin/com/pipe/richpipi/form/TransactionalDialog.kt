@@ -73,37 +73,39 @@ fun TransactionalDialog(
     viewModel: TransactionalViewModel,
     selectedMonth: Int,
     selectedYear: Int,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var expanded by remember { mutableStateOf(false) }
 
     val hasValidQuantity = uiState.quantity.isNotBlank() && !uiState.isQuantityError
     val hasCategory =
-        if (uiState.transactionType == DomainTransactionType.EXPENSE)
+        if (uiState.transactionType == DomainTransactionType.EXPENSE) {
             uiState.expenseCategory != null
-        else uiState.incomeCategory != null
+        } else {
+            uiState.incomeCategory != null
+        }
     val isSubmitEnabled = hasValidQuantity && hasCategory
 
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
         BoxWithConstraints {
             val dialogPadding = if (maxWidth < 400.dp) 4.dp else 15.dp
 
             Surface(
                 shape = RoundedCornerShape(16.dp),
-                modifier = Modifier.fillMaxWidth().padding(dialogPadding)
+                modifier = Modifier.fillMaxWidth().padding(dialogPadding),
             ) {
                 Box {
                     Column(
                         modifier = Modifier.padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                        horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         TransactionTypeSelector(
                             selectedType = uiState.transactionType,
-                            onTypeSelected = viewModel::onTransactionTypeChange
+                            onTypeSelected = viewModel::onTransactionTypeChange,
                         )
 
                         Spacer(modifier = Modifier.height(8.dp))
@@ -119,7 +121,7 @@ fun TransactionalDialog(
 
                         NotesInput(
                             notes = uiState.notes,
-                            onNotesChange = viewModel::onNotesChange
+                            onNotesChange = viewModel::onNotesChange,
                         )
 
                         Spacer(modifier = Modifier.height(6.dp))
@@ -131,19 +133,20 @@ fun TransactionalDialog(
                             onSubmit = {
                                 viewModel.submit(selectedMonth, selectedYear)
                                 onDismiss()
-                            }
+                            },
                         )
                     }
 
                     IconButton(
                         onClick = onDismiss,
                         modifier = Modifier.align(Alignment.TopEnd)
-                            .offset(x = (3).dp, y = -(2.5).dp)
+                            .offset(x = (3).dp, y = -(2.5).dp),
                     ) {
                         Icon(
-                            Icons.Default.Close, contentDescription = stringResource(
-                                Res.string.form_close_button_description
-                            )
+                            Icons.Default.Close,
+                            contentDescription = stringResource(
+                                Res.string.form_close_button_description,
+                            ),
                         )
                     }
                 }
@@ -155,12 +158,12 @@ fun TransactionalDialog(
 @Composable
 private fun TransactionTypeSelector(
     selectedType: DomainTransactionType,
-    onTypeSelected: (DomainTransactionType) -> Unit
+    onTypeSelected: (DomainTransactionType) -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         val radioOptions = listOf(DomainTransactionType.EXPENSE, DomainTransactionType.INCOME)
         radioOptions.forEach { option ->
@@ -168,19 +171,20 @@ private fun TransactionTypeSelector(
                 Modifier.selectable(
                     selected = (selectedType == option),
                     onClick = { onTypeSelected(option) },
-                    role = Role.RadioButton
+                    role = Role.RadioButton,
                 ).padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 RadioButton(selected = (selectedType == option), onClick = null)
                 Text(
                     text =
-                        if (option == DomainTransactionType.EXPENSE)
-                            stringResource(Res.string.transaction_type_expense)
-                        else
-                            stringResource(Res.string.transaction_type_income),
+                    if (option == DomainTransactionType.EXPENSE) {
+                        stringResource(Res.string.transaction_type_expense)
+                    } else {
+                        stringResource(Res.string.transaction_type_income)
+                    },
                     style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(start = 4.dp)
+                    modifier = Modifier.padding(start = 4.dp),
                 )
             }
         }
@@ -195,7 +199,7 @@ private fun CategoryAndQuantityInput(
     onIncomeCategoryChange: (IncomeCategory) -> Unit,
     onQuantityChange: (String) -> Unit,
     expanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit
+    onExpandedChange: (Boolean) -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -211,10 +215,13 @@ private fun CategoryAndQuantityInput(
                     .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                     .fillMaxWidth(),
                 readOnly = true,
-                value = if (uiState.transactionType == DomainTransactionType.EXPENSE) mapCategory(
-                    uiState.expenseCategory
-                )
-                else mapCategory(uiState.incomeCategory),
+                value = if (uiState.transactionType == DomainTransactionType.EXPENSE) {
+                    mapCategory(
+                        uiState.expenseCategory,
+                    )
+                } else {
+                    mapCategory(uiState.incomeCategory)
+                },
                 onValueChange = {},
                 label = { Text(stringResource(Res.string.form_category_label)) },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
@@ -264,7 +271,7 @@ private fun CategoryAndQuantityInput(
                 if (uiState.isQuantityError) {
                     Text(text = stringResource(Res.string.label_invalid_number))
                 }
-            }
+            },
         )
     }
 }
@@ -275,7 +282,7 @@ private fun NotesInput(notes: String, onNotesChange: (String) -> Unit) {
         value = notes,
         onValueChange = onNotesChange,
         label = { Text(stringResource(Res.string.form_notes_label)) },
-        modifier = Modifier.fillMaxWidth().offset(y = -(8).dp)
+        modifier = Modifier.fillMaxWidth().offset(y = -(8).dp),
     )
 }
 
@@ -284,24 +291,24 @@ private fun ActionsBar(
     isRecurring: Boolean,
     onRecurringChange: (Boolean) -> Unit,
     isSubmitEnabled: Boolean,
-    onSubmit: () -> Unit
+    onSubmit: () -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(Res.string.form_recurring_label))
             Spacer(modifier = Modifier.width(8.dp))
             Switch(
                 checked = isRecurring,
-                onCheckedChange = onRecurringChange
+                onCheckedChange = onRecurringChange,
             )
         }
         Button(
             onClick = onSubmit,
-            enabled = isSubmitEnabled
+            enabled = isSubmitEnabled,
         ) {
             Text(stringResource(Res.string.form_submit_button))
         }

@@ -18,21 +18,24 @@ val ColorScheme.money
 
 val ColorScheme.incomeBackground
     @Composable get() =
-        if (isSystemInDarkTheme())
+        if (isSystemInDarkTheme()) {
             DarkContainerIncomeBackground
-        else
+        } else {
             LightContainerIncomeBackground
+        }
 
 val ColorScheme.expenseBackground
     @Composable get() =
-        if (isSystemInDarkTheme())
+        if (isSystemInDarkTheme()) {
             DarkContainerExpenseBackground
-        else
+        } else {
             LightContainerExpenseBackground
+        }
 
 val ColorScheme.dockBackground
     @Composable get() =
-        if (isSystemInDarkTheme())
+        if (isSystemInDarkTheme()) {
             DarkDockBackground
-        else
+        } else {
             LightDockBackground
+        }

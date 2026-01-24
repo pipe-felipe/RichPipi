@@ -7,4 +7,3 @@ class DeleteTransactionUseCase(private val repository: TransactionRepository) {
         return repository.deleteTransaction(id)
     }
 }
-

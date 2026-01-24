@@ -17,7 +17,7 @@ class GetTransactionsForMonthTest {
 
         override fun getTransactionsForMonth(
             monthStartMillis: Long,
-            monthEndExclusiveMillis: Long
+            monthEndExclusiveMillis: Long,
         ): Flow<List<Transaction>> {
             lastStart = monthStartMillis
             lastEndExclusive = monthEndExclusiveMillis

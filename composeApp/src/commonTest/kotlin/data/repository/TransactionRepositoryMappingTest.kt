@@ -1,10 +1,9 @@
 package data.repository
 
 import data.local.entity.TransactionEntity
-import domain.model.Transaction
 import domain.model.TransactionType
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -25,7 +24,9 @@ class TransactionRepositoryMappingTest {
             val removed = if (idx >= 0) {
                 list.removeAt(idx)
                 true
-            } else false
+            } else {
+                false
+            }
             flow.value = list
             return if (removed) 1 else 0
         }
@@ -40,13 +41,13 @@ class TransactionRepositoryMappingTest {
 
                 override fun getTransactionsForMonth(
                     monthStartMillis: Long,
-                    monthEndExclusiveMillis: Long
+                    monthEndExclusiveMillis: Long,
                 ) = fakeDao.getAllTransactions()
 
                 override suspend fun getTransactionById(id: Int) = fakeDao.list.find { it.id == id }
                 override suspend fun addTransaction(item: TransactionEntity) = fakeDao.addTransaction(item)
                 override suspend fun deleteTransactionById(id: Int) = fakeDao.deleteTransactionById(id)
-            }
+            },
         )
 
         fakeDao.addTransaction(TransactionEntity(amountCents = 9999, type = domain.model.TransactionType.INCOME, description = "d", humanDate = "2026-01-01", createdAt = 1L))

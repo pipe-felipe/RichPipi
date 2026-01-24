@@ -10,5 +10,5 @@ data class Transaction(
     val description: String? = null,
     val humanDate: String = "",
     val isRecurring: Boolean = false,
-    val createdAt: Long = 0L
+    val createdAt: Long = 0L,
 )

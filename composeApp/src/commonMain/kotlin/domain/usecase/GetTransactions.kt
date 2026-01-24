@@ -7,4 +7,3 @@ import kotlinx.coroutines.flow.Flow
 class GetTransactions(private val repository: TransactionRepository) {
     operator fun invoke(): Flow<List<Transaction>> = repository.getTransactions()
 }
-

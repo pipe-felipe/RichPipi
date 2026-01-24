@@ -17,10 +17,10 @@ class MainScreenViewModelTest {
     fun `compute totals sums income and expense correctly`() {
         val items = listOf(
             Transaction(id = 1, amountCents = 100000, type = TransactionType.INCOME), // 1000.00
-            Transaction(id = 2, amountCents = 25050, type = TransactionType.INCOME),  // 250.50
-            Transaction(id = 3, amountCents = 3000, type = TransactionType.EXPENSE),  // 30.00
-            Transaction(id = 4, amountCents = 475, type = TransactionType.EXPENSE),   // 4.75
-            Transaction(id = 6, amountCents = 1025, type = TransactionType.INCOME)    // 10.25
+            Transaction(id = 2, amountCents = 25050, type = TransactionType.INCOME), // 250.50
+            Transaction(id = 3, amountCents = 3000, type = TransactionType.EXPENSE), // 30.00
+            Transaction(id = 4, amountCents = 475, type = TransactionType.EXPENSE), // 4.75
+            Transaction(id = 6, amountCents = 1025, type = TransactionType.INCOME), // 10.25
         )
 
         val vm = MainScreenViewModel()
@@ -39,7 +39,7 @@ class MainScreenViewModelTest {
         val items = listOf(
             Transaction(id = 1, amountCents = 0, type = TransactionType.INCOME),
             Transaction(id = 2, amountCents = 0, type = TransactionType.EXPENSE),
-            Transaction(id = 3, amountCents = 50000, type = TransactionType.INCOME) // 500.00
+            Transaction(id = 3, amountCents = 50000, type = TransactionType.INCOME), // 500.00
         )
 
         val vm = MainScreenViewModel()
@@ -56,7 +56,7 @@ class MainScreenViewModelTest {
     fun `saving can be negative when expenses exceed income`() {
         val items = listOf(
             Transaction(id = 1, amountCents = 1000, type = TransactionType.INCOME), // 10.00
-            Transaction(id = 2, amountCents = 2500, type = TransactionType.EXPENSE) // 25.00
+            Transaction(id = 2, amountCents = 2500, type = TransactionType.EXPENSE), // 25.00
         )
 
         val vm = MainScreenViewModel()
@@ -75,11 +75,11 @@ class MainScreenViewModelTest {
             // Month A net: +100.00
             Transaction(id = 1, amountCents = 10000, type = TransactionType.INCOME),
             // Month B net: -25.00
-            Transaction(id = 2, amountCents = 2500, type = TransactionType.EXPENSE)
+            Transaction(id = 2, amountCents = 2500, type = TransactionType.EXPENSE),
         )
 
         val monthItems = listOf(
-            Transaction(id = 2, amountCents = 2500, type = TransactionType.EXPENSE)
+            Transaction(id = 2, amountCents = 2500, type = TransactionType.EXPENSE),
         )
 
         val vm = MainScreenViewModel()
@@ -112,7 +112,7 @@ class MainScreenViewModelTest {
                     type = TransactionType.INCOME,
                     humanDate = "2026-02-01",
                     isRecurring = true,
-                    createdAt = febStart
+                    createdAt = febStart,
                 ),
                 // One expense in Jan/2026.
                 Transaction(
@@ -121,9 +121,9 @@ class MainScreenViewModelTest {
                     type = TransactionType.EXPENSE,
                     humanDate = "2026-01-01",
                     isRecurring = false,
-                    createdAt = janStart
-                )
-            )
+                    createdAt = janStart,
+                ),
+            ),
         )
 
         val vm = MainScreenViewModel(itemsSource = itemsFlow)

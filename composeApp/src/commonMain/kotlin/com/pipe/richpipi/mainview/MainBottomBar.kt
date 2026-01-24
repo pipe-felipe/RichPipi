@@ -37,13 +37,13 @@ import richpipi.composeapp.generated.resources.save_icon
 fun MainBottomBar(
     onAddButtonClick: () -> Unit,
     onSaveButtonClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Box(
         modifier = modifier
             .navigationBarsPadding()
             .padding(bottom = 4.dp),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Surface(
             modifier = Modifier
@@ -51,28 +51,28 @@ fun MainBottomBar(
                     elevation = 12.dp,
                     shape = RoundedCornerShape(24.dp),
                     ambientColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f),
-                    spotColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
+                    spotColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
                 ),
             shape = RoundedCornerShape(24.dp),
             color = MaterialTheme.colorScheme.dockBackground,
-            tonalElevation = 12.dp
+            tonalElevation = 12.dp,
         ) {
             Row(
                 modifier = Modifier
                     .height(64.dp)
                     .padding(horizontal = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 DockIcon(
                     painter = painterResource(Res.drawable.save_icon),
                     contentDescription = "Save",
-                    onClick = onSaveButtonClick
+                    onClick = onSaveButtonClick,
                 )
                 DockIcon(
                     painter = painterResource(Res.drawable.add_item),
                     contentDescription = "Add",
-                    onClick = onAddButtonClick
+                    onClick = onAddButtonClick,
                 )
             }
         }
@@ -84,7 +84,7 @@ private fun DockIcon(
     painter: Painter,
     contentDescription: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     var isPressed by remember { mutableStateOf(false) }
 
@@ -92,9 +92,9 @@ private fun DockIcon(
         targetValue = if (isPressed) 1.15f else 1f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
+            stiffness = Spring.StiffnessLow,
         ),
-        label = "dockIconScale"
+        label = "dockIconScale",
     )
 
     Box(
@@ -107,21 +107,21 @@ private fun DockIcon(
                         tryAwaitRelease()
                         isPressed = false
                         onClick()
-                    }
+                    },
                 )
             }
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
             },
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Image(
             painter = painter,
             contentDescription = contentDescription,
             modifier = Modifier
                 .fillMaxHeight()
-                .padding(vertical = 0.dp)
+                .padding(vertical = 0.dp),
         )
     }
 }

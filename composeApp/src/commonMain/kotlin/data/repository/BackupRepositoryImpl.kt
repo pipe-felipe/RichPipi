@@ -1,16 +1,16 @@
 package data.repository
 
+import data.remote.GoogleDriveService
 import domain.model.BackupResult
 import domain.model.BackupService
 import domain.repository.BackupRepository
-import data.remote.GoogleDriveService
 
 /**
  * Implementation of BackupRepository.
  * This class coordinates between different backup services.
  */
 class BackupRepositoryImpl(
-    private val googleDriveService: GoogleDriveService
+    private val googleDriveService: GoogleDriveService,
 ) : BackupRepository {
 
     override suspend fun createBackupFolder(service: BackupService, folderName: String): BackupResult {

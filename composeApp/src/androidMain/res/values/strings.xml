@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">RichPipi</string>
+
+    <!-- Credential Management Strings -->
+    <string name="error_web_client_id_not_configured">ID do cliente não configurado. Armazene-o com segurança usando EncryptedCredentialsManager.</string>
+    <string name="error_failed_authenticate_google_drive">Falha ao autenticar com Google Drive: %s</string>
+    <string name="error_not_authenticated">Não autenticado</string>
+    <string name="error_failed_create_folder">Falha ao criar pasta no Google Drive</string>
+    <string name="error_failed_credentials_initialization">Falha ao inicializar credenciais: %s</string>
+    <string name="error_google_client_id_not_stored">ID do cliente Google não foi armazenado. Chame CredentialsInitializer.initializeGoogleCredentials(context, clientId) com seu Web Client ID do Google Cloud Console.</string>
+    <string name="success_credentials_initialized">Credenciais inicializadas com sucesso</string>
 </resources>

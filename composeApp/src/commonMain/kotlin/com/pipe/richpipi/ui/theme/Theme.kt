@@ -11,7 +11,7 @@ private val DarkColorScheme = darkColorScheme(
     secondary = DarkPiSecondary,
     tertiary = DarkPiTertiary,
     surfaceBright = PiGolden,
-    surfaceDim = DarkPiMoney
+    surfaceDim = DarkPiMoney,
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -19,13 +19,13 @@ private val LightColorScheme = lightColorScheme(
     secondary = LightPiSecondary,
     tertiary = LightPiTertiary,
     surfaceBright = PiGolden,
-    surfaceDim = LightPiMoney
+    surfaceDim = LightPiMoney,
 )
 
 @Composable
 fun RichPipiTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val colorScheme = when {
         darkTheme -> DarkColorScheme
@@ -35,6 +35,6 @@ fun RichPipiTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = MaterialTheme.typography,
-        content = content
+        content = content,
     )
 }

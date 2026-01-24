@@ -1,8 +1,8 @@
 package domain.usecase
 
 import domain.model.Transaction
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -25,7 +25,9 @@ class GetAllItemsUseCaseTest {
             return if (idx >= 0) {
                 items.removeAt(idx)
                 1
-            } else 0
+            } else {
+                0
+            }
         }
     }
 
@@ -44,8 +46,8 @@ class GetAllItemsUseCaseTest {
                 amountCents = 100,
                 type = domain.model.TransactionType.INCOME,
                 description = "d",
-                createdAt = 1L
-            )
+                createdAt = 1L,
+            ),
         )
         val after = useCase().first()
         assertEquals(1, after.size)

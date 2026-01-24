@@ -8,4 +8,3 @@ class MakeTransactionUseCase(private val repository: TransactionRepository) {
         return repository.makeTransaction(item)
     }
 }
-

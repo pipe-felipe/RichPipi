@@ -9,7 +9,7 @@ import domain.repository.BackupRepository
  * This use case handles the business logic for backup operations.
  */
 class CreateBackupFolderUseCase(
-    private val backupRepository: BackupRepository
+    private val backupRepository: BackupRepository,
 ) {
     /**
      * Creates a "rich-pipi-backup" folder in Google Drive.
@@ -26,7 +26,7 @@ class CreateBackupFolderUseCase(
             if (!backupRepository.isAuthenticated(service)) {
                 // Attempt to authenticate first
                 val authResult = backupRepository.authenticate(service)
-                if (authResult is BackupResult.Error) {
+                if (authResult is BackupResult.Error || authResult is BackupResult.SignInRequired) {
                     return authResult
                 }
             }

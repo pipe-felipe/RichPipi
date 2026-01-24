@@ -38,7 +38,7 @@ data class FormUiState(
     val quantity: String = "",
     val notes: String = "",
     val isRecurring: Boolean = false,
-    val isQuantityError: Boolean = false
+    val isQuantityError: Boolean = false,
 )
 
 /**
@@ -47,7 +47,7 @@ data class FormUiState(
 class TransactionalViewModel(
     private val addItemUseCase: MakeTransactionUseCase,
     getAllItemsUseCase: GetTransactions,
-    private val deleteItemUseCase: DeleteTransactionUseCase
+    private val deleteItemUseCase: DeleteTransactionUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FormUiState())
@@ -105,11 +105,11 @@ class TransactionalViewModel(
 
         _uiState.update { currentState ->
             currentState.copy(
-                quantity = input, isQuantityError = input.isNotBlank() && !isValid
+                quantity = input,
+                isQuantityError = input.isNotBlank() && !isValid,
             )
         }
     }
-
 
     /**
      * Called when the notes field value changes.
@@ -138,13 +138,16 @@ class TransactionalViewModel(
         val state = uiState.value
         val hasValidQuantity = state.quantity.isNotBlank() && !state.isQuantityError
         val hasCategory =
-            if (state.transactionType == DomainTransactionType.EXPENSE) state.expenseCategory != null
-            else state.incomeCategory != null
+            if (state.transactionType == DomainTransactionType.EXPENSE) {
+                state.expenseCategory != null
+            } else {
+                state.incomeCategory != null
+            }
 
         if (!hasValidQuantity || !hasCategory) {
             _uiState.update { currentState ->
                 currentState.copy(
-                    isQuantityError = currentState.quantity.isNotBlank() && currentState.isQuantityError
+                    isQuantityError = currentState.quantity.isNotBlank() && currentState.isQuantityError,
                 )
             }
             return
@@ -165,7 +168,7 @@ class TransactionalViewModel(
             description = state.notes,
             humanDate = dateText,
             isRecurring = state.isRecurring,
-            createdAt = Clock.System.now().toEpochMilliseconds()
+            createdAt = Clock.System.now().toEpochMilliseconds(),
         )
 
         CoroutineScope(Dispatchers.Default).launch {

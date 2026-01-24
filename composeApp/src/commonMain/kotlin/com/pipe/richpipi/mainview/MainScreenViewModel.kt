@@ -20,7 +20,8 @@ import kotlinx.coroutines.launch
  * It is not an AndroidX ViewModel so it can be instantiated from common code easily.
  */
 class MainScreenViewModel(
-    itemsSource: Flow<List<Transaction>> = emptyFlow(), private val onDeleteItem: (Int) -> Unit = {}
+    itemsSource: Flow<List<Transaction>> = emptyFlow(),
+    private val onDeleteItem: (Int) -> Unit = {},
 ) {
     private val _items = MutableStateFlow<List<Transaction>>(emptyList())
     val items: StateFlow<List<Transaction>> = _items.asStateFlow()
@@ -43,7 +44,7 @@ class MainScreenViewModel(
 
     private val _currentMonthYearText =
         MutableStateFlow(
-            formatMonthYear(initialMonthYear.first, initialMonthYear.second)
+            formatMonthYear(initialMonthYear.first, initialMonthYear.second),
         )
     val currentMonthYearText: StateFlow<String> = _currentMonthYearText.asStateFlow()
 
@@ -66,8 +67,11 @@ class MainScreenViewModel(
                 list.filter { tx ->
                     // Recurring items should only be considered once the month reaches their start date
                     // (createdAt is stored as epoch millis).
-                    if (tx.isRecurring) tx.createdAt < endExclusive
-                    else tx.createdAt in start..<endExclusive
+                    if (tx.isRecurring) {
+                        tx.createdAt < endExclusive
+                    } else {
+                        tx.createdAt in start..<endExclusive
+                    }
                 }
             }.collect { filtered ->
                 _items.value = filtered
@@ -156,7 +160,7 @@ class MainScreenViewModel(
             "Setembro",
             "Outubro",
             "Novembro",
-            "Dezembro"
+            "Dezembro",
         )
         return "${monthNames[month - 1]} $year"
     }

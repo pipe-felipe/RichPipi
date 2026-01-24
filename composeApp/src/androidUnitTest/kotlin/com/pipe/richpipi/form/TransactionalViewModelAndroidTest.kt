@@ -10,10 +10,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
-import org.junit.Test
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
+import org.junit.Test
 
 class TransactionalViewModelAndroidTest {
 
@@ -45,7 +45,7 @@ class TransactionalViewModelAndroidTest {
         val vm = TransactionalViewModel(
             addItemUseCase = MakeTransactionUseCase(repo),
             getAllItemsUseCase = GetTransactions(repo),
-            deleteItemUseCase = DeleteTransactionUseCase(repo)
+            deleteItemUseCase = DeleteTransactionUseCase(repo),
         )
 
         vm.onTransactionTypeChange(TransactionType.INCOME)

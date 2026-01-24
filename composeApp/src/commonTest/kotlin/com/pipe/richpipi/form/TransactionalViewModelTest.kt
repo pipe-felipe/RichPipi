@@ -26,7 +26,7 @@ class TransactionalViewModelTest {
 
         override fun getTransactionsForMonth(
             monthStartMillis: Long,
-            monthEndExclusiveMillis: Long
+            monthEndExclusiveMillis: Long,
         ): Flow<List<Transaction>> = flowOf(emptyList())
 
         override suspend fun makeTransaction(transaction: Transaction): Long {
@@ -43,7 +43,7 @@ class TransactionalViewModelTest {
         val vm = TransactionalViewModel(
             addItemUseCase = MakeTransactionUseCase(repo),
             getAllItemsUseCase = GetTransactions(repo),
-            deleteItemUseCase = DeleteTransactionUseCase(repo)
+            deleteItemUseCase = DeleteTransactionUseCase(repo),
         )
 
         vm.onQuantityChange("abc")
@@ -59,7 +59,7 @@ class TransactionalViewModelTest {
         val vm = TransactionalViewModel(
             addItemUseCase = MakeTransactionUseCase(repo),
             getAllItemsUseCase = GetTransactions(repo),
-            deleteItemUseCase = DeleteTransactionUseCase(repo)
+            deleteItemUseCase = DeleteTransactionUseCase(repo),
         )
 
         vm.onTransactionTypeChange(TransactionType.EXPENSE)

@@ -2,7 +2,6 @@ package data.repository
 
 import data.remote.GoogleDriveService
 import domain.model.BackupResult
-import domain.model.BackupService
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -13,7 +12,7 @@ class BackupRepositoryImplTest {
     fun `repository should delegate to correct service for GoogleDrive`() {
         // Given
         val mockGoogleDriveService = MockGoogleDriveService(
-            createFolderResult = BackupResult.Success
+            createFolderResult = BackupResult.Success,
         )
         val repository = BackupRepositoryImpl(mockGoogleDriveService)
 
@@ -26,7 +25,7 @@ class BackupRepositoryImplTest {
     fun `should handle authentication status correctly`() {
         // Given
         val mockGoogleDriveService = MockGoogleDriveService(
-            isAuthenticatedResult = true
+            isAuthenticatedResult = true,
         )
         val repository = BackupRepositoryImpl(mockGoogleDriveService)
 
@@ -38,7 +37,7 @@ class BackupRepositoryImplTest {
 private class MockGoogleDriveService(
     val createFolderResult: BackupResult = BackupResult.Success,
     val isAuthenticatedResult: Boolean = false,
-    private val authenticateResult: BackupResult = BackupResult.Success
+    private val authenticateResult: BackupResult = BackupResult.Success,
 ) : GoogleDriveService {
 
     var lastCreatedFolderName: String? = null

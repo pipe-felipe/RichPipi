@@ -24,12 +24,13 @@ class TransactionRepositoryDeleteTest {
             val removed = if (idx >= 0) {
                 list.removeAt(idx)
                 true
-            } else false
+            } else {
+                false
+            }
             flow.value = list
             return if (removed) 1 else 0
         }
     }
-
 
     @Test
     fun `repository delete delegates to dao`() = runBlocking {
@@ -44,13 +45,13 @@ class TransactionRepositoryDeleteTest {
 
                 override fun getTransactionsForMonth(
                     monthStartMillis: Long,
-                    monthEndExclusiveMillis: Long
+                    monthEndExclusiveMillis: Long,
                 ) = fakeDao.getAllTransactions()
 
                 override suspend fun getTransactionById(id: Int) = fakeDao.list.find { it.id == id }
                 override suspend fun addTransaction(item: TransactionEntity) = fakeDao.addTransaction(item)
                 override suspend fun deleteTransactionById(id: Int) = fakeDao.deleteTransactionById(id)
-            }
+            },
         )
 
         val deleted = repo.deleteTransaction(1)

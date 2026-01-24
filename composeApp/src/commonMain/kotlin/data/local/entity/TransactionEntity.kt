@@ -13,5 +13,5 @@ data class TransactionEntity(
     val description: String? = null,
     val humanDate: String? = null,
     val isRecurring: Boolean = false,
-    val createdAt: Long = 0L
+    val createdAt: Long = 0L,
 )
