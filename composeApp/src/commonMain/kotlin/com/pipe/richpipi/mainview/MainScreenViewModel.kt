@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
+import kotlin.time.Clock
 
 /**
  * Lightweight view-model-like class for the main screen UI.
@@ -132,14 +133,10 @@ class MainScreenViewModel(
         _currentMonthYearText.value = formatMonthYear(month, year)
     }
 
-    /**
-     * Creates a backup folder in Google Drive.
-     * @param onResult Callback to handle the result of the backup operation
-     */
-    fun createBackupFolder(onResult: (BackupResult) -> Unit) {
+    fun backupToDrive(onResult: (BackupResult) -> Unit) {
         scope.launch {
             try {
-                val result = BackupModule.createBackupFolderUseCase.execute()
+                val result = BackupModule.createSpreadSheetUseCase.execute(Clock.System.now().toEpochMilliseconds())
                 onResult(result)
             } catch (e: Exception) {
                 onResult(BackupResult.Error("Failed to create backup", e))

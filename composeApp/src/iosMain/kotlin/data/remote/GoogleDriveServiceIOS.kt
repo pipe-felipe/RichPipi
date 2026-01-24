@@ -12,6 +12,13 @@ class GoogleDriveServiceIOS : GoogleDriveService {
         return BackupResult.Error("Google Drive not yet implemented for iOS")
     }
 
+    override suspend fun createSpreadsheet(
+        folderName: String,
+        spreadsheetName: String,
+    ): BackupResult {
+        return BackupResult.Error("Google Drive authentication not yet implemented for iOS")
+    }
+
     override suspend fun isAuthenticated(): Boolean {
         return false
     }

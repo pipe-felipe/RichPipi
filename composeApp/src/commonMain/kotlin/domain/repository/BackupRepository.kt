@@ -18,6 +18,15 @@ interface BackupRepository {
     suspend fun createBackupFolder(service: BackupService, folderName: String): BackupResult
 
     /**
+     * Creates a Spreadsheet in Google Drive.
+     * @param service The backup service to check
+     * @param folderName The name of the folder to create the spreadsheet in
+     * @param spreadsheetName The name of the spreadsheet to create
+     * @return BackupResult indicating success or failure
+     */
+    suspend fun createSpreadsheet(service: BackupService, folderName: String, spreadsheetName: String): BackupResult
+
+    /**
      * Checks if the user is authenticated with the backup service.
      * @param service The backup service to check
      * @return true if authenticated, false otherwise

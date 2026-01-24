@@ -38,11 +38,11 @@ subprojects {
         kotlin {
             target("**/*.kt")
             // Use ktlint for formatting and basic lint rules
-            ktlint("0.48.2").userData(mapOf(
-                // disable the trailing-comma-on-call-site rule which is failing on some call-sites
-                "disabled_rules" to "trailing-comma-on-call-site"
+            ktlint("0.50.0").editorConfigOverride(mapOf(
+                "max_line_length" to "off",
+                "trailing_comma_on_call_site" to "false",
+                "trailing_comma_on_declaration_site" to "false"
             ))
-            // Note: .editorconfig defines max_line_length = 80; some formatters don't auto-wrap long lines.
             trimTrailingWhitespace()
             endWithNewline()
         }

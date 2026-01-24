@@ -130,6 +130,15 @@ class TransactionalViewModel(
     }
 
     /**
+     * Called when the date field value changes.
+     */
+    fun onDateChange(newDate: String) {
+        _uiState.update { currentState ->
+            currentState.copy(date = newDate)
+        }
+    }
+
+    /**
      * Called when the form is submitted.
      */
     @OptIn(ExperimentalTime::class)

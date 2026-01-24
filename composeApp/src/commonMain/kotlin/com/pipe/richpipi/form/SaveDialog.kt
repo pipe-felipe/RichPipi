@@ -100,7 +100,7 @@ private fun SaveDialogContent(
                                     when (result) {
                                         is BackupResult.Success -> {
                                             isSuccess = true
-                                            resultMessage = "Pasta criada com sucesso no Google Drive!"
+                                            resultMessage = "Seu dado foi salvo com sucesso! 😊"
                                         }
                                         is BackupResult.Error -> {
                                             isSuccess = false
