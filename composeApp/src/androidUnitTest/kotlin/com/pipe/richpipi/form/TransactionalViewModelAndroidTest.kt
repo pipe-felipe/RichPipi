@@ -58,6 +58,9 @@ class TransactionalViewModelAndroidTest {
         val year = 2026
         val expectedHumanDate = "$year-${month.toString().padStart(2, '0')}-01"
 
+        // Set the date explicitly to match expectedHumanDate
+        vm.onDateChange(expectedHumanDate)
+
         vm.submit(month = month, year = year)
 
         val deadline = System.currentTimeMillis() + 2_000
