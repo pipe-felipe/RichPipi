@@ -67,10 +67,9 @@ fun App(
         SaveDialog(
             onDismiss = { showSaveDialogState.value = false },
             onSave = { onResult ->
-                mainVm.createBackupFolder { result ->
+                mainVm.backupToDrive { result ->
                     when (result) {
                         is BackupResult.SignInRequired -> {
-                            // Trigger sign-in flow, then retry after sign-in
                             onSignInRequired()
                         }
                         else -> onResult(result)

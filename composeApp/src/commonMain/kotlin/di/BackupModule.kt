@@ -3,7 +3,7 @@ package di
 import data.remote.createGoogleDriveService
 import data.repository.BackupRepositoryImpl
 import domain.repository.BackupRepository
-import domain.usecase.CreateBackupFolderUseCase
+import domain.usecase.CreateSpreadSheetUseCase
 
 /**
  * Simple dependency injection container for backup functionality.
@@ -16,7 +16,7 @@ object BackupModule {
         BackupRepositoryImpl(googleDriveService)
     }
 
-    val createBackupFolderUseCase: CreateBackupFolderUseCase by lazy {
-        CreateBackupFolderUseCase(backupRepository)
+    val createSpreadSheetUseCase: CreateSpreadSheetUseCase by lazy {
+        CreateSpreadSheetUseCase(backupRepository)
     }
 }

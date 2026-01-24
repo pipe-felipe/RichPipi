@@ -15,6 +15,14 @@ interface GoogleDriveService {
     suspend fun createFolder(folderName: String): BackupResult
 
     /**
+     * Creates a Spreadsheet in Google Drive.
+     * @param folderName The name of the folder to create the spreadsheet in
+     * @param spreadsheetName The name of the spreadsheet to create
+     * @return BackupResult indicating success or failure
+     */
+    suspend fun createSpreadsheet(folderName: String, spreadsheetName: String): BackupResult
+
+    /**
      * Checks if the user is authenticated with Google Drive.
      * @return true if authenticated, false otherwise
      */

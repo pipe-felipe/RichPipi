@@ -43,12 +43,16 @@ class MainActivity : ComponentActivity() {
         val factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
-                return TransactionalViewModel(addItemUseCase, getAllItemsUseCase, deleteItemUseCase) as T
+                return TransactionalViewModel(
+                    addItemUseCase,
+                    getAllItemsUseCase,
+                    deleteItemUseCase,
+                ) as T
             }
         }
 
-        // Obtain ViewModel instance scoped to this Activity using the factory
-        val vm = ViewModelProvider(this, factory).get(TransactionalViewModel::class.java)
+        val vm =
+            ViewModelProvider(this, factory)[TransactionalViewModel::class.java]
 
         setContent {
             App(

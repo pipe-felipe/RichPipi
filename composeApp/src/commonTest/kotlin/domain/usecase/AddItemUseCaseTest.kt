@@ -22,7 +22,12 @@ class AddItemUseCaseTest {
         }
         override suspend fun deleteTransaction(id: Int): Int {
             val idx = items.indexOfFirst { it.id == id }
-            return if (idx >= 0) { items.removeAt(idx); 1 } else 0
+            return if (idx >= 0) {
+                items.removeAt(idx)
+                1
+            } else {
+                0
+            }
         }
     }
 

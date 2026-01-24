@@ -17,6 +17,7 @@ import data.local.EncryptedCredentialsManager
 import domain.model.BackupResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlin.collections.get
 
 /**
  * Android implementation of GoogleDriveService using Google Drive API v3.
@@ -89,7 +90,6 @@ class GoogleDriveServiceAndroid(
             withContext(Dispatchers.IO) {
                 val service = driveService ?: return@withContext BackupResult.Error("Not authenticated")
 
-                // Check if folder already exists
                 val existing = service.files().list()
                     .setQ("name='$folderName' and mimeType='application/vnd.google-apps.folder' and trashed=false")
                     .execute()
@@ -109,6 +109,43 @@ class GoogleDriveServiceAndroid(
             }
         } catch (e: Exception) {
             BackupResult.Error("Failed to create folder in Google Drive", e)
+        }
+    }
+
+    override suspend fun createSpreadsheet(
+        folderName: String,
+        spreadsheetName: String,
+    ): BackupResult {
+        return try {
+            withContext(Dispatchers.IO) {
+                val service = driveService ?: return@withContext BackupResult.Error("Not authenticated")
+
+                val existing = service.files().list()
+                    .setQ("name='$folderName' and mimeType='application/vnd.google-apps.folder' and trashed=false")
+                    .setFields("files(id)")
+                    .execute()
+
+                val folderId = if (existing.files.isNotEmpty()) {
+                    existing.files[0].id
+                } else {
+                    val folder = File().apply {
+                        name = folderName
+                        mimeType = "application/vnd.google-apps.folder"
+                    }
+                    service.files().create(folder).setFields("id").execute().id
+                } ?: return@withContext BackupResult.Error("Failed to obtain folder id")
+
+                val spreadsheet = File().apply {
+                    name = spreadsheetName
+                    mimeType = "application/vnd.google-apps.spreadsheet"
+                    parents = listOf(folderId)
+                }
+
+                service.files().create(spreadsheet).execute()
+                BackupResult.Success
+            }
+        } catch (e: Exception) {
+            BackupResult.Error("Failed to create spreadsheet in Google Drive", e)
         }
     }
 

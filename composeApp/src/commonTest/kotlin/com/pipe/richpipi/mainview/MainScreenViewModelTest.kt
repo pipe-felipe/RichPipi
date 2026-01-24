@@ -157,19 +157,28 @@ class MainScreenViewModelTest {
     }
 
     @Test
-    fun `createBackupFolder should handle success result correctly`() {
+    fun `backupToDrive should call callback with result`() = runBlocking {
         // Given
         val vm = MainScreenViewModel()
         var callbackResult: BackupResult? = null
+        var callbackCalled = false
 
         // When
-        vm.createBackupFolder { result ->
+        vm.backupToDrive { result ->
             callbackResult = result
+            callbackCalled = true
         }
 
-        // Then - we can't test the actual backup without mocking the use case,
-        // but we can verify the callback mechanism works
-        // The actual result will depend on the BackupModule implementation
-        assertTrue(callbackResult != null || callbackResult == null) // Either works since we don't mock the use case
+        // Wait a bit for the coroutine to complete
+        delay(1000)
+
+        // Then - callback should be called
+        assertTrue(callbackCalled, "Callback should be called")
+        assertTrue(
+            callbackResult is BackupResult.Success ||
+            callbackResult is BackupResult.Error ||
+            callbackResult is BackupResult.SignInRequired,
+            "Result should be one of the expected BackupResult types"
+        )
     }
 }

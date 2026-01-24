@@ -21,6 +21,18 @@ class BackupRepositoryImpl(
         }
     }
 
+    override suspend fun createSpreadsheet(
+        service: BackupService,
+        folderName: String,
+        spreadsheetName: String,
+    ): BackupResult {
+        return when (service) {
+            is BackupService.GoogleDrive -> {
+                googleDriveService.createSpreadsheet(folderName, spreadsheetName)
+            }
+        }
+    }
+
     override suspend fun isAuthenticated(service: BackupService): Boolean {
         return when (service) {
             is BackupService.GoogleDrive -> {
