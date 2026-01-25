@@ -43,6 +43,7 @@ kotlin {
             // Google Drive API
             implementation(libs.google.api.client.android)
             implementation(libs.google.api.services.drive)
+            implementation(libs.google.api.services.sheets)
             implementation(libs.google.http.client.android)
             implementation(libs.androidx.credentials)
             implementation(libs.androidx.credentials.auth)

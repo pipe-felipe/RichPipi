@@ -5,6 +5,7 @@ import com.pipe.richpipi.platform.monthBoundsUtcMillis
 import di.BackupModule
 import domain.model.BackupResult
 import domain.model.Transaction
+import domain.usecase.ExportDataToSpreadsheetUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -23,6 +24,7 @@ import kotlin.time.Clock
 class MainScreenViewModel(
     itemsSource: Flow<List<Transaction>> = emptyFlow(),
     private val onDeleteItem: (Int) -> Unit = {},
+    private val exportDataToSpreadsheetUseCase: ExportDataToSpreadsheetUseCase? = null,
 ) {
     private val _items = MutableStateFlow<List<Transaction>>(emptyList())
     val items: StateFlow<List<Transaction>> = _items.asStateFlow()
@@ -50,6 +52,7 @@ class MainScreenViewModel(
     val currentMonthYearText: StateFlow<String> = _currentMonthYearText.asStateFlow()
 
     private val scope = CoroutineScope(Dispatchers.Default)
+
 
     init {
         scope.launch {
@@ -133,15 +136,61 @@ class MainScreenViewModel(
         _currentMonthYearText.value = formatMonthYear(month, year)
     }
 
-    fun backupToDrive(onResult: (BackupResult) -> Unit) {
+    private var onResultCallback: ((BackupResult) -> Unit)? = null
+
+    private val _backupResult = MutableStateFlow<BackupResult?>(null)
+    val backupResult: StateFlow<BackupResult?> = _backupResult.asStateFlow()
+
+    fun clearBackupResult() {
+        _backupResult.value = null
+    }
+
+    fun backupToDrive(onResult: (BackupResult) -> Unit, onSignInRequired: () -> Unit) {
+        onResultCallback = onResult
+        _backupResult.value = null
         scope.launch {
             try {
-                val result = BackupModule.createSpreadSheetUseCase.execute(Clock.System.now().toEpochMilliseconds())
-                onResult(result)
+                when (val result = createSpreadsheet()) {
+                    is BackupResult.SignInRequired -> {
+                        _backupResult.value = result
+                        onResult(result) // Notifica o dialog para mostrar a mensagem
+                        onSignInRequired() // Abre a tela de login
+                    }
+                    else -> {
+                        _backupResult.value = result
+                        onResult(result)
+                    }
+                }
             } catch (e: Exception) {
-                onResult(BackupResult.Error("Failed to create backup", e))
+                val error = BackupResult.Error("Falha ao criar backup", e)
+                _backupResult.value = error
+                onResult(error)
             }
         }
+    }
+
+    fun onSignInSuccess() {
+        scope.launch {
+            try {
+                val result = createSpreadsheet()
+                _backupResult.value = result
+                onResultCallback?.invoke(result)
+            } catch (e: Exception) {
+                val error = BackupResult.Error("Falha ao criar backup após o login", e)
+                _backupResult.value = error
+                onResultCallback?.invoke(error)
+            }
+        }
+    }
+
+    private suspend fun createSpreadsheet(): BackupResult {
+        // If we have an export use case, use it to export data with content
+        // Otherwise, fall back to the simple spreadsheet creation
+        return exportDataToSpreadsheetUseCase?.execute(
+            Clock.System.now().toEpochMilliseconds(),
+        ) ?: BackupModule.createSpreadSheetUseCase.execute(
+            Clock.System.now().toEpochMilliseconds(),
+        )
     }
 
     private fun formatMonthYear(month: Int, year: Int): String {

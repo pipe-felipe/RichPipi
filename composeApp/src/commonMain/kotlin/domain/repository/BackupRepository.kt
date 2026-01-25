@@ -2,6 +2,7 @@ package domain.repository
 
 import domain.model.BackupResult
 import domain.model.BackupService
+import domain.model.SpreadsheetData
 
 /**
  * Repository interface for backup operations.
@@ -25,6 +26,21 @@ interface BackupRepository {
      * @return BackupResult indicating success or failure
      */
     suspend fun createSpreadsheet(service: BackupService, folderName: String, spreadsheetName: String): BackupResult
+
+    /**
+     * Creates a Spreadsheet in Google Drive and writes data to it.
+     * @param service The backup service to use
+     * @param folderName The name of the folder to create the spreadsheet in
+     * @param spreadsheetName The name of the spreadsheet to create
+     * @param data The data to write to the spreadsheet
+     * @return BackupResult indicating success or failure
+     */
+    suspend fun createSpreadsheetWithData(
+        service: BackupService,
+        folderName: String,
+        spreadsheetName: String,
+        data: SpreadsheetData,
+    ): BackupResult
 
     /**
      * Checks if the user is authenticated with the backup service.

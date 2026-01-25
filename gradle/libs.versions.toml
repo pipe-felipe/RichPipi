@@ -46,6 +46,7 @@ androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.r
 # Google Drive API
 google-api-client-android = { module = "com.google.api-client:google-api-client-android", version = "2.7.0" }
 google-api-services-drive = { module = "com.google.apis:google-api-services-drive", version = "v3-rev20240914-2.0.0" }
+google-api-services-sheets = { module = "com.google.apis:google-api-services-sheets", version = "v4-rev20240826-2.0.0" }
 google-http-client-android = { module = "com.google.http-client:google-http-client-android", version = "1.45.1" }
 androidx-credentials = { module = "androidx.credentials:credentials", version = "1.5.0" }
 androidx-credentials-auth = { module = "androidx.credentials:credentials-play-services-auth", version = "1.5.0" }

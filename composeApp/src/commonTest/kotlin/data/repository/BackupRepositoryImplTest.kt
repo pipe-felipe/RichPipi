@@ -2,6 +2,7 @@ package data.repository
 
 import data.remote.GoogleDriveService
 import domain.model.BackupResult
+import domain.model.SpreadsheetData
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -39,6 +40,7 @@ private class MockGoogleDriveService(
     val isAuthenticatedResult: Boolean = false,
     private val authenticateResult: BackupResult = BackupResult.Success,
     val createSpreadsheetResult: BackupResult = BackupResult.Success,
+    val createSpreadsheetWithDataResult: BackupResult = BackupResult.Success,
 ) : GoogleDriveService {
 
     var lastCreatedFolderName: String? = null
@@ -47,6 +49,7 @@ private class MockGoogleDriveService(
     // New tracking fields for spreadsheet creation
     var lastCreatedSpreadsheetName: String? = null
     var lastSpreadsheetFolderName: String? = null
+    var lastSpreadsheetData: SpreadsheetData? = null
 
     override suspend fun createFolder(folderName: String): BackupResult {
         lastCreatedFolderName = folderName
@@ -62,10 +65,20 @@ private class MockGoogleDriveService(
         return authenticateResult
     }
 
-    // New suspend implementation for createSpreadsheet
     override suspend fun createSpreadsheet(folderName: String, spreadsheetName: String): BackupResult {
         lastSpreadsheetFolderName = folderName
         lastCreatedSpreadsheetName = spreadsheetName
         return createSpreadsheetResult
+    }
+
+    override suspend fun createSpreadsheetWithData(
+        folderName: String,
+        spreadsheetName: String,
+        data: SpreadsheetData,
+    ): BackupResult {
+        lastSpreadsheetFolderName = folderName
+        lastCreatedSpreadsheetName = spreadsheetName
+        lastSpreadsheetData = data
+        return createSpreadsheetWithDataResult
     }
 }

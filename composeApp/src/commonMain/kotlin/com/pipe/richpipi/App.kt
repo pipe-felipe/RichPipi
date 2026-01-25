@@ -13,13 +13,15 @@ import com.pipe.richpipi.form.TransactionalDialog
 import com.pipe.richpipi.form.TransactionalViewModel
 import com.pipe.richpipi.mainview.MainScreenContent
 import com.pipe.richpipi.mainview.MainScreenViewModel
-import domain.model.BackupResult
+import domain.usecase.ExportDataToSpreadsheetUseCase
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun App(
     transactionalViewModel: TransactionalViewModel? = null,
+    exportDataToSpreadsheetUseCase: ExportDataToSpreadsheetUseCase? = null,
     onSignInRequired: () -> Unit = {},
+    onSignInSuccess: ((MainScreenViewModel) -> Unit)? = null,
 ) {
     val showDialogState: MutableState<Boolean> = remember { mutableStateOf(false) }
     val showSaveDialogState: MutableState<Boolean> = remember { mutableStateOf(false) }
@@ -29,8 +31,12 @@ fun App(
         MainScreenViewModel(
             itemsSource = vm.items,
             onDeleteItem = { id -> vm.deleteItem(id) },
+            exportDataToSpreadsheetUseCase = exportDataToSpreadsheetUseCase,
         )
     }
+
+    // Expor o mainVm através do callback onSignInSuccess quando fornecido
+    onSignInSuccess?.invoke(mainVm)
 
     val itemsList by mainVm.items.collectAsState()
     val incomeText by mainVm.totalIncomeText.collectAsState()
@@ -39,6 +45,7 @@ fun App(
     val currentMonthYear by mainVm.currentMonthYearText.collectAsState()
     val currentMonth by mainVm.currentMonth.collectAsState()
     val currentYear by mainVm.currentYear.collectAsState()
+    val backupResult by mainVm.backupResult.collectAsState()
 
     MainScreenContent(
         itemsList = itemsList,
@@ -66,17 +73,14 @@ fun App(
     if (showSaveDialogState.value) {
         SaveDialog(
             onDismiss = { showSaveDialogState.value = false },
-            onSave = { onResult ->
-                mainVm.backupToDrive { result ->
-                    when (result) {
-                        is BackupResult.SignInRequired -> {
-                            onSignInRequired()
-                        }
-                        else -> onResult(result)
-                    }
-                }
+            onSave = {
+                mainVm.backupToDrive(
+                    onResult = { /* resultado será observado via backupResult */ },
+                    onSignInRequired = onSignInRequired,
+                )
             },
-            onSignInRequired = onSignInRequired,
+            backupResult = backupResult,
+            onClearResult = { mainVm.clearBackupResult() },
         )
     }
 }
