@@ -33,6 +33,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import domain.model.ImportResult
 import domain.model.SpreadsheetFile
+import kotlinx.coroutines.delay
 
 @Composable
 fun RestoreDialog(
@@ -84,6 +85,14 @@ private fun RestoreDialogContent(
         null -> null
     }
     val isSuccess = restoreResult is ImportResult.Success
+
+    // Auto-dismiss dialog after successful restore
+    LaunchedEffect(restoreResult) {
+        if (restoreResult is ImportResult.Success) {
+            delay(1500) // Small delay so user can see the success message
+            onDismiss()
+        }
+    }
 
     BoxWithConstraints {
         Surface(

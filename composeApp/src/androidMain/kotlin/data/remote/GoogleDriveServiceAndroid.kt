@@ -309,13 +309,8 @@ class GoogleDriveServiceAndroid(
         // Try to restore session if user was previously signed in
         return try {
             val account = GoogleSignIn.getLastSignedInAccount(context)
-            if (account != null && GoogleSignIn.hasPermissions(
-                    account,
-                    Scope(DriveScopes.DRIVE_FILE),
-                    Scope(SheetsScopes.SPREADSHEETS),
-                )
-            ) {
-                // User has valid session, setup the services
+            if (account != null) {
+                // User has a signed-in account, try to setup the services
                 try {
                     setupDriveService(account)
                     true
