@@ -64,7 +64,7 @@ fun MainBottomBar(
                 modifier = Modifier
                     .height(64.dp)
                     .padding(horizontal = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(0.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 DockIcon(

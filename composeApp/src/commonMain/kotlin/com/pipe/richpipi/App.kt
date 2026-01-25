@@ -44,7 +44,6 @@ fun App(
         )
     }
 
-    // Expor o mainVm através do callback onSignInSuccess quando fornecido
     onSignInSuccess?.invoke(mainVm)
 
     val itemsList by mainVm.items.collectAsState()
@@ -60,7 +59,6 @@ fun App(
     val isLoadingBackups by mainVm.isLoadingBackups.collectAsState()
     val authStatus by mainVm.authStatus.collectAsState()
 
-    // Try to get the user name on startup
     androidx.compose.runtime.LaunchedEffect(Unit) {
         mainVm.refreshUserName()
     }
@@ -99,7 +97,6 @@ fun App(
     }
 
     if (showSaveDialogState.value) {
-        // Auto-close save dialog and show login required when SignInRequired
         androidx.compose.runtime.LaunchedEffect(backupResult) {
             if (backupResult is domain.model.BackupResult.SignInRequired) {
                 showSaveDialogState.value = false
@@ -112,7 +109,6 @@ fun App(
             onDismiss = { showSaveDialogState.value = false },
             onSave = {
                 mainVm.backupToDrive(
-                    onResult = { /* resultado será observado via backupResult */ },
                     onSignInRequired = {
                         showSaveDialogState.value = false
                         showLoginRequiredDialogState.value = true
@@ -125,7 +121,6 @@ fun App(
     }
 
     if (showRestoreDialogState.value) {
-        // Auto-close restore dialog and show login required when SignInRequired
         androidx.compose.runtime.LaunchedEffect(restoreResult) {
             if (restoreResult is domain.model.ImportResult.SignInRequired) {
                 showRestoreDialogState.value = false

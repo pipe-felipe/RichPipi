@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -34,7 +35,6 @@ import richpipi.composeapp.generated.resources.Res
 import richpipi.composeapp.generated.resources.no_transaction
 
 // TODO fazer as cores
-// TODO fazer os itens adicionado, deixar arrumadinho
 @Composable
 fun MainScreenContent(
     itemsList: List<Transaction>,
@@ -138,7 +138,7 @@ private fun ItemRow(
     ) {
         Row(
             modifier = Modifier
-                .padding(12.dp),
+                .padding(14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
@@ -161,9 +161,14 @@ private fun ItemRow(
                     "-R$${formatMoneyFromCents(item.amountCents)}"
                 },
                 style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(start = 8.dp),
+                modifier = Modifier
+                    .padding(start = 4.dp)
+                    .offset(x = 12.dp),
             )
-            IconButton(onClick = onDelete) {
+            IconButton(
+                onClick = onDelete,
+                modifier = Modifier.offset(x = 12.dp)
+            ) {
                 Icon(
                     Icons.Default.Delete,
                     contentDescription = "Delete",

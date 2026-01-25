@@ -71,7 +71,8 @@ class MainScreenViewModel(
         object Error : AuthStatus()
     }
 
-    private val _authStatus = MutableStateFlow<AuthStatus>(AuthStatus.NotAuthenticated)
+    private val _authStatus =
+        MutableStateFlow<AuthStatus>(AuthStatus.NotAuthenticated)
     val authStatus: StateFlow<AuthStatus> = _authStatus
 
     fun authenticate(onSignInRequired: () -> Unit) {
@@ -80,7 +81,9 @@ class MainScreenViewModel(
                 when (val result = authenticateUseCase.execute()) {
                     is AuthResult.Success -> {
                         _userName.value = result.userName
-                        _authStatus.value = AuthStatus.Authenticated(result.userName ?: "Desconhecido")
+                        _authStatus.value = AuthStatus.Authenticated(
+                            result.userName ?: "Desconhecido"
+                        )
                     }
 
                     is AuthResult.SignInRequired -> {
@@ -215,8 +218,8 @@ class MainScreenViewModel(
     }
 
     fun backupToDrive(
-        onResult: (BackupResult) -> Unit,
         onSignInRequired: () -> Unit,
+        onResult: ((BackupResult) -> Unit)? = null,
     ) {
         onResultCallback = onResult
         _backupResult.value = null
@@ -225,26 +228,25 @@ class MainScreenViewModel(
                 when (val result = createSpreadsheet()) {
                     is BackupResult.SignInRequired -> {
                         _backupResult.value = result
-                        onResult(result)
+                        onResult?.invoke(result)
                         onSignInRequired()
                     }
 
                     else -> {
                         _backupResult.value = result
-                        onResult(result)
+                        onResult?.invoke(result)
                     }
                 }
             } catch (e: Exception) {
                 val error = BackupResult.Error("Falha ao criar backup", e)
                 _backupResult.value = error
-                onResult(error)
+                onResult?.invoke(error)
             }
         }
     }
 
     fun onSignInSuccess() {
         scope.launch {
-            // Refresh user name after successful sign-in
             refreshUserName()
 
             try {
