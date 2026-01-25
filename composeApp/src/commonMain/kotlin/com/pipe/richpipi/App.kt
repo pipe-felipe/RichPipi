@@ -13,13 +13,13 @@ import com.pipe.richpipi.form.TransactionalDialog
 import com.pipe.richpipi.form.TransactionalViewModel
 import com.pipe.richpipi.mainview.MainScreenContent
 import com.pipe.richpipi.mainview.MainScreenViewModel
-import domain.model.BackupResult
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun App(
     transactionalViewModel: TransactionalViewModel? = null,
     onSignInRequired: () -> Unit = {},
+    onSignInSuccess: ((MainScreenViewModel) -> Unit)? = null,
 ) {
     val showDialogState: MutableState<Boolean> = remember { mutableStateOf(false) }
     val showSaveDialogState: MutableState<Boolean> = remember { mutableStateOf(false) }
@@ -31,6 +31,9 @@ fun App(
             onDeleteItem = { id -> vm.deleteItem(id) },
         )
     }
+
+    // Expor o mainVm através do callback onSignInSuccess quando fornecido
+    onSignInSuccess?.invoke(mainVm)
 
     val itemsList by mainVm.items.collectAsState()
     val incomeText by mainVm.totalIncomeText.collectAsState()
@@ -67,16 +70,12 @@ fun App(
         SaveDialog(
             onDismiss = { showSaveDialogState.value = false },
             onSave = { onResult ->
-                mainVm.backupToDrive { result ->
-                    when (result) {
-                        is BackupResult.SignInRequired -> {
-                            onSignInRequired()
-                        }
-                        else -> onResult(result)
-                    }
-                }
+                mainVm.backupToDrive(
+                    onResult = onResult,
+                    onSignInRequired = onSignInRequired,
+                )
             },
-            onSignInRequired = onSignInRequired,
+            onSignInSuccess = { mainVm.onSignInSuccess() },
         )
     }
 }

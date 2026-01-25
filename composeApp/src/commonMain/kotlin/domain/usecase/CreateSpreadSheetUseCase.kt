@@ -15,10 +15,7 @@ class CreateSpreadSheetUseCase(
 
         return try {
             if (!backupRepository.isAuthenticated(service)) {
-                val authResult = backupRepository.authenticate(service)
-                if (authResult is BackupResult.Error || authResult is BackupResult.SignInRequired) {
-                    return authResult
-                }
+                return BackupResult.SignInRequired
             }
 
             // Ensure folder exists
@@ -30,7 +27,7 @@ class CreateSpreadSheetUseCase(
             // Create the spreadsheet inside the folder
             backupRepository.createSpreadsheet(service, folderName, spreadsheetName)
         } catch (e: Exception) {
-            BackupResult.Error("Failed to create spreadsheet", e)
+            BackupResult.Error("Falha ao criar planilha", e)
         }
     }
 }

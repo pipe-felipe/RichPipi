@@ -133,15 +133,37 @@ class MainScreenViewModel(
         _currentMonthYearText.value = formatMonthYear(month, year)
     }
 
-    fun backupToDrive(onResult: (BackupResult) -> Unit) {
+    private var onResultCallback: ((BackupResult) -> Unit)? = null
+
+    fun backupToDrive(onResult: (BackupResult) -> Unit, onSignInRequired: () -> Unit) {
+        onResultCallback = onResult
         scope.launch {
             try {
-                val result = BackupModule.createSpreadSheetUseCase.execute(Clock.System.now().toEpochMilliseconds())
-                onResult(result)
+                when (val result = createSpreadsheet()) {
+                    is BackupResult.SignInRequired -> onSignInRequired()
+                    else -> onResult(result)
+                }
             } catch (e: Exception) {
-                onResult(BackupResult.Error("Failed to create backup", e))
+                onResult(BackupResult.Error("Falha ao criar backup", e))
             }
         }
+    }
+
+    fun onSignInSuccess() {
+        scope.launch {
+            try {
+                val result = createSpreadsheet()
+                onResultCallback?.invoke(result)
+            } catch (e: Exception) {
+                onResultCallback?.invoke(BackupResult.Error("Falha ao criar backup após o login", e))
+            }
+        }
+    }
+
+    private suspend fun createSpreadsheet(): BackupResult {
+        return BackupModule.createSpreadSheetUseCase.execute(
+            Clock.System.now().toEpochMilliseconds(),
+        )
     }
 
     private fun formatMonthYear(month: Int, year: Int): String {

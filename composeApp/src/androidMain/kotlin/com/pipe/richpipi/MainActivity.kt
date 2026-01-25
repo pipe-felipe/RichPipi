@@ -8,6 +8,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.pipe.richpipi.form.TransactionalViewModel
+import com.pipe.richpipi.mainview.MainScreenViewModel
 import data.local.database.DatabaseProvider
 import data.remote.GoogleSignInHandler
 import data.remote.initializeGoogleDriveService
@@ -19,11 +20,14 @@ import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
+    private var mainScreenViewModel: MainScreenViewModel? = null
+
     private val signInLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult(),
     ) { result ->
         lifecycleScope.launch {
-            GoogleSignInHandler.handleSignInResult(result.data)
+            // Se a autenticação foi bem-sucedida, tenta criar a planilha novamente
+            mainScreenViewModel?.onSignInSuccess()
         }
     }
 
@@ -61,6 +65,9 @@ class MainActivity : ComponentActivity() {
                     GoogleSignInHandler.getSignInIntent()?.let { intent ->
                         signInLauncher.launch(intent)
                     }
+                },
+                onSignInSuccess = { viewModel ->
+                    mainScreenViewModel = viewModel
                 },
             )
         }

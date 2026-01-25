@@ -40,7 +40,7 @@ import richpipi.composeapp.generated.resources.save_dialog_title
 fun SaveDialog(
     onDismiss: () -> Unit,
     onSave: (onResult: (BackupResult) -> Unit) -> Unit,
-    onSignInRequired: () -> Unit = {},
+    onSignInSuccess: () -> Unit = {},
 ) {
     Dialog(
         onDismissRequest = onDismiss,
@@ -49,7 +49,7 @@ fun SaveDialog(
         SaveDialogContent(
             onDismiss = onDismiss,
             onSave = onSave,
-            onSignInRequired = onSignInRequired,
+            onSignInSuccess = onSignInSuccess,
         )
     }
 }
@@ -58,7 +58,7 @@ fun SaveDialog(
 private fun SaveDialogContent(
     onDismiss: () -> Unit,
     onSave: (onResult: (BackupResult) -> Unit) -> Unit,
-    onSignInRequired: () -> Unit = {},
+    onSignInSuccess: () -> Unit = {},
 ) {
     var isLoading by remember { mutableStateOf(false) }
     var resultMessage by remember { mutableStateOf<String?>(null) }
@@ -96,19 +96,19 @@ private fun SaveDialogContent(
                                 isLoading = true
                                 resultMessage = null
                                 onSave { result ->
-                                    isLoading = false
                                     when (result) {
                                         is BackupResult.Success -> {
+                                            isLoading = false
                                             isSuccess = true
                                             resultMessage = "Seu dado foi salvo com sucesso! 😊"
                                         }
                                         is BackupResult.Error -> {
+                                            isLoading = false
                                             isSuccess = false
                                             resultMessage = "Erro: ${result.message}"
                                         }
                                         is BackupResult.SignInRequired -> {
-                                            resultMessage = "Por favor, faça login com sua conta Google."
-                                            onSignInRequired()
+                                            resultMessage = "Aguardando autenticação..."
                                         }
                                     }
                                 }
