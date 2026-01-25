@@ -301,7 +301,35 @@ class GoogleDriveServiceAndroid(
     }
 
     override suspend fun isAuthenticated(): Boolean {
-        return isAuthenticatedFlag && driveService != null && sheetsService != null
+        // If already authenticated with services, return true
+        if (isAuthenticatedFlag && driveService != null && sheetsService != null) {
+            return true
+        }
+
+        // Try to restore session if user was previously signed in
+        return try {
+            val account = GoogleSignIn.getLastSignedInAccount(context)
+            if (account != null && GoogleSignIn.hasPermissions(
+                    account,
+                    Scope(DriveScopes.DRIVE_FILE),
+                    Scope(SheetsScopes.SPREADSHEETS),
+                )
+            ) {
+                // User has valid session, setup the services
+                try {
+                    setupDriveService(account)
+                    true
+                } catch (setupError: Exception) {
+                    println("Failed to setup drive service: ${setupError.message}")
+                    false
+                }
+            } else {
+                false
+            }
+        } catch (e: Exception) {
+            println("isAuthenticated check failed: ${e.message}")
+            false
+        }
     }
 
     override suspend fun authenticate(): BackupResult {

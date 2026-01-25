@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.pipe.richpipi.form.AlreadyAuthenticatedDialog
 import com.pipe.richpipi.form.LoginRequiredDialog
 import com.pipe.richpipi.form.RestoreDialog
 import com.pipe.richpipi.form.SaveDialog
@@ -31,6 +32,7 @@ fun App(
     val showSaveDialogState: MutableState<Boolean> = remember { mutableStateOf(false) }
     val showRestoreDialogState: MutableState<Boolean> = remember { mutableStateOf(false) }
     val showLoginRequiredDialogState: MutableState<Boolean> = remember { mutableStateOf(false) }
+    val showAlreadyAuthenticatedDialogState: MutableState<Boolean> = remember { mutableStateOf(false) }
 
     val vm: TransactionalViewModel = transactionalViewModel ?: viewModel()
     val mainVm = remember {
@@ -76,7 +78,13 @@ fun App(
         onAddButtonClick = { showDialogState.value = true },
         onSaveButtonClick = { showSaveDialogState.value = true },
         onRestoreButtonClick = { showRestoreDialogState.value = true },
-        onLoginButtonClick = { mainVm.authenticate(onSignInRequired) },
+        onLoginButtonClick = {
+            if (authStatus is MainScreenViewModel.AuthStatus.Authenticated) {
+                showAlreadyAuthenticatedDialogState.value = true
+            } else {
+                mainVm.authenticate(onSignInRequired)
+            }
+        },
         onLoginRequiredClick = { showLoginRequiredDialogState.value = true },
         onDeleteItem = { id -> mainVm.delete(id) },
     )
@@ -91,12 +99,24 @@ fun App(
     }
 
     if (showSaveDialogState.value) {
+        // Auto-close save dialog and show login required when SignInRequired
+        androidx.compose.runtime.LaunchedEffect(backupResult) {
+            if (backupResult is domain.model.BackupResult.SignInRequired) {
+                showSaveDialogState.value = false
+                mainVm.clearBackupResult()
+                showLoginRequiredDialogState.value = true
+            }
+        }
+
         SaveDialog(
             onDismiss = { showSaveDialogState.value = false },
             onSave = {
                 mainVm.backupToDrive(
                     onResult = { /* resultado será observado via backupResult */ },
-                    onSignInRequired = onSignInRequired,
+                    onSignInRequired = {
+                        showSaveDialogState.value = false
+                        showLoginRequiredDialogState.value = true
+                    },
                 )
             },
             backupResult = backupResult,
@@ -105,15 +125,32 @@ fun App(
     }
 
     if (showRestoreDialogState.value) {
+        // Auto-close restore dialog and show login required when SignInRequired
+        androidx.compose.runtime.LaunchedEffect(restoreResult) {
+            if (restoreResult is domain.model.ImportResult.SignInRequired) {
+                showRestoreDialogState.value = false
+                mainVm.clearRestoreResult()
+                showLoginRequiredDialogState.value = true
+            }
+        }
+
         RestoreDialog(
             onDismiss = { showRestoreDialogState.value = false },
             onRestore = { spreadsheetId ->
                 mainVm.restoreFromBackup(
                     spreadsheetId = spreadsheetId,
-                    onSignInRequired = onSignInRequired,
+                    onSignInRequired = {
+                        showRestoreDialogState.value = false
+                        showLoginRequiredDialogState.value = true
+                    },
                 )
             },
-            onLoadBackups = { mainVm.loadAvailableBackups(onSignInRequired) },
+            onLoadBackups = {
+                mainVm.loadAvailableBackups {
+                    showRestoreDialogState.value = false
+                    showLoginRequiredDialogState.value = true
+                }
+            },
             availableBackups = availableBackups,
             restoreResult = restoreResult,
             isLoading = isLoadingBackups,
@@ -124,6 +161,14 @@ fun App(
     if (showLoginRequiredDialogState.value) {
         LoginRequiredDialog(
             onDismiss = { showLoginRequiredDialogState.value = false },
+        )
+    }
+
+    if (showAlreadyAuthenticatedDialogState.value) {
+        val userName = (authStatus as? MainScreenViewModel.AuthStatus.Authenticated)?.userName ?: ""
+        AlreadyAuthenticatedDialog(
+            userName = userName,
+            onDismiss = { showAlreadyAuthenticatedDialogState.value = false },
         )
     }
 }

@@ -120,8 +120,10 @@ class MainScreenViewModel(
                 itemsSource.collect { list ->
                     _allItems.value = list
                 }
-            } catch (_: Throwable) {
-                // ignore
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Throwable) {
+                println("Error collecting transactions: ${e.message}")
             }
         }
 

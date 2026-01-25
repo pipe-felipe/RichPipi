@@ -45,4 +45,7 @@ você pode continuar com seus dados sem perder nada 😊🐶</string>
     <string name="login_required_dialog_title">Autenticação Necessária</string>
     <string name="login_required_dialog_message">Para usar backup e recuperação, você precisa fazer login com sua conta Google. Clique no botão de login na barra inferior para continuar.</string>
     <string name="login_required_dialog_button">Entendi</string>
+
+    <string name="already_authenticated_dialog_title">Já Autenticado</string>
+    <string name="already_authenticated_dialog_message">Você já está autenticado! Pode usar os botões de backup e recuperação normalmente.</string>
 </resources>
