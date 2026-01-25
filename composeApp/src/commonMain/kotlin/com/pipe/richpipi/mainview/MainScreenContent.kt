@@ -42,12 +42,14 @@ fun MainScreenContent(
     totalExpenseText: String,
     totalSavingText: String,
     currentMonthYear: String,
+    userName: String?,
     onPreviousMonth: () -> Unit,
     onNextMonth: () -> Unit,
     onCurrentMonthClick: () -> Unit,
     onAddButtonClick: () -> Unit,
     onSaveButtonClick: () -> Unit,
     onRestoreButtonClick: () -> Unit,
+    onLoginButtonClick: () -> Unit,
     onDeleteItem: (Int) -> Unit,
 ) {
     RichPipiTheme {
@@ -60,6 +62,7 @@ fun MainScreenContent(
                         totalExpenseText = totalExpenseText,
                         totalSavingText = totalSavingText,
                         currentMonthYear = currentMonthYear,
+                        userName = userName,
                         onPreviousMonth = onPreviousMonth,
                         onNextMonth = onNextMonth,
                         onCurrentMonthClick = onCurrentMonthClick,
@@ -91,17 +94,19 @@ fun MainScreenContent(
                         ),
                     ) {
                         items(itemsList) { item ->
-                            ItemRow(item = item, onDelete = { onDeleteItem(item.id) })
+                            ItemRow(
+                                item = item,
+                                onDelete = { onDeleteItem(item.id) })
                         }
                     }
                 }
             }
 
-            // Floating macOS-style dock
             MainBottomBar(
                 onAddButtonClick = onAddButtonClick,
                 onSaveButtonClick = onSaveButtonClick,
                 onRestoreButtonClick = onRestoreButtonClick,
+                onLoginButtonClick = onLoginButtonClick,
                 modifier = Modifier.align(Alignment.BottomCenter),
             )
         }
@@ -109,7 +114,11 @@ fun MainScreenContent(
 }
 
 @Composable
-private fun ItemRow(item: Transaction, onDelete: () -> Unit, modifier: Modifier = Modifier) {
+private fun ItemRow(
+    item: Transaction,
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Card(
         modifier = modifier
             .fillMaxWidth()

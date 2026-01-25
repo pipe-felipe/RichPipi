@@ -37,6 +37,7 @@ fun MainTopBar(
     totalExpenseText: String,
     totalSavingText: String,
     currentMonthYear: String,
+    userName: String?,
     onPreviousMonth: () -> Unit,
     onNextMonth: () -> Unit,
     onCurrentMonthClick: () -> Unit,
@@ -49,6 +50,16 @@ fun MainTopBar(
         shape = RoundedCornerShape(bottomStart = 14.dp, bottomEnd = 14.dp),
     ) {
         Column {
+            if (!userName.isNullOrBlank()) {
+                Text(
+                    text = userName,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    modifier = Modifier
+                        .padding(start = 16.dp, top = 4.dp),
+                )
+            }
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),

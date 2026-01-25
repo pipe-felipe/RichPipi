@@ -92,4 +92,8 @@ private class MockGoogleDriveService(
     override suspend fun readSpreadsheetData(spreadsheetId: String): SpreadsheetData? {
         return readSpreadsheetDataResult
     }
+
+    override suspend fun getAuthenticatedUserName(): String? {
+        return null
+    }
 }

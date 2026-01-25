@@ -44,4 +44,8 @@ class GoogleDriveServiceIOS : GoogleDriveService {
     override suspend fun authenticate(): BackupResult {
         return BackupResult.Error("Google Drive authentication not yet implemented for iOS")
     }
+
+    override suspend fun getAuthenticatedUserName(): String? {
+        return null
+    }
 }

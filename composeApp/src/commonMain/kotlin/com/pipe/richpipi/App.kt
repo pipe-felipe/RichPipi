@@ -54,6 +54,12 @@ fun App(
     val availableBackups by mainVm.availableBackups.collectAsState()
     val restoreResult by mainVm.restoreResult.collectAsState()
     val isLoadingBackups by mainVm.isLoadingBackups.collectAsState()
+    val userName by mainVm.userName.collectAsState()
+
+    // Try to get the user name on startup
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        mainVm.refreshUserName()
+    }
 
     MainScreenContent(
         itemsList = itemsList,
@@ -61,12 +67,14 @@ fun App(
         totalExpenseText = expenseText,
         totalSavingText = savingText,
         currentMonthYear = currentMonthYear,
+        userName = userName,
         onPreviousMonth = { mainVm.goToPreviousMonth() },
         onNextMonth = { mainVm.goToNextMonth() },
         onCurrentMonthClick = { mainVm.goToCurrentMonth() },
         onAddButtonClick = { showDialogState.value = true },
         onSaveButtonClick = { showSaveDialogState.value = true },
         onRestoreButtonClick = { showRestoreDialogState.value = true },
+        onLoginButtonClick = { mainVm.authenticate(onSignInRequired) },
         onDeleteItem = { id -> mainVm.delete(id) },
     )
 

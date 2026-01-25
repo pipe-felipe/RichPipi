@@ -38,6 +38,7 @@ fun MainBottomBar(
     onAddButtonClick: () -> Unit,
     onSaveButtonClick: () -> Unit,
     onRestoreButtonClick: () -> Unit,
+    onLoginButtonClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -65,6 +66,11 @@ fun MainBottomBar(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                DockIcon(
+                    painter = painterResource(Res.drawable.save_icon),
+                    contentDescription = "Login",
+                    onClick = onLoginButtonClick,
+                )
                 DockIcon(
                     painter = painterResource(Res.drawable.save_icon),
                     contentDescription = "Save",

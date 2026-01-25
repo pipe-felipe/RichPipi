@@ -85,4 +85,12 @@ class BackupRepositoryImpl(
             }
         }
     }
+
+    override suspend fun getAuthenticatedUserName(service: BackupService): String? {
+        return when (service) {
+            is BackupService.GoogleDrive -> {
+                googleDriveService.getAuthenticatedUserName()
+            }
+        }
+    }
 }

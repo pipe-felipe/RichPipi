@@ -326,6 +326,15 @@ class GoogleDriveServiceAndroid(
         }
     }
 
+    override suspend fun getAuthenticatedUserName(): String? {
+        return try {
+            val account = GoogleSignIn.getLastSignedInAccount(context)
+            account?.displayName ?: account?.email
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     /**
      * Signs out the current user.
      */

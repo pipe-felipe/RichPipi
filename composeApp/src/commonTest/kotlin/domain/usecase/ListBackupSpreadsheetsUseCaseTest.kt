@@ -99,4 +99,8 @@ private class ListTestBackupRepository(
     override suspend fun authenticate(service: BackupService): BackupResult {
         return authenticateResult
     }
+
+    override suspend fun getAuthenticatedUserName(service: BackupService): String? {
+        return null
+    }
 }

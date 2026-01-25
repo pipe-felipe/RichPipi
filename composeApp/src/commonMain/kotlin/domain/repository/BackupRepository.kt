@@ -72,4 +72,11 @@ interface BackupRepository {
      * @return Result of the authentication operation
      */
     suspend fun authenticate(service: BackupService): BackupResult
+
+    /**
+     * Gets the name of the currently authenticated user.
+     * @param service The backup service to check
+     * @return The user's display name, or null if not authenticated
+     */
+    suspend fun getAuthenticatedUserName(service: BackupService): String?
 }

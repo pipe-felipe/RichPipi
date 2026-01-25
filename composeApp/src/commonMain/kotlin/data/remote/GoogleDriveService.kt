@@ -62,4 +62,10 @@ interface GoogleDriveService {
      * @return BackupResult indicating success or failure
      */
     suspend fun authenticate(): BackupResult
+
+    /**
+     * Gets the name of the currently authenticated user.
+     * @return The user's display name, or null if not authenticated
+     */
+    suspend fun getAuthenticatedUserName(): String?
 }

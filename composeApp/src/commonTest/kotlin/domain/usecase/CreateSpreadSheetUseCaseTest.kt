@@ -165,4 +165,8 @@ class TestMockBackupRepository(
     ): SpreadsheetData? {
         return null
     }
+
+    override suspend fun getAuthenticatedUserName(service: BackupService): String? {
+        return null
+    }
 }

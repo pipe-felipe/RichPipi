@@ -4,6 +4,7 @@ import data.remote.createGoogleDriveService
 import data.repository.BackupRepositoryImpl
 import domain.repository.BackupRepository
 import domain.repository.TransactionRepository
+import domain.usecase.AuthenticateUseCase
 import domain.usecase.CreateSpreadSheetUseCase
 import domain.usecase.ExportDataToSpreadsheetUseCase
 import domain.usecase.ImportDataFromSpreadsheetUseCase
@@ -26,6 +27,10 @@ object BackupModule {
 
     val listBackupSpreadsheetsUseCase: ListBackupSpreadsheetsUseCase by lazy {
         ListBackupSpreadsheetsUseCase(backupRepository)
+    }
+
+    val authenticateUseCase: AuthenticateUseCase by lazy {
+        AuthenticateUseCase(backupRepository)
     }
 
     /**
