@@ -54,7 +54,7 @@ fun App(
     val availableBackups by mainVm.availableBackups.collectAsState()
     val restoreResult by mainVm.restoreResult.collectAsState()
     val isLoadingBackups by mainVm.isLoadingBackups.collectAsState()
-    val userName by mainVm.userName.collectAsState()
+    val authStatus by mainVm.authStatus.collectAsState()
 
     // Try to get the user name on startup
     androidx.compose.runtime.LaunchedEffect(Unit) {
@@ -67,7 +67,7 @@ fun App(
         totalExpenseText = expenseText,
         totalSavingText = savingText,
         currentMonthYear = currentMonthYear,
-        userName = userName,
+        authStatus = authStatus,
         onPreviousMonth = { mainVm.goToPreviousMonth() },
         onNextMonth = { mainVm.goToNextMonth() },
         onCurrentMonthClick = { mainVm.goToCurrentMonth() },

@@ -16,10 +16,15 @@ sealed class AuthResult {
 /**
  * Use case for authenticating with the backup service and getting user info.
  */
+interface IAuthenticateUseCase {
+    suspend fun execute(): AuthResult
+    suspend fun getCurrentUserName(): String?
+}
+
 class AuthenticateUseCase(
     private val backupRepository: BackupRepository,
-) {
-    suspend fun execute(): AuthResult {
+) : IAuthenticateUseCase {
+    override suspend fun execute(): AuthResult {
         val service = BackupService.GoogleDrive
 
         return try {
@@ -47,10 +52,7 @@ class AuthenticateUseCase(
         }
     }
 
-    /**
-     * Gets the currently authenticated user's name without triggering authentication.
-     */
-    suspend fun getCurrentUserName(): String? {
+    override suspend fun getCurrentUserName(): String? {
         val service = BackupService.GoogleDrive
         return try {
             backupRepository.getAuthenticatedUserName(service)

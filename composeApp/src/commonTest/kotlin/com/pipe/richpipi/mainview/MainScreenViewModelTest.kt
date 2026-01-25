@@ -13,6 +13,11 @@ import kotlin.test.assertTrue
 
 class MainScreenViewModelTest {
 
+    private val defaultFakeAuth = object : domain.usecase.IAuthenticateUseCase {
+        override suspend fun execute() = domain.usecase.AuthResult.Success("TestUser")
+        override suspend fun getCurrentUserName() = "TestUser"
+    }
+
     @Test
     fun `compute totals sums income and expense correctly`() {
         val items = listOf(
@@ -23,7 +28,7 @@ class MainScreenViewModelTest {
             Transaction(id = 6, amountCents = 1025, type = TransactionType.INCOME), // 10.25
         )
 
-        val vm = MainScreenViewModel()
+        val vm = MainScreenViewModel(authenticateUseCase = defaultFakeAuth)
 
         val (income, expense) = vm.computeTotalsForTest(items)
         val saving = income - expense
@@ -42,7 +47,7 @@ class MainScreenViewModelTest {
             Transaction(id = 3, amountCents = 50000, type = TransactionType.INCOME), // 500.00
         )
 
-        val vm = MainScreenViewModel()
+        val vm = MainScreenViewModel(authenticateUseCase = defaultFakeAuth)
 
         val (income, expense) = vm.computeTotalsForTest(items)
         val saving = income - expense
@@ -59,7 +64,7 @@ class MainScreenViewModelTest {
             Transaction(id = 2, amountCents = 2500, type = TransactionType.EXPENSE), // 25.00
         )
 
-        val vm = MainScreenViewModel()
+        val vm = MainScreenViewModel(authenticateUseCase = defaultFakeAuth)
 
         val (income, expense) = vm.computeTotalsForTest(items)
         val saving = income - expense
@@ -82,7 +87,7 @@ class MainScreenViewModelTest {
             Transaction(id = 2, amountCents = 2500, type = TransactionType.EXPENSE),
         )
 
-        val vm = MainScreenViewModel()
+        val vm = MainScreenViewModel(authenticateUseCase = defaultFakeAuth)
 
         // Month-scoped totals (e.g., month B) only see that month's items.
         val (monthInc, monthExp) = vm.computeTotalsForTest(monthItems)
@@ -126,7 +131,7 @@ class MainScreenViewModelTest {
             ),
         )
 
-        val vm = MainScreenViewModel(itemsSource = itemsFlow)
+        val vm = MainScreenViewModel(itemsSource = itemsFlow, authenticateUseCase = defaultFakeAuth)
 
         // Go to Jan/2026 (before salary start month)
         while (vm.currentYear.value > 2026 || (vm.currentYear.value == 2026 && vm.currentMonth.value > 1)) {
@@ -159,7 +164,7 @@ class MainScreenViewModelTest {
     @Test
     fun `backupToDrive should call callback with result`() = runBlocking {
         // Given
-        val vm = MainScreenViewModel()
+        val vm = MainScreenViewModel(authenticateUseCase = defaultFakeAuth)
         var callbackResult: BackupResult? = null
         var callbackCalled = false
         var signInRequiredCalled = false
@@ -197,7 +202,7 @@ class MainScreenViewModelTest {
     @Test
     fun `backupToDrive should call onSignInRequired when not authenticated`() = runBlocking {
         // Given
-        val vm = MainScreenViewModel()
+        val vm = MainScreenViewModel(authenticateUseCase = defaultFakeAuth)
         var signInRequiredCalled = false
         var resultCallbackCalled = false
 
@@ -225,7 +230,7 @@ class MainScreenViewModelTest {
     @Test
     fun `onSignInSuccess should retry creating spreadsheet`() = runBlocking {
         // Given
-        val vm = MainScreenViewModel()
+        val vm = MainScreenViewModel(authenticateUseCase = defaultFakeAuth)
         var firstCallbackResult: BackupResult? = null
 
         // When - First attempt (might require sign-in)
@@ -253,5 +258,63 @@ class MainScreenViewModelTest {
                 firstCallbackResult is BackupResult.SignInRequired,
             "First callback should receive a result",
         )
+    }
+
+    @Test
+    fun `authStatus is NotAuthenticated by default`() = runBlocking {
+        val vm = MainScreenViewModel(authenticateUseCase = defaultFakeAuth)
+        assertTrue(vm.authStatus.value is MainScreenViewModel.AuthStatus.NotAuthenticated)
+    }
+
+    @Test
+    fun `authStatus becomes Authenticated on success`() = runBlocking {
+        val fakeAuth = object : domain.usecase.IAuthenticateUseCase {
+            override suspend fun execute() = domain.usecase.AuthResult.Success("João")
+            override suspend fun getCurrentUserName() = "João"
+        }
+        val vm = MainScreenViewModel(authenticateUseCase = fakeAuth)
+        vm.authenticate {}
+        delay(100)
+        assertTrue(vm.authStatus.value is MainScreenViewModel.AuthStatus.Authenticated)
+        assertEquals("João", (vm.authStatus.value as MainScreenViewModel.AuthStatus.Authenticated).userName)
+    }
+
+    @Test
+    fun `authStatus becomes NotAuthenticated when sign-in required`() = runBlocking {
+        val fakeAuth = object : domain.usecase.IAuthenticateUseCase {
+            override suspend fun execute() = domain.usecase.AuthResult.SignInRequired
+            override suspend fun getCurrentUserName() = null
+        }
+        val vm = MainScreenViewModel(authenticateUseCase = fakeAuth)
+        var signInRequiredCalled = false
+        vm.authenticate { signInRequiredCalled = true }
+        delay(100)
+        assertTrue(vm.authStatus.value is MainScreenViewModel.AuthStatus.NotAuthenticated)
+        assertTrue(signInRequiredCalled)
+    }
+
+    @Test
+    fun `authStatus becomes Error on error`() = runBlocking {
+        val fakeAuth = object : domain.usecase.IAuthenticateUseCase {
+            override suspend fun execute(): domain.usecase.AuthResult = throw Exception("fail")
+            override suspend fun getCurrentUserName(): String? = throw Exception("fail")
+        }
+        val vm = MainScreenViewModel(authenticateUseCase = fakeAuth)
+        vm.authenticate {}
+        delay(100)
+        assertTrue(vm.authStatus.value is MainScreenViewModel.AuthStatus.Error)
+    }
+
+    @Test
+    fun `authStatus uses fallback name if userName is null`() = runBlocking {
+        val fakeAuth = object : domain.usecase.IAuthenticateUseCase {
+            override suspend fun execute() = domain.usecase.AuthResult.Success(null)
+            override suspend fun getCurrentUserName() = null
+        }
+        val vm = MainScreenViewModel(authenticateUseCase = fakeAuth)
+        vm.authenticate {}
+        delay(100)
+        assertTrue(vm.authStatus.value is MainScreenViewModel.AuthStatus.Authenticated)
+        assertEquals("Desconhecido", (vm.authStatus.value as MainScreenViewModel.AuthStatus.Authenticated).userName)
     }
 }

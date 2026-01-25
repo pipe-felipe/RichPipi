@@ -27,6 +27,9 @@ import com.pipe.richpipi.ui.theme.golden
 import com.pipe.richpipi.ui.theme.money
 import org.jetbrains.compose.resources.stringResource
 import richpipi.composeapp.generated.resources.Res
+import richpipi.composeapp.generated.resources.auth_status_authenticated
+import richpipi.composeapp.generated.resources.auth_status_error
+import richpipi.composeapp.generated.resources.auth_status_not_authenticated
 import richpipi.composeapp.generated.resources.income
 import richpipi.composeapp.generated.resources.outgoing
 import richpipi.composeapp.generated.resources.saving
@@ -37,7 +40,7 @@ fun MainTopBar(
     totalExpenseText: String,
     totalSavingText: String,
     currentMonthYear: String,
-    userName: String?,
+    authStatus: MainScreenViewModel.AuthStatus,
     onPreviousMonth: () -> Unit,
     onNextMonth: () -> Unit,
     onCurrentMonthClick: () -> Unit,
@@ -50,15 +53,18 @@ fun MainTopBar(
         shape = RoundedCornerShape(bottomStart = 14.dp, bottomEnd = 14.dp),
     ) {
         Column {
-            if (!userName.isNullOrBlank()) {
-                Text(
-                    text = userName,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    modifier = Modifier
-                        .padding(start = 16.dp, top = 4.dp),
-                )
+            val statusText = when (authStatus) {
+                is MainScreenViewModel.AuthStatus.NotAuthenticated -> stringResource(Res.string.auth_status_not_authenticated)
+                is MainScreenViewModel.AuthStatus.Authenticated -> stringResource(Res.string.auth_status_authenticated, authStatus.userName)
+                is MainScreenViewModel.AuthStatus.Error -> stringResource(Res.string.auth_status_error)
             }
+            Text(
+                text = statusText,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                modifier = Modifier
+                    .padding(start = 16.dp, top = 4.dp),
+            )
 
             Row(
                 modifier = Modifier

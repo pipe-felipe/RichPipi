@@ -42,7 +42,7 @@ fun MainScreenContent(
     totalExpenseText: String,
     totalSavingText: String,
     currentMonthYear: String,
-    userName: String?,
+    authStatus: MainScreenViewModel.AuthStatus,
     onPreviousMonth: () -> Unit,
     onNextMonth: () -> Unit,
     onCurrentMonthClick: () -> Unit,
@@ -62,7 +62,7 @@ fun MainScreenContent(
                         totalExpenseText = totalExpenseText,
                         totalSavingText = totalSavingText,
                         currentMonthYear = currentMonthYear,
-                        userName = userName,
+                        authStatus = authStatus,
                         onPreviousMonth = onPreviousMonth,
                         onNextMonth = onNextMonth,
                         onCurrentMonthClick = onCurrentMonthClick,
@@ -96,7 +96,8 @@ fun MainScreenContent(
                         items(itemsList) { item ->
                             ItemRow(
                                 item = item,
-                                onDelete = { onDeleteItem(item.id) })
+                                onDelete = { onDeleteItem(item.id) },
+                            )
                         }
                     }
                 }
@@ -117,7 +118,7 @@ fun MainScreenContent(
 private fun ItemRow(
     item: Transaction,
     onDelete: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Card(
         modifier = modifier
