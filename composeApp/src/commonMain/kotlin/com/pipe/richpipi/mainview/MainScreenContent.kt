@@ -25,7 +25,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.pipe.richpipi.ui.theme.RichPipiTheme
 import com.pipe.richpipi.ui.theme.expenseBackground
 import com.pipe.richpipi.ui.theme.incomeBackground
 import domain.model.Transaction
@@ -34,7 +33,6 @@ import org.jetbrains.compose.resources.stringResource
 import richpipi.composeapp.generated.resources.Res
 import richpipi.composeapp.generated.resources.no_transaction
 
-// TODO fazer as cores
 @Composable
 fun MainScreenContent(
     itemsList: List<Transaction>,
@@ -55,66 +53,64 @@ fun MainScreenContent(
 ) {
     val isAuthenticated = authStatus is MainScreenViewModel.AuthStatus.Authenticated
 
-    RichPipiTheme {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Scaffold(
-                modifier = Modifier.fillMaxSize(),
-                topBar = {
-                    MainTopBar(
-                        totalIncomeText = totalIncomeText,
-                        totalExpenseText = totalExpenseText,
-                        totalSavingText = totalSavingText,
-                        currentMonthYear = currentMonthYear,
-                        authStatus = authStatus,
-                        onPreviousMonth = onPreviousMonth,
-                        onNextMonth = onNextMonth,
-                        onCurrentMonthClick = onCurrentMonthClick,
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            topBar = {
+                MainTopBar(
+                    totalIncomeText = totalIncomeText,
+                    totalExpenseText = totalExpenseText,
+                    totalSavingText = totalSavingText,
+                    currentMonthYear = currentMonthYear,
+                    authStatus = authStatus,
+                    onPreviousMonth = onPreviousMonth,
+                    onNextMonth = onNextMonth,
+                    onCurrentMonthClick = onCurrentMonthClick,
+                )
+            },
+        ) { innerPadding ->
+            if (itemsList.isEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding),
+                ) {
+                    Text(
+                        text = stringResource(Res.string.no_transaction),
+                        modifier = Modifier.padding(16.dp),
+                        style = MaterialTheme.typography.bodyMedium,
                     )
-                },
-            ) { innerPadding ->
-                if (itemsList.isEmpty()) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding),
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.no_transaction),
-                            modifier = Modifier.padding(16.dp),
-                            style = MaterialTheme.typography.bodyMedium,
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding),
+                    contentPadding = PaddingValues(
+                        start = 8.dp,
+                        end = 8.dp,
+                        top = 8.dp,
+                        bottom = 88.dp,
+                    ),
+                ) {
+                    items(itemsList) { item ->
+                        ItemRow(
+                            item = item,
+                            onDelete = { onDeleteItem(item.id) },
                         )
-                    }
-                } else {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding),
-                        contentPadding = PaddingValues(
-                            start = 8.dp,
-                            end = 8.dp,
-                            top = 8.dp,
-                            bottom = 88.dp,
-                        ),
-                    ) {
-                        items(itemsList) { item ->
-                            ItemRow(
-                                item = item,
-                                onDelete = { onDeleteItem(item.id) },
-                            )
-                        }
                     }
                 }
             }
-
-            MainBottomBar(
-                onAddButtonClick = onAddButtonClick,
-                onSaveButtonClick = if (isAuthenticated) onSaveButtonClick else onLoginRequiredClick,
-                onRestoreButtonClick = if (isAuthenticated) onRestoreButtonClick else onLoginRequiredClick,
-                onLoginButtonClick = onLoginButtonClick,
-                isAuthenticated = isAuthenticated,
-                modifier = Modifier.align(Alignment.BottomCenter),
-            )
         }
+
+        MainBottomBar(
+            onAddButtonClick = onAddButtonClick,
+            onSaveButtonClick = if (isAuthenticated) onSaveButtonClick else onLoginRequiredClick,
+            onRestoreButtonClick = if (isAuthenticated) onRestoreButtonClick else onLoginRequiredClick,
+            onLoginButtonClick = onLoginButtonClick,
+            isAuthenticated = isAuthenticated,
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
     }
 }
 
