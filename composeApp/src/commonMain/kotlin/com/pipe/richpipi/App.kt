@@ -13,11 +13,13 @@ import com.pipe.richpipi.form.TransactionalDialog
 import com.pipe.richpipi.form.TransactionalViewModel
 import com.pipe.richpipi.mainview.MainScreenContent
 import com.pipe.richpipi.mainview.MainScreenViewModel
+import domain.usecase.ExportDataToSpreadsheetUseCase
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun App(
     transactionalViewModel: TransactionalViewModel? = null,
+    exportDataToSpreadsheetUseCase: ExportDataToSpreadsheetUseCase? = null,
     onSignInRequired: () -> Unit = {},
     onSignInSuccess: ((MainScreenViewModel) -> Unit)? = null,
 ) {
@@ -29,6 +31,7 @@ fun App(
         MainScreenViewModel(
             itemsSource = vm.items,
             onDeleteItem = { id -> vm.deleteItem(id) },
+            exportDataToSpreadsheetUseCase = exportDataToSpreadsheetUseCase,
         )
     }
 

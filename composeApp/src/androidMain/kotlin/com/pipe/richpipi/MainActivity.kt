@@ -13,6 +13,7 @@ import data.local.database.DatabaseProvider
 import data.remote.GoogleSignInHandler
 import data.remote.initializeGoogleDriveService
 import data.repository.TransactionRepositoryImpl
+import di.BackupModule
 import domain.usecase.DeleteTransactionUseCase
 import domain.usecase.GetTransactions
 import domain.usecase.MakeTransactionUseCase
@@ -49,6 +50,9 @@ class MainActivity : ComponentActivity() {
         val getAllItemsUseCase = GetTransactions(repo)
         val deleteItemUseCase = DeleteTransactionUseCase(repo)
 
+        // Create export use case with transaction repository
+        val exportDataToSpreadsheetUseCase = BackupModule.createExportDataToSpreadsheetUseCase(repo)
+
         val factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
@@ -66,6 +70,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             App(
                 transactionalViewModel = vm,
+                exportDataToSpreadsheetUseCase = exportDataToSpreadsheetUseCase,
                 onSignInRequired = {
                     GoogleSignInHandler.getSignInIntent()?.let { intent ->
                         signInLauncher.launch(intent)

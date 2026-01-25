@@ -3,6 +3,7 @@ package domain.usecase
 import domain.BackupConstants
 import domain.model.BackupResult
 import domain.model.BackupService
+import domain.model.SpreadsheetData
 import domain.repository.BackupRepository
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -101,6 +102,7 @@ class TestMockBackupRepository(
     private val authenticateResult: BackupResult = BackupResult.Success,
     private val createFolderResult: BackupResult = BackupResult.Success,
     private val createSpreadsheetResult: BackupResult = BackupResult.Success,
+    private val createSpreadsheetWithDataResult: BackupResult = BackupResult.Success,
 ) : BackupRepository {
 
     var authenticateCalled = false
@@ -108,6 +110,7 @@ class TestMockBackupRepository(
 
     var lastCreatedSpreadsheetName: String? = null
     var lastSpreadsheetFolderName: String? = null
+    var lastSpreadsheetData: SpreadsheetData? = null
 
     override suspend fun createBackupFolder(
         service: BackupService,
@@ -125,6 +128,18 @@ class TestMockBackupRepository(
         lastSpreadsheetFolderName = folderName
         lastCreatedSpreadsheetName = spreadsheetName
         return createSpreadsheetResult
+    }
+
+    override suspend fun createSpreadsheetWithData(
+        service: BackupService,
+        folderName: String,
+        spreadsheetName: String,
+        data: SpreadsheetData,
+    ): BackupResult {
+        lastSpreadsheetFolderName = folderName
+        lastCreatedSpreadsheetName = spreadsheetName
+        lastSpreadsheetData = data
+        return createSpreadsheetWithDataResult
     }
 
     override suspend fun isAuthenticated(service: BackupService): Boolean {

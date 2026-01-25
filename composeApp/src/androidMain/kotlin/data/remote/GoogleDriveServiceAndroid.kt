@@ -13,8 +13,14 @@ import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.drive.Drive
 import com.google.api.services.drive.DriveScopes
 import com.google.api.services.drive.model.File
+import com.google.api.services.sheets.v4.Sheets
+import com.google.api.services.sheets.v4.SheetsScopes
+import com.google.api.services.sheets.v4.model.Spreadsheet
+import com.google.api.services.sheets.v4.model.SpreadsheetProperties
+import com.google.api.services.sheets.v4.model.ValueRange
 import data.local.EncryptedCredentialsManager
 import domain.model.BackupResult
+import domain.model.SpreadsheetData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.collections.get
@@ -29,13 +35,14 @@ class GoogleDriveServiceAndroid(
 
     private val credentialsManager = EncryptedCredentialsManager(context)
     private var driveService: Drive? = null
+    private var sheetsService: Sheets? = null
     private var isAuthenticatedFlag = false
     private var googleSignInClient: GoogleSignInClient
 
     init {
         val signInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestEmail()
-            .requestScopes(Scope(DriveScopes.DRIVE_FILE))
+            .requestScopes(Scope(DriveScopes.DRIVE_FILE), Scope(SheetsScopes.SPREADSHEETS))
             .build()
         googleSignInClient = GoogleSignIn.getClient(context, signInOptions)
     }
@@ -69,13 +76,24 @@ class GoogleDriveServiceAndroid(
         withContext(Dispatchers.IO) {
             val credential = GoogleAccountCredential.usingOAuth2(
                 context,
-                listOf(DriveScopes.DRIVE_FILE),
+                listOf(DriveScopes.DRIVE_FILE, SheetsScopes.SPREADSHEETS),
             )
             credential.selectedAccount = account.account
 
+            val httpTransport = NetHttpTransport()
+            val jsonFactory = GsonFactory()
+
             driveService = Drive.Builder(
-                NetHttpTransport(),
-                GsonFactory(),
+                httpTransport,
+                jsonFactory,
+                credential,
+            )
+                .setApplicationName("RichPipi")
+                .build()
+
+            sheetsService = Sheets.Builder(
+                httpTransport,
+                jsonFactory,
                 credential,
             )
                 .setApplicationName("RichPipi")
@@ -149,15 +167,80 @@ class GoogleDriveServiceAndroid(
         }
     }
 
+    override suspend fun createSpreadsheetWithData(
+        folderName: String,
+        spreadsheetName: String,
+        data: SpreadsheetData,
+    ): BackupResult {
+        return try {
+            withContext(Dispatchers.IO) {
+                val driveApi = driveService ?: return@withContext BackupResult.Error("Not authenticated")
+                val sheetsApi = sheetsService ?: return@withContext BackupResult.Error("Sheets service not initialized")
+
+                // Find or create the folder
+                val existing = driveApi.files().list()
+                    .setQ("name='$folderName' and mimeType='application/vnd.google-apps.folder' and trashed=false")
+                    .setFields("files(id)")
+                    .execute()
+
+                val folderId = if (existing.files.isNotEmpty()) {
+                    existing.files[0].id
+                } else {
+                    val folder = File().apply {
+                        name = folderName
+                        mimeType = "application/vnd.google-apps.folder"
+                    }
+                    driveApi.files().create(folder).setFields("id").execute().id
+                } ?: return@withContext BackupResult.Error("Failed to obtain folder id")
+
+                // Create spreadsheet using Sheets API
+                val spreadsheetProperties = SpreadsheetProperties().setTitle(spreadsheetName)
+                val spreadsheet = Spreadsheet().setProperties(spreadsheetProperties)
+                val createdSpreadsheet = sheetsApi.spreadsheets().create(spreadsheet).execute()
+                val spreadsheetId = createdSpreadsheet.spreadsheetId
+                    ?: return@withContext BackupResult.Error("Failed to create spreadsheet")
+
+                // Move spreadsheet to the folder using Drive API
+                val file = driveApi.files().get(spreadsheetId).setFields("parents").execute()
+                val previousParents = file.parents?.joinToString(",") ?: ""
+                driveApi.files().update(spreadsheetId, null)
+                    .setAddParents(folderId)
+                    .setRemoveParents(previousParents)
+                    .setFields("id, parents")
+                    .execute()
+
+                // Write data to the spreadsheet
+                val allData = mutableListOf<List<Any>>()
+                allData.add(data.headers)
+                data.rows.forEach { row -> allData.add(row) }
+
+                val body = ValueRange().setValues(allData)
+                sheetsApi.spreadsheets().values()
+                    .update(spreadsheetId, "A1", body)
+                    .setValueInputOption("RAW")
+                    .execute()
+
+                BackupResult.Success
+            }
+        } catch (e: Exception) {
+            BackupResult.Error("Failed to create spreadsheet with data in Google Drive", e)
+        }
+    }
+
     override suspend fun isAuthenticated(): Boolean {
-        return isAuthenticatedFlag && driveService != null
+        return isAuthenticatedFlag && driveService != null && sheetsService != null
     }
 
     override suspend fun authenticate(): BackupResult {
         return try {
             // Check if user is already signed in
             val account = GoogleSignIn.getLastSignedInAccount(context)
-            if (account != null && GoogleSignIn.hasPermissions(account, Scope(DriveScopes.DRIVE_FILE))) {
+            if (account != null && GoogleSignIn.hasPermissions(
+                    account,
+                    Scope(DriveScopes.DRIVE_FILE),
+                    Scope(SheetsScopes.SPREADSHEETS),
+                )
+            ) {
                 setupDriveService(account)
                 BackupResult.Success
             } else {
@@ -177,6 +260,7 @@ class GoogleDriveServiceAndroid(
         return try {
             googleSignInClient.signOut()
             driveService = null
+            sheetsService = null
             isAuthenticatedFlag = false
             BackupResult.Success
         } catch (e: Exception) {

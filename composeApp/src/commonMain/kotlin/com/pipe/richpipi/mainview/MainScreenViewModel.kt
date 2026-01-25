@@ -5,6 +5,7 @@ import com.pipe.richpipi.platform.monthBoundsUtcMillis
 import di.BackupModule
 import domain.model.BackupResult
 import domain.model.Transaction
+import domain.usecase.ExportDataToSpreadsheetUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -23,6 +24,7 @@ import kotlin.time.Clock
 class MainScreenViewModel(
     itemsSource: Flow<List<Transaction>> = emptyFlow(),
     private val onDeleteItem: (Int) -> Unit = {},
+    private val exportDataToSpreadsheetUseCase: ExportDataToSpreadsheetUseCase? = null,
 ) {
     private val _items = MutableStateFlow<List<Transaction>>(emptyList())
     val items: StateFlow<List<Transaction>> = _items.asStateFlow()
@@ -182,7 +184,11 @@ class MainScreenViewModel(
     }
 
     private suspend fun createSpreadsheet(): BackupResult {
-        return BackupModule.createSpreadSheetUseCase.execute(
+        // If we have an export use case, use it to export data with content
+        // Otherwise, fall back to the simple spreadsheet creation
+        return exportDataToSpreadsheetUseCase?.execute(
+            Clock.System.now().toEpochMilliseconds(),
+        ) ?: BackupModule.createSpreadSheetUseCase.execute(
             Clock.System.now().toEpochMilliseconds(),
         )
     }
