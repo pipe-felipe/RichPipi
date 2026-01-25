@@ -42,6 +42,7 @@ fun App(
     val currentMonthYear by mainVm.currentMonthYearText.collectAsState()
     val currentMonth by mainVm.currentMonth.collectAsState()
     val currentYear by mainVm.currentYear.collectAsState()
+    val backupResult by mainVm.backupResult.collectAsState()
 
     MainScreenContent(
         itemsList = itemsList,
@@ -69,13 +70,14 @@ fun App(
     if (showSaveDialogState.value) {
         SaveDialog(
             onDismiss = { showSaveDialogState.value = false },
-            onSave = { onResult ->
+            onSave = {
                 mainVm.backupToDrive(
-                    onResult = onResult,
+                    onResult = { /* resultado será observado via backupResult */ },
                     onSignInRequired = onSignInRequired,
                 )
             },
-            onSignInSuccess = { mainVm.onSignInSuccess() },
+            backupResult = backupResult,
+            onClearResult = { mainVm.clearBackupResult() },
         )
     }
 }

@@ -51,6 +51,7 @@ class MainScreenViewModel(
 
     private val scope = CoroutineScope(Dispatchers.Default)
 
+
     init {
         scope.launch {
             try {
@@ -135,16 +136,33 @@ class MainScreenViewModel(
 
     private var onResultCallback: ((BackupResult) -> Unit)? = null
 
+    private val _backupResult = MutableStateFlow<BackupResult?>(null)
+    val backupResult: StateFlow<BackupResult?> = _backupResult.asStateFlow()
+
+    fun clearBackupResult() {
+        _backupResult.value = null
+    }
+
     fun backupToDrive(onResult: (BackupResult) -> Unit, onSignInRequired: () -> Unit) {
         onResultCallback = onResult
+        _backupResult.value = null
         scope.launch {
             try {
                 when (val result = createSpreadsheet()) {
-                    is BackupResult.SignInRequired -> onSignInRequired()
-                    else -> onResult(result)
+                    is BackupResult.SignInRequired -> {
+                        _backupResult.value = result
+                        onResult(result) // Notifica o dialog para mostrar a mensagem
+                        onSignInRequired() // Abre a tela de login
+                    }
+                    else -> {
+                        _backupResult.value = result
+                        onResult(result)
+                    }
                 }
             } catch (e: Exception) {
-                onResult(BackupResult.Error("Falha ao criar backup", e))
+                val error = BackupResult.Error("Falha ao criar backup", e)
+                _backupResult.value = error
+                onResult(error)
             }
         }
     }
@@ -153,9 +171,12 @@ class MainScreenViewModel(
         scope.launch {
             try {
                 val result = createSpreadsheet()
+                _backupResult.value = result
                 onResultCallback?.invoke(result)
             } catch (e: Exception) {
-                onResultCallback?.invoke(BackupResult.Error("Falha ao criar backup após o login", e))
+                val error = BackupResult.Error("Falha ao criar backup após o login", e)
+                _backupResult.value = error
+                onResultCallback?.invoke(error)
             }
         }
     }

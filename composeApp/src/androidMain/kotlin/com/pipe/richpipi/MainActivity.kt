@@ -26,8 +26,13 @@ class MainActivity : ComponentActivity() {
         ActivityResultContracts.StartActivityForResult(),
     ) { result ->
         lifecycleScope.launch {
+            // Processa o resultado do sign-in
+            val signInResult = GoogleSignInHandler.handleSignInResult(result.data)
+
             // Se a autenticação foi bem-sucedida, tenta criar a planilha novamente
-            mainScreenViewModel?.onSignInSuccess()
+            if (signInResult is domain.model.BackupResult.Success) {
+                mainScreenViewModel?.onSignInSuccess()
+            }
         }
     }
 

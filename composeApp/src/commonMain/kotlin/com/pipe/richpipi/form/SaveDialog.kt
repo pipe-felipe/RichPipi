@@ -19,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,17 +40,24 @@ import richpipi.composeapp.generated.resources.save_dialog_title
 @Composable
 fun SaveDialog(
     onDismiss: () -> Unit,
-    onSave: (onResult: (BackupResult) -> Unit) -> Unit,
-    onSignInSuccess: () -> Unit = {},
+    onSave: () -> Unit,
+    backupResult: BackupResult?,
+    onClearResult: () -> Unit,
 ) {
     Dialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = {
+            onClearResult()
+            onDismiss()
+        },
         properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
         SaveDialogContent(
-            onDismiss = onDismiss,
+            onDismiss = {
+                onClearResult()
+                onDismiss()
+            },
             onSave = onSave,
-            onSignInSuccess = onSignInSuccess,
+            backupResult = backupResult,
         )
     }
 }
@@ -57,12 +65,26 @@ fun SaveDialog(
 @Composable
 private fun SaveDialogContent(
     onDismiss: () -> Unit,
-    onSave: (onResult: (BackupResult) -> Unit) -> Unit,
-    onSignInSuccess: () -> Unit = {},
+    onSave: () -> Unit,
+    backupResult: BackupResult?,
 ) {
     var isLoading by remember { mutableStateOf(false) }
-    var resultMessage by remember { mutableStateOf<String?>(null) }
-    var isSuccess by remember { mutableStateOf(false) }
+
+    // Atualiza o estado baseado no backupResult
+    val resultMessage = when (backupResult) {
+        is BackupResult.Success -> "Seu dado foi salvo com sucesso! 😊"
+        is BackupResult.Error -> "Erro: ${backupResult.message}"
+        is BackupResult.SignInRequired -> "Aguardando autenticação..."
+        null -> null
+    }
+    val isSuccess = backupResult is BackupResult.Success
+
+    // Para de mostrar loading quando recebe um resultado
+    LaunchedEffect(backupResult) {
+        if (backupResult != null) {
+            isLoading = false
+        }
+    }
 
     BoxWithConstraints {
         Surface(
@@ -94,24 +116,7 @@ private fun SaveDialogContent(
                         SaveButton(
                             onClick = {
                                 isLoading = true
-                                resultMessage = null
-                                onSave { result ->
-                                    when (result) {
-                                        is BackupResult.Success -> {
-                                            isLoading = false
-                                            isSuccess = true
-                                            resultMessage = "Seu dado foi salvo com sucesso! 😊"
-                                        }
-                                        is BackupResult.Error -> {
-                                            isLoading = false
-                                            isSuccess = false
-                                            resultMessage = "Erro: ${result.message}"
-                                        }
-                                        is BackupResult.SignInRequired -> {
-                                            resultMessage = "Aguardando autenticação..."
-                                        }
-                                    }
-                                }
+                                onSave()
                             },
                             enabled = !isLoading,
                         )
