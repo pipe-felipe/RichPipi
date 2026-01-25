@@ -1,7 +1,6 @@
 package domain.usecase
 
 import domain.BackupConstants
-import domain.model.BackupResult
 import domain.model.BackupService
 import domain.model.SpreadsheetFile
 import domain.repository.BackupRepository
@@ -26,16 +25,9 @@ class ListBackupSpreadsheetsUseCase(
         val folderName = BackupConstants.DEFAULT_FOLDER_NAME
 
         return try {
-            // First check if authenticated
+            // Check if authenticated - if not, return error immediately
             if (!backupRepository.isAuthenticated(service)) {
-                // Try to authenticate
-                val authResult = backupRepository.authenticate(service)
-                if (authResult is BackupResult.SignInRequired) {
-                    return ListBackupsResult.SignInRequired
-                }
-                if (authResult is BackupResult.Error) {
-                    return ListBackupsResult.Error(authResult.message)
-                }
+                return ListBackupsResult.SignInRequired
             }
 
             val spreadsheets = backupRepository.listBackupSpreadsheets(service, folderName)

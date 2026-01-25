@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.pipe.richpipi.form.LoginRequiredDialog
 import com.pipe.richpipi.form.RestoreDialog
 import com.pipe.richpipi.form.SaveDialog
 import com.pipe.richpipi.form.TransactionalDialog
@@ -29,6 +30,7 @@ fun App(
     val showDialogState: MutableState<Boolean> = remember { mutableStateOf(false) }
     val showSaveDialogState: MutableState<Boolean> = remember { mutableStateOf(false) }
     val showRestoreDialogState: MutableState<Boolean> = remember { mutableStateOf(false) }
+    val showLoginRequiredDialogState: MutableState<Boolean> = remember { mutableStateOf(false) }
 
     val vm: TransactionalViewModel = transactionalViewModel ?: viewModel()
     val mainVm = remember {
@@ -75,6 +77,7 @@ fun App(
         onSaveButtonClick = { showSaveDialogState.value = true },
         onRestoreButtonClick = { showRestoreDialogState.value = true },
         onLoginButtonClick = { mainVm.authenticate(onSignInRequired) },
+        onLoginRequiredClick = { showLoginRequiredDialogState.value = true },
         onDeleteItem = { id -> mainVm.delete(id) },
     )
 
@@ -115,6 +118,12 @@ fun App(
             restoreResult = restoreResult,
             isLoading = isLoadingBackups,
             onClearResult = { mainVm.clearRestoreResult() },
+        )
+    }
+
+    if (showLoginRequiredDialogState.value) {
+        LoginRequiredDialog(
+            onDismiss = { showLoginRequiredDialogState.value = false },
         )
     }
 }

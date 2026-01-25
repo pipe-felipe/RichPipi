@@ -41,4 +41,8 @@ você pode continuar com seus dados sem perder nada 😊🐶</string>
     <string name="auth_status_not_authenticated">Sem conta 😅</string>
     <string name="auth_status_authenticated">Conta: %1$s 🐶</string>
     <string name="auth_status_error">Erro de autenticação 😕</string>
+
+    <string name="login_required_dialog_title">Autenticação Necessária</string>
+    <string name="login_required_dialog_message">Para usar backup e recuperação, você precisa fazer login com sua conta Google. Clique no botão de login na barra inferior para continuar.</string>
+    <string name="login_required_dialog_button">Entendi</string>
 </resources>

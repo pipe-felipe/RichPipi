@@ -50,8 +50,11 @@ fun MainScreenContent(
     onSaveButtonClick: () -> Unit,
     onRestoreButtonClick: () -> Unit,
     onLoginButtonClick: () -> Unit,
+    onLoginRequiredClick: () -> Unit,
     onDeleteItem: (Int) -> Unit,
 ) {
+    val isAuthenticated = authStatus is MainScreenViewModel.AuthStatus.Authenticated
+
     RichPipiTheme {
         Box(modifier = Modifier.fillMaxSize()) {
             Scaffold(
@@ -105,9 +108,10 @@ fun MainScreenContent(
 
             MainBottomBar(
                 onAddButtonClick = onAddButtonClick,
-                onSaveButtonClick = onSaveButtonClick,
-                onRestoreButtonClick = onRestoreButtonClick,
+                onSaveButtonClick = if (isAuthenticated) onSaveButtonClick else onLoginRequiredClick,
+                onRestoreButtonClick = if (isAuthenticated) onRestoreButtonClick else onLoginRequiredClick,
                 onLoginButtonClick = onLoginButtonClick,
+                isAuthenticated = isAuthenticated,
                 modifier = Modifier.align(Alignment.BottomCenter),
             )
         }

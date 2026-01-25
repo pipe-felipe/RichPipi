@@ -39,6 +39,7 @@ fun MainBottomBar(
     onSaveButtonClick: () -> Unit,
     onRestoreButtonClick: () -> Unit,
     onLoginButtonClick: () -> Unit,
+    isAuthenticated: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -75,11 +76,13 @@ fun MainBottomBar(
                     painter = painterResource(Res.drawable.save_icon),
                     contentDescription = "Save",
                     onClick = onSaveButtonClick,
+                    enabled = isAuthenticated,
                 )
                 DockIcon(
                     painter = painterResource(Res.drawable.save_icon),
                     contentDescription = "Restore",
                     onClick = onRestoreButtonClick,
+                    enabled = isAuthenticated,
                 )
                 DockIcon(
                     painter = painterResource(Res.drawable.add_item),
@@ -97,11 +100,12 @@ private fun DockIcon(
     contentDescription: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     var isPressed by remember { mutableStateOf(false) }
 
     val scale by animateFloatAsState(
-        targetValue = if (isPressed) 1.15f else 1f,
+        targetValue = if (isPressed && enabled) 1.15f else 1f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessLow,
@@ -109,22 +113,29 @@ private fun DockIcon(
         label = "dockIconScale",
     )
 
+    val alpha = if (enabled) 1f else 0.4f
+
     Box(
         modifier = modifier
             .fillMaxHeight()
-            .pointerInput(Unit) {
+            .pointerInput(enabled) {
                 detectTapGestures(
                     onPress = {
-                        isPressed = true
-                        tryAwaitRelease()
-                        isPressed = false
-                        onClick()
+                        if (enabled) {
+                            isPressed = true
+                            tryAwaitRelease()
+                            isPressed = false
+                            onClick()
+                        } else {
+                            onClick()
+                        }
                     },
                 )
             }
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
+                this.alpha = alpha
             },
         contentAlignment = Alignment.Center,
     ) {
