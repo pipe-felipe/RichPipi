@@ -1,7 +1,6 @@
 package com.pipe.richpipi.mainview
 
 import com.pipe.richpipi.platform.currentMonthYear
-import com.pipe.richpipi.platform.monthBoundsUtcMillis
 import di.BackupModule
 import domain.model.BackupResult
 import domain.model.ImportResult
@@ -82,7 +81,7 @@ class MainScreenViewModel(
                     is AuthResult.Success -> {
                         _userName.value = result.userName
                         _authStatus.value = AuthStatus.Authenticated(
-                            result.userName ?: "Desconhecido"
+                            result.userName ?: "Desconhecido",
                         )
                     }
 
@@ -136,15 +135,14 @@ class MainScreenViewModel(
                 _currentMonth,
                 _currentYear,
             ) { list, month, year ->
-                val (start, endExclusive) = monthBoundsUtcMillis(
-                    month = month,
-                    year = year,
-                )
                 list.filter { tx ->
                     if (tx.isRecurring) {
-                        tx.createdAt < endExclusive
+                        // Recurring transactions appear from their start month onwards
+                        (tx.targetYear < year) ||
+                            (tx.targetYear == year && tx.targetMonth <= month)
                     } else {
-                        tx.createdAt in start..<endExclusive
+                        // Non-recurring transactions appear only in their target month
+                        tx.targetMonth == month && tx.targetYear == year
                     }
                 }
             }.collect { filtered ->
@@ -154,17 +152,23 @@ class MainScreenViewModel(
                 _totalIncomeText.value = "R$ ${formatTwoDecimals(inc)}"
                 _totalExpenseText.value = "R$ ${formatTwoDecimals(exp)}"
 
-                val (_, selectedMonthEndExclusive) =
-                    monthBoundsUtcMillis(
-                        month = _currentMonth.value,
-                        year = _currentYear.value,
-                    )
+                val selectedMonth = _currentMonth.value
+                val selectedYear = _currentYear.value
 
                 val accumulatedItems = _allItems.value.filter { tx ->
-                    tx.createdAt < selectedMonthEndExclusive
+                    // Include transactions up to and including the selected month
+                    (tx.targetYear < selectedYear) ||
+                        (tx.targetYear == selectedYear && tx.targetMonth <= selectedMonth)
                 }
 
-                val (allInc, allExp) = computeTotals(accumulatedItems)
+                // For savings calculation, only count income up to current month
+                // (future income should not be counted)
+                val (currentMonth, currentYear) = currentMonthYear()
+                val (allInc, allExp) = computeTotalsForSavingsWithTargetMonth(
+                    accumulatedItems,
+                    currentMonth = currentMonth,
+                    currentYear = currentYear,
+                )
                 _totalSavingText.value =
                     "R$ ${formatTwoDecimals(allInc - allExp)}"
             }

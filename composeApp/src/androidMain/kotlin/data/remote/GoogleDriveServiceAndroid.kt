@@ -45,7 +45,7 @@ class GoogleDriveServiceAndroid(
                 .requestEmail()
                 .requestScopes(
                     Scope(DriveScopes.DRIVE_FILE),
-                    Scope(SheetsScopes.SPREADSHEETS)
+                    Scope(SheetsScopes.SPREADSHEETS),
                 )
                 .build()
         googleSignInClient = GoogleSignIn.getClient(context, signInOptions)
@@ -171,7 +171,7 @@ class GoogleDriveServiceAndroid(
         } catch (e: Exception) {
             BackupResult.Error(
                 "Failed to create spreadsheet in Google Drive",
-                e
+                e,
             )
         }
     }
@@ -238,7 +238,7 @@ class GoogleDriveServiceAndroid(
         } catch (e: Exception) {
             BackupResult.Error(
                 "Failed to create spreadsheet with data in Google Drive",
-                e
+                e,
             )
         }
     }
@@ -292,7 +292,7 @@ class GoogleDriveServiceAndroid(
                 if (values.isEmpty()) {
                     return@withContext SpreadsheetData(
                         headers = emptyList(),
-                        rows = emptyList()
+                        rows = emptyList(),
                     )
                 }
 
@@ -354,7 +354,7 @@ class GoogleDriveServiceAndroid(
         } catch (e: Exception) {
             BackupResult.Error(
                 "Failed to authenticate with Google Drive: ${e.message}",
-                e
+                e,
             )
         }
     }

@@ -20,6 +20,8 @@ class TransactionRepositoryImpl(private val dao: TransactionDao) : TransactionRe
                     humanDate = entity.humanDate ?: "",
                     isRecurring = entity.isRecurring,
                     createdAt = entity.createdAt,
+                    targetMonth = entity.targetMonth,
+                    targetYear = entity.targetYear,
                 )
             }
         }
@@ -40,6 +42,8 @@ class TransactionRepositoryImpl(private val dao: TransactionDao) : TransactionRe
                     humanDate = entity.humanDate ?: "",
                     isRecurring = entity.isRecurring,
                     createdAt = entity.createdAt,
+                    targetMonth = entity.targetMonth,
+                    targetYear = entity.targetYear,
                 )
             }
         }
@@ -54,6 +58,8 @@ class TransactionRepositoryImpl(private val dao: TransactionDao) : TransactionRe
             humanDate = transaction.humanDate,
             isRecurring = transaction.isRecurring,
             createdAt = transaction.createdAt,
+            targetMonth = transaction.targetMonth,
+            targetYear = transaction.targetYear,
         )
         return dao.addTransaction(entity)
     }
@@ -76,6 +82,8 @@ class TransactionRepositoryImpl(private val dao: TransactionDao) : TransactionRe
                 humanDate = transaction.humanDate,
                 isRecurring = transaction.isRecurring,
                 createdAt = transaction.createdAt,
+                targetMonth = transaction.targetMonth,
+                targetYear = transaction.targetYear,
             )
         }
         return dao.insertAll(entities)

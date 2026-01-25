@@ -110,7 +110,7 @@ class ExportDataToSpreadsheetUseCaseTest {
         assertEquals(BackupResult.Success, result)
         assertNotNull(mockBackupRepository.lastSpreadsheetData)
         assertEquals(0, mockBackupRepository.lastSpreadsheetData?.rows?.size)
-        assertEquals(8, mockBackupRepository.lastSpreadsheetData?.headers?.size)
+        assertEquals(10, mockBackupRepository.lastSpreadsheetData?.headers?.size)
     }
 
     @Test

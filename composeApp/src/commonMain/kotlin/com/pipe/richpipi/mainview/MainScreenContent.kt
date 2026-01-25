@@ -167,7 +167,7 @@ private fun ItemRow(
             )
             IconButton(
                 onClick = onDelete,
-                modifier = Modifier.offset(x = 12.dp)
+                modifier = Modifier.offset(x = 12.dp),
             ) {
                 Icon(
                     Icons.Default.Delete,

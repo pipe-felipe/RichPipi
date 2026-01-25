@@ -21,10 +21,10 @@ class ImportDataFromSpreadsheetUseCaseTest {
     @Test
     fun `execute should import transactions when authenticated`() = runTest {
         val spreadsheetData = SpreadsheetData(
-            headers = listOf("ID", "Valor (centavos)", "Tipo", "Categoria", "Descrição", "Data", "Recorrente", "Criado em"),
+            headers = listOf("ID", "Valor (centavos)", "Tipo", "Categoria", "Descrição", "Data", "Recorrente", "Criado em", "Mês Destino", "Ano Destino"),
             rows = listOf(
-                listOf("1", "10000", "Receita", "Salário", "Pagamento", "01/01/2025", "Sim", "1704067200000"),
-                listOf("2", "5000", "Despesa", "Alimentação", "Mercado", "02/01/2025", "Não", "1704153600000"),
+                listOf("1", "10000", "Receita", "Salário", "Pagamento", "01/01/2025", "Sim", "1704067200000", "1", "2025"),
+                listOf("2", "5000", "Despesa", "Alimentação", "Mercado", "02/01/2025", "Não", "1704153600000", "1", "2025"),
             ),
         )
 
@@ -93,10 +93,10 @@ class ImportDataFromSpreadsheetUseCaseTest {
     @Test
     fun `execute should parse transaction types correctly`() = runTest {
         val spreadsheetData = SpreadsheetData(
-            headers = listOf("ID", "Valor (centavos)", "Tipo", "Categoria", "Descrição", "Data", "Recorrente", "Criado em"),
+            headers = listOf("ID", "Valor (centavos)", "Tipo", "Categoria", "Descrição", "Data", "Recorrente", "Criado em", "Mês Destino", "Ano Destino"),
             rows = listOf(
-                listOf("1", "10000", "Receita", "Salário", "Pagamento", "01/01/2025", "Não", "1704067200000"),
-                listOf("2", "5000", "Despesa", "Alimentação", "Mercado", "02/01/2025", "Não", "1704153600000"),
+                listOf("1", "10000", "Receita", "Salário", "Pagamento", "01/01/2025", "Não", "1704067200000", "1", "2025"),
+                listOf("2", "5000", "Despesa", "Alimentação", "Mercado", "02/01/2025", "Não", "1704153600000", "1", "2025"),
             ),
         )
 
@@ -116,11 +116,11 @@ class ImportDataFromSpreadsheetUseCaseTest {
     @Test
     fun `execute should skip invalid rows`() = runTest {
         val spreadsheetData = SpreadsheetData(
-            headers = listOf("ID", "Valor (centavos)", "Tipo", "Categoria", "Descrição", "Data", "Recorrente", "Criado em"),
+            headers = listOf("ID", "Valor (centavos)", "Tipo", "Categoria", "Descrição", "Data", "Recorrente", "Criado em", "Mês Destino", "Ano Destino"),
             rows = listOf(
-                listOf("1", "10000", "Receita", "Salário", "Pagamento", "01/01/2025", "Sim", "1704067200000"),
-                listOf("2", "invalid", "Despesa", "Alimentação", "Mercado", "02/01/2025", "Não", "1704153600000"),
-                listOf("3", "3000", "InvalidType", "Alimentação", "Mercado", "03/01/2025", "Não", "1704240000000"),
+                listOf("1", "10000", "Receita", "Salário", "Pagamento", "01/01/2025", "Sim", "1704067200000", "1", "2025"),
+                listOf("2", "invalid", "Despesa", "Alimentação", "Mercado", "02/01/2025", "Não", "1704153600000", "1", "2025"),
+                listOf("3", "3000", "InvalidType", "Alimentação", "Mercado", "03/01/2025", "Não", "1704240000000", "1", "2025"),
             ),
         )
 

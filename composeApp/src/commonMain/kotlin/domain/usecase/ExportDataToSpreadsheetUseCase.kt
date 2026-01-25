@@ -57,6 +57,8 @@ class ExportDataToSpreadsheetUseCase(
             "Data",
             "Recorrente",
             "Criado em",
+            "Mês Destino",
+            "Ano Destino",
         )
 
         val rows = transactions.map { transaction ->
@@ -72,6 +74,8 @@ class ExportDataToSpreadsheetUseCase(
                 transaction.humanDate,
                 if (transaction.isRecurring) "Sim" else "Não",
                 transaction.createdAt.toString(),
+                transaction.targetMonth.toString(),
+                transaction.targetYear.toString(),
             )
         }
 

@@ -118,6 +118,8 @@ class MainScreenViewModelTest {
                     humanDate = "2026-02-01",
                     isRecurring = true,
                     createdAt = febStart,
+                    targetMonth = 2,
+                    targetYear = 2026,
                 ),
                 // One expense in Jan/2026.
                 Transaction(
@@ -127,6 +129,8 @@ class MainScreenViewModelTest {
                     humanDate = "2026-01-01",
                     isRecurring = false,
                     createdAt = janStart,
+                    targetMonth = 1,
+                    targetYear = 2026,
                 ),
             ),
         )
@@ -157,8 +161,10 @@ class MainScreenViewModelTest {
         assertEquals("R$ 100.00", vm.totalIncomeText.value)
         assertEquals("R$ 0.00", vm.totalExpenseText.value)
 
-        // Accumulated saving up to Feb end includes Jan expense + Feb salary => 100.00 - 50.00 = 50.00
-        assertEquals("R$ 50.00", vm.totalSavingText.value)
+        // Accumulated saving: Since current date is Jan/2026, Feb income is future and NOT counted.
+        // Only Jan expense is counted: -50.00
+        // Note: Future income is excluded from savings calculation to prevent counting money not yet received.
+        assertEquals("R$ -50.00", vm.totalSavingText.value)
     }
 
     @Test

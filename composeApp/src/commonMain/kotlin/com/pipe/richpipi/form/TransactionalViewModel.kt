@@ -2,6 +2,7 @@ package com.pipe.richpipi.form
 
 import androidx.lifecycle.ViewModel
 import com.pipe.richpipi.platform.currentDateString
+import com.pipe.richpipi.platform.monthBoundsUtcMillis
 import domain.model.Transaction
 import domain.usecase.DeleteTransactionUseCase
 import domain.usecase.GetTransactions
@@ -15,8 +16,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.math.round
-import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
 import domain.model.TransactionType as DomainTransactionType
 
 enum class ExpenseCategory {
@@ -141,7 +140,6 @@ class TransactionalViewModel(
     /**
      * Called when the form is submitted.
      */
-    @OptIn(ExperimentalTime::class)
     fun submit(month: Int, year: Int) {
         // Validate required fields: category and quantity
         val state = uiState.value
@@ -170,6 +168,10 @@ class TransactionalViewModel(
             currentDateString()
         }
 
+        // Use the start of the selected month for createdAt
+        // This ensures the transaction appears in the correct month
+        val (monthStart, _) = monthBoundsUtcMillis(month, year)
+
         val item = Transaction(
             amountCents = amountCents,
             type = state.transactionType,
@@ -177,7 +179,9 @@ class TransactionalViewModel(
             description = state.notes,
             humanDate = dateText,
             isRecurring = state.isRecurring,
-            createdAt = Clock.System.now().toEpochMilliseconds(),
+            createdAt = monthStart,
+            targetMonth = month,
+            targetYear = year,
         )
 
         CoroutineScope(Dispatchers.Default).launch {
