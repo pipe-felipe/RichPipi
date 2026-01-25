@@ -47,6 +47,7 @@ fun MainScreenContent(
     onCurrentMonthClick: () -> Unit,
     onAddButtonClick: () -> Unit,
     onSaveButtonClick: () -> Unit,
+    onRestoreButtonClick: () -> Unit,
     onDeleteItem: (Int) -> Unit,
 ) {
     RichPipiTheme {
@@ -100,6 +101,7 @@ fun MainScreenContent(
             MainBottomBar(
                 onAddButtonClick = onAddButtonClick,
                 onSaveButtonClick = onSaveButtonClick,
+                onRestoreButtonClick = onRestoreButtonClick,
                 modifier = Modifier.align(Alignment.BottomCenter),
             )
         }

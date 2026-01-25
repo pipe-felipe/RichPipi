@@ -8,23 +8,27 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.pipe.richpipi.form.RestoreDialog
 import com.pipe.richpipi.form.SaveDialog
 import com.pipe.richpipi.form.TransactionalDialog
 import com.pipe.richpipi.form.TransactionalViewModel
 import com.pipe.richpipi.mainview.MainScreenContent
 import com.pipe.richpipi.mainview.MainScreenViewModel
 import domain.usecase.ExportDataToSpreadsheetUseCase
+import domain.usecase.ImportDataFromSpreadsheetUseCase
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun App(
     transactionalViewModel: TransactionalViewModel? = null,
     exportDataToSpreadsheetUseCase: ExportDataToSpreadsheetUseCase? = null,
+    importDataFromSpreadsheetUseCase: ImportDataFromSpreadsheetUseCase? = null,
     onSignInRequired: () -> Unit = {},
     onSignInSuccess: ((MainScreenViewModel) -> Unit)? = null,
 ) {
     val showDialogState: MutableState<Boolean> = remember { mutableStateOf(false) }
     val showSaveDialogState: MutableState<Boolean> = remember { mutableStateOf(false) }
+    val showRestoreDialogState: MutableState<Boolean> = remember { mutableStateOf(false) }
 
     val vm: TransactionalViewModel = transactionalViewModel ?: viewModel()
     val mainVm = remember {
@@ -32,6 +36,7 @@ fun App(
             itemsSource = vm.items,
             onDeleteItem = { id -> vm.deleteItem(id) },
             exportDataToSpreadsheetUseCase = exportDataToSpreadsheetUseCase,
+            importDataFromSpreadsheetUseCase = importDataFromSpreadsheetUseCase,
         )
     }
 
@@ -46,6 +51,9 @@ fun App(
     val currentMonth by mainVm.currentMonth.collectAsState()
     val currentYear by mainVm.currentYear.collectAsState()
     val backupResult by mainVm.backupResult.collectAsState()
+    val availableBackups by mainVm.availableBackups.collectAsState()
+    val restoreResult by mainVm.restoreResult.collectAsState()
+    val isLoadingBackups by mainVm.isLoadingBackups.collectAsState()
 
     MainScreenContent(
         itemsList = itemsList,
@@ -58,6 +66,7 @@ fun App(
         onCurrentMonthClick = { mainVm.goToCurrentMonth() },
         onAddButtonClick = { showDialogState.value = true },
         onSaveButtonClick = { showSaveDialogState.value = true },
+        onRestoreButtonClick = { showRestoreDialogState.value = true },
         onDeleteItem = { id -> mainVm.delete(id) },
     )
 
@@ -81,6 +90,23 @@ fun App(
             },
             backupResult = backupResult,
             onClearResult = { mainVm.clearBackupResult() },
+        )
+    }
+
+    if (showRestoreDialogState.value) {
+        RestoreDialog(
+            onDismiss = { showRestoreDialogState.value = false },
+            onRestore = { spreadsheetId ->
+                mainVm.restoreFromBackup(
+                    spreadsheetId = spreadsheetId,
+                    onSignInRequired = onSignInRequired,
+                )
+            },
+            onLoadBackups = { mainVm.loadAvailableBackups(onSignInRequired) },
+            availableBackups = availableBackups,
+            restoreResult = restoreResult,
+            isLoading = isLoadingBackups,
+            onClearResult = { mainVm.clearRestoreResult() },
         )
     }
 }

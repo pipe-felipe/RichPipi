@@ -16,6 +16,11 @@ class DeleteItemUseCaseTest {
             deletedId = id
             return 1
         }
+
+        override suspend fun deleteAllTransactions(): Int = throw UnsupportedOperationException()
+
+        override suspend fun insertTransactions(transactions: List<domain.model.Transaction>): List<Long> =
+            throw UnsupportedOperationException()
     }
 
     @Test

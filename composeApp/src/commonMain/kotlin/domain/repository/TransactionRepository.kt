@@ -10,4 +10,17 @@ interface TransactionRepository {
 
     suspend fun makeTransaction(transaction: Transaction): Long
     suspend fun deleteTransaction(id: Int): Int
+
+    /**
+     * Deletes all transactions from the database.
+     * @return Number of transactions deleted
+     */
+    suspend fun deleteAllTransactions(): Int
+
+    /**
+     * Inserts multiple transactions at once.
+     * @param transactions List of transactions to insert
+     * @return List of inserted IDs
+     */
+    suspend fun insertTransactions(transactions: List<Transaction>): List<Long>
 }

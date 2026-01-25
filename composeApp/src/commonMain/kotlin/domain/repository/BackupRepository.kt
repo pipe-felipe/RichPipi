@@ -3,6 +3,7 @@ package domain.repository
 import domain.model.BackupResult
 import domain.model.BackupService
 import domain.model.SpreadsheetData
+import domain.model.SpreadsheetFile
 
 /**
  * Repository interface for backup operations.
@@ -41,6 +42,22 @@ interface BackupRepository {
         spreadsheetName: String,
         data: SpreadsheetData,
     ): BackupResult
+
+    /**
+     * Lists all available backup spreadsheets.
+     * @param service The backup service to use
+     * @param folderName The name of the folder to list spreadsheets from
+     * @return List of available spreadsheet files
+     */
+    suspend fun listBackupSpreadsheets(service: BackupService, folderName: String): List<SpreadsheetFile>
+
+    /**
+     * Reads data from a backup spreadsheet.
+     * @param service The backup service to use
+     * @param spreadsheetId The ID of the spreadsheet to read
+     * @return SpreadsheetData containing the backup data, or null if failed
+     */
+    suspend fun readSpreadsheetData(service: BackupService, spreadsheetId: String): SpreadsheetData?
 
     /**
      * Checks if the user is authenticated with the backup service.

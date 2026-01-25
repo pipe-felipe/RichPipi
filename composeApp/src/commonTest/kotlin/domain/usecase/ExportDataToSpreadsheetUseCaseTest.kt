@@ -4,6 +4,7 @@ import domain.BackupConstants
 import domain.model.BackupResult
 import domain.model.BackupService
 import domain.model.SpreadsheetData
+import domain.model.SpreadsheetFile
 import domain.model.Transaction
 import domain.model.TransactionType
 import domain.repository.BackupRepository
@@ -247,6 +248,20 @@ private class MockBackupRepository(
         authenticateCalled = true
         return authenticateResult
     }
+
+    override suspend fun listBackupSpreadsheets(
+        service: BackupService,
+        folderName: String,
+    ): List<SpreadsheetFile> {
+        return emptyList()
+    }
+
+    override suspend fun readSpreadsheetData(
+        service: BackupService,
+        spreadsheetId: String,
+    ): SpreadsheetData? {
+        return null
+    }
 }
 
 private class MockTransactionRepository(
@@ -270,5 +285,13 @@ private class MockTransactionRepository(
 
     override suspend fun deleteTransaction(id: Int): Int {
         return 1
+    }
+
+    override suspend fun deleteAllTransactions(): Int {
+        return transactions.size
+    }
+
+    override suspend fun insertTransactions(transactions: List<Transaction>): List<Long> {
+        return transactions.mapIndexed { index, _ -> index.toLong() + 1 }
     }
 }

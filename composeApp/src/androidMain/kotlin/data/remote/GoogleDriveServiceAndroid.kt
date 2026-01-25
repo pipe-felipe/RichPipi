@@ -21,6 +21,7 @@ import com.google.api.services.sheets.v4.model.ValueRange
 import data.local.EncryptedCredentialsManager
 import domain.model.BackupResult
 import domain.model.SpreadsheetData
+import domain.model.SpreadsheetFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.collections.get
@@ -224,6 +225,78 @@ class GoogleDriveServiceAndroid(
             }
         } catch (e: Exception) {
             BackupResult.Error("Failed to create spreadsheet with data in Google Drive", e)
+        }
+    }
+
+    override suspend fun listSpreadsheets(folderName: String): List<SpreadsheetFile> {
+        return try {
+            withContext(Dispatchers.IO) {
+                val driveApi = driveService ?: return@withContext emptyList()
+
+                // Find the folder
+                val folderResult = driveApi.files().list()
+                    .setQ("name='$folderName' and mimeType='application/vnd.google-apps.folder' and trashed=false")
+                    .setFields("files(id)")
+                    .execute()
+
+                if (folderResult.files.isNullOrEmpty()) {
+                    return@withContext emptyList()
+                }
+
+                val folderId = folderResult.files[0].id
+
+                // List spreadsheets in the folder
+                val spreadsheetResult = driveApi.files().list()
+                    .setQ("'$folderId' in parents and mimeType='application/vnd.google-apps.spreadsheet' and trashed=false")
+                    .setFields("files(id, name, createdTime)")
+                    .setOrderBy("createdTime desc")
+                    .execute()
+
+                spreadsheetResult.files?.map { file ->
+                    SpreadsheetFile(
+                        id = file.id,
+                        name = file.name,
+                        createdTime = file.createdTime?.toString(),
+                    )
+                } ?: emptyList()
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    override suspend fun readSpreadsheetData(spreadsheetId: String): SpreadsheetData? {
+        return try {
+            withContext(Dispatchers.IO) {
+                val sheetsApi = sheetsService ?: return@withContext null
+
+                // Read all data from the first sheet
+                val response = sheetsApi.spreadsheets().values()
+                    .get(spreadsheetId, "A:Z")
+                    .execute()
+
+                val values = response.getValues() ?: return@withContext null
+
+                if (values.isEmpty()) {
+                    return@withContext SpreadsheetData(headers = emptyList(), rows = emptyList())
+                }
+
+                // First row is headers
+                val headers = values[0].map { it?.toString() ?: "" }
+
+                // Rest are data rows
+                val rows = if (values.size > 1) {
+                    values.drop(1).map { row ->
+                        row.map { it?.toString() ?: "" }
+                    }
+                } else {
+                    emptyList()
+                }
+
+                SpreadsheetData(headers = headers, rows = rows)
+            }
+        } catch (e: Exception) {
+            null
         }
     }
 

@@ -4,6 +4,7 @@ import data.remote.GoogleDriveService
 import domain.model.BackupResult
 import domain.model.BackupService
 import domain.model.SpreadsheetData
+import domain.model.SpreadsheetFile
 import domain.repository.BackupRepository
 
 /**
@@ -43,6 +44,28 @@ class BackupRepositoryImpl(
         return when (service) {
             is BackupService.GoogleDrive -> {
                 googleDriveService.createSpreadsheetWithData(folderName, spreadsheetName, data)
+            }
+        }
+    }
+
+    override suspend fun listBackupSpreadsheets(
+        service: BackupService,
+        folderName: String,
+    ): List<SpreadsheetFile> {
+        return when (service) {
+            is BackupService.GoogleDrive -> {
+                googleDriveService.listSpreadsheets(folderName)
+            }
+        }
+    }
+
+    override suspend fun readSpreadsheetData(
+        service: BackupService,
+        spreadsheetId: String,
+    ): SpreadsheetData? {
+        return when (service) {
+            is BackupService.GoogleDrive -> {
+                googleDriveService.readSpreadsheetData(spreadsheetId)
             }
         }
     }

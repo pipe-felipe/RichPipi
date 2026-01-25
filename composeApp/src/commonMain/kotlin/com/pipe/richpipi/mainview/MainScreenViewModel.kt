@@ -4,8 +4,12 @@ import com.pipe.richpipi.platform.currentMonthYear
 import com.pipe.richpipi.platform.monthBoundsUtcMillis
 import di.BackupModule
 import domain.model.BackupResult
+import domain.model.ImportResult
+import domain.model.SpreadsheetFile
 import domain.model.Transaction
 import domain.usecase.ExportDataToSpreadsheetUseCase
+import domain.usecase.ImportDataFromSpreadsheetUseCase
+import domain.usecase.ListBackupsResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -25,6 +29,7 @@ class MainScreenViewModel(
     itemsSource: Flow<List<Transaction>> = emptyFlow(),
     private val onDeleteItem: (Int) -> Unit = {},
     private val exportDataToSpreadsheetUseCase: ExportDataToSpreadsheetUseCase? = null,
+    private val importDataFromSpreadsheetUseCase: ImportDataFromSpreadsheetUseCase? = null,
 ) {
     private val _items = MutableStateFlow<List<Transaction>>(emptyList())
     val items: StateFlow<List<Transaction>> = _items.asStateFlow()
@@ -191,6 +196,70 @@ class MainScreenViewModel(
         ) ?: BackupModule.createSpreadSheetUseCase.execute(
             Clock.System.now().toEpochMilliseconds(),
         )
+    }
+
+    // Restore functionality
+    private val _availableBackups = MutableStateFlow<List<SpreadsheetFile>>(emptyList())
+    val availableBackups: StateFlow<List<SpreadsheetFile>> = _availableBackups.asStateFlow()
+
+    private val _restoreResult = MutableStateFlow<ImportResult?>(null)
+    val restoreResult: StateFlow<ImportResult?> = _restoreResult.asStateFlow()
+
+    private val _isLoadingBackups = MutableStateFlow(false)
+    val isLoadingBackups: StateFlow<Boolean> = _isLoadingBackups.asStateFlow()
+
+    fun clearRestoreResult() {
+        _restoreResult.value = null
+    }
+
+    private var onRestoreSignInRequired: (() -> Unit)? = null
+
+    fun loadAvailableBackups(onSignInRequired: () -> Unit) {
+        onRestoreSignInRequired = onSignInRequired
+        scope.launch {
+            _isLoadingBackups.value = true
+            _restoreResult.value = null
+            _availableBackups.value = emptyList()
+            try {
+                when (val result = BackupModule.listBackupSpreadsheetsUseCase.execute()) {
+                    is ListBackupsResult.Success -> {
+                        _availableBackups.value = result.spreadsheets
+                        if (result.spreadsheets.isEmpty()) {
+                            _restoreResult.value = ImportResult.NoBackupsFound
+                        }
+                    }
+                    is ListBackupsResult.SignInRequired -> {
+                        _restoreResult.value = ImportResult.SignInRequired
+                        onSignInRequired()
+                    }
+                    is ListBackupsResult.Error -> {
+                        _restoreResult.value = ImportResult.Error(result.message)
+                    }
+                }
+            } catch (e: Exception) {
+                _restoreResult.value = ImportResult.Error("Falha ao carregar backups", e)
+            } finally {
+                _isLoadingBackups.value = false
+            }
+        }
+    }
+
+    fun restoreFromBackup(spreadsheetId: String, onSignInRequired: () -> Unit) {
+        scope.launch {
+            _restoreResult.value = null
+            try {
+                val result = importDataFromSpreadsheetUseCase?.execute(spreadsheetId)
+                    ?: ImportResult.Error("Funcionalidade de importação não disponível")
+
+                _restoreResult.value = result
+
+                if (result is ImportResult.SignInRequired) {
+                    onSignInRequired()
+                }
+            } catch (e: Exception) {
+                _restoreResult.value = ImportResult.Error("Falha ao restaurar backup", e)
+            }
+        }
     }
 
     private fun formatMonthYear(month: Int, year: Int): String {

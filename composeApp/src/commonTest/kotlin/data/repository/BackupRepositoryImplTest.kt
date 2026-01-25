@@ -3,6 +3,7 @@ package data.repository
 import data.remote.GoogleDriveService
 import domain.model.BackupResult
 import domain.model.SpreadsheetData
+import domain.model.SpreadsheetFile
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -41,6 +42,8 @@ private class MockGoogleDriveService(
     private val authenticateResult: BackupResult = BackupResult.Success,
     val createSpreadsheetResult: BackupResult = BackupResult.Success,
     val createSpreadsheetWithDataResult: BackupResult = BackupResult.Success,
+    val listSpreadsheetsResult: List<SpreadsheetFile> = emptyList(),
+    val readSpreadsheetDataResult: SpreadsheetData? = null,
 ) : GoogleDriveService {
 
     var lastCreatedFolderName: String? = null
@@ -80,5 +83,13 @@ private class MockGoogleDriveService(
         lastCreatedSpreadsheetName = spreadsheetName
         lastSpreadsheetData = data
         return createSpreadsheetWithDataResult
+    }
+
+    override suspend fun listSpreadsheets(folderName: String): List<SpreadsheetFile> {
+        return listSpreadsheetsResult
+    }
+
+    override suspend fun readSpreadsheetData(spreadsheetId: String): SpreadsheetData? {
+        return readSpreadsheetDataResult
     }
 }
