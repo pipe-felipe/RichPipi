@@ -34,6 +34,17 @@ import androidx.compose.ui.window.DialogProperties
 import domain.model.ImportResult
 import domain.model.SpreadsheetFile
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.stringResource
+import richpipi.composeapp.generated.resources.Res
+import richpipi.composeapp.generated.resources.form_close_button_description
+import richpipi.composeapp.generated.resources.restore_dialog_auth_required
+import richpipi.composeapp.generated.resources.restore_dialog_description
+import richpipi.composeapp.generated.resources.restore_dialog_error
+import richpipi.composeapp.generated.resources.restore_dialog_loading
+import richpipi.composeapp.generated.resources.restore_dialog_no_backups
+import richpipi.composeapp.generated.resources.restore_dialog_select_backup
+import richpipi.composeapp.generated.resources.restore_dialog_success
+import richpipi.composeapp.generated.resources.restore_dialog_title
 
 @Composable
 fun RestoreDialog(
@@ -78,18 +89,17 @@ private fun RestoreDialogContent(
     isLoading: Boolean,
 ) {
     val resultMessage = when (restoreResult) {
-        is ImportResult.Success -> "Backup restaurado com sucesso! ${restoreResult.importedCount} transações importadas. 😊"
-        is ImportResult.Error -> "Erro: ${restoreResult.message}"
-        is ImportResult.SignInRequired -> "Autenticação necessária..."
-        is ImportResult.NoBackupsFound -> "Nenhum backup encontrado."
+        is ImportResult.Success -> stringResource(Res.string.restore_dialog_success, restoreResult.importedCount)
+        is ImportResult.Error -> stringResource(Res.string.restore_dialog_error, restoreResult.message)
+        is ImportResult.SignInRequired -> stringResource(Res.string.restore_dialog_auth_required)
+        is ImportResult.NoBackupsFound -> stringResource(Res.string.restore_dialog_no_backups)
         null -> null
     }
     val isSuccess = restoreResult is ImportResult.Success
 
-    // Auto-dismiss dialog after successful restore
     LaunchedEffect(restoreResult) {
         if (restoreResult is ImportResult.Success) {
-            delay(1500) // Small delay so user can see the success message
+            delay(1500)
             onDismiss()
         }
     }
@@ -121,13 +131,13 @@ private fun RestoreDialogContent(
                         CircularProgressIndicator(modifier = Modifier.padding(16.dp))
                     } else if (availableBackups.isEmpty() && restoreResult !is ImportResult.NoBackupsFound) {
                         Text(
-                            text = "Carregando backups...",
+                            text = stringResource(Res.string.restore_dialog_loading),
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.padding(16.dp),
                         )
                     } else if (availableBackups.isNotEmpty()) {
                         Text(
-                            text = "Selecione um backup para restaurar:",
+                            text = stringResource(Res.string.restore_dialog_select_backup),
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.padding(bottom = 8.dp),
                         )
@@ -170,14 +180,14 @@ private fun RestoreDialogHeader() {
             modifier = Modifier.padding(end = 8.dp),
         )
         Text(
-            text = "Restaurar Backup",
+            text = stringResource(Res.string.restore_dialog_title),
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center,
         )
     }
 
     Text(
-        text = "Selecione um backup do Google Drive para restaurar seus dados. Atenção: os dados atuais serão substituídos.",
+        text = stringResource(Res.string.restore_dialog_description),
         style = MaterialTheme.typography.bodyMedium,
         textAlign = TextAlign.Justify,
         modifier = Modifier.padding(bottom = 16.dp),
@@ -226,7 +236,7 @@ private fun CloseButton(onDismiss: () -> Unit, modifier: Modifier = Modifier) {
     ) {
         Icon(
             Icons.Default.Close,
-            contentDescription = "Fechar",
+            contentDescription = stringResource(Res.string.form_close_button_description),
         )
     }
 }
