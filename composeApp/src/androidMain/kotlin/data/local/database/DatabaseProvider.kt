@@ -6,6 +6,9 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 object DatabaseProvider {
+    @Volatile
+    private var INSTANCE: AppDatabase? = null
+
     private val MIGRATION_2_3 = object : Migration(2, 3) {
         override fun migrate(db: SupportSQLiteDatabase) {
             db.execSQL(
@@ -26,10 +29,14 @@ object DatabaseProvider {
     }
 
     fun provideDatabase(context: Context): AppDatabase {
-        return Room.databaseBuilder(
-            context.applicationContext,
-            AppDatabase::class.java,
-            "richpipi-db",
-        ).addMigrations(MIGRATION_2_3, MIGRATION_3_4).build()
+        return INSTANCE ?: synchronized(this) {
+            val instance = Room.databaseBuilder(
+                context.applicationContext,
+                AppDatabase::class.java,
+                "richpipi-db",
+            ).addMigrations(MIGRATION_2_3, MIGRATION_3_4).build()
+            INSTANCE = instance
+            instance
+        }
     }
 }

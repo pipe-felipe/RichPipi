@@ -13,12 +13,14 @@ import domain.usecase.ImportDataFromSpreadsheetUseCase
 import domain.usecase.ListBackupsResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import kotlin.time.Clock
 
@@ -26,8 +28,9 @@ import kotlin.time.Clock
  * Lightweight view-model-like class for the main screen UI.
  * It is not an AndroidX ViewModel so it can be instantiated from common code easily.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class MainScreenViewModel(
-    itemsSource: Flow<List<Transaction>> = emptyFlow(),
+    private val itemsSource: Flow<List<Transaction>> = emptyFlow(),
     private val onDeleteItem: (Int) -> Unit = {},
     private val exportDataToSpreadsheetUseCase: ExportDataToSpreadsheetUseCase? = null,
     private val importDataFromSpreadsheetUseCase: ImportDataFromSpreadsheetUseCase? = null,
@@ -45,6 +48,9 @@ class MainScreenViewModel(
     val totalSavingText: StateFlow<String> = _totalSavingText.asStateFlow()
 
     private val _allItems = MutableStateFlow<List<Transaction>>(emptyList())
+
+    // Trigger to force refresh of items from the source
+    private val _refreshTrigger = MutableStateFlow(0)
 
     private val initialMonthYear = currentMonthYear()
     private val _currentMonth = MutableStateFlow(initialMonthYear.first)
@@ -119,7 +125,9 @@ class MainScreenViewModel(
     init {
         scope.launch {
             try {
-                itemsSource.collect { list ->
+                _refreshTrigger.flatMapLatest {
+                    itemsSource
+                }.collect { list ->
                     _allItems.value = list
                 }
             } catch (e: kotlinx.coroutines.CancellationException) {
@@ -338,6 +346,11 @@ class MainScreenViewModel(
 
                 _restoreResult.value = result
 
+                if (result is ImportResult.Success) {
+                    // Force refresh of items from the source after successful import
+                    refreshItems()
+                }
+
                 if (result is ImportResult.SignInRequired) {
                     onSignInRequired()
                 }
@@ -346,6 +359,14 @@ class MainScreenViewModel(
                     ImportResult.Error("Falha ao restaurar backup", e)
             }
         }
+    }
+
+    /**
+     * Forces a refresh of items from the source.
+     * This is useful after data has been modified externally (e.g., after restore).
+     */
+    fun refreshItems() {
+        _refreshTrigger.value++
     }
 
     private fun formatMonthYear(month: Int, year: Int): String {
