@@ -31,8 +31,8 @@ import com.pipe.richpipi.ui.theme.dockBackground
 import org.jetbrains.compose.resources.painterResource
 import richpipi.composeapp.generated.resources.Res
 import richpipi.composeapp.generated.resources.add_item
-import richpipi.composeapp.generated.resources.recover_data_icon
 import richpipi.composeapp.generated.resources.login_icon
+import richpipi.composeapp.generated.resources.recover_data_icon
 import richpipi.composeapp.generated.resources.save_icon
 
 @Composable
