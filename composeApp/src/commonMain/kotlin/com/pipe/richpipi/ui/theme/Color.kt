@@ -56,5 +56,5 @@ val LightContainerExpenseBackground = Color(0x8BF59F9F)
 // BOTH
 val PiGolden = Color(0xFFE7C504)
 
-val DarkDockBackground = Color(0xBD09180B) // Semi-transparent dark
-val LightDockBackground = Color(0xBEFFE2DE) // Semi-transparent light
+val DarkDockBackground = Color(0xAAFCEDDC) // Semi-transparent dark
+val LightDockBackground = Color(0xAAFCEDDC) // Semi-transparent light

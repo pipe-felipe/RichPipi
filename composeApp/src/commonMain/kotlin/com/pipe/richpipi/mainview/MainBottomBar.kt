@@ -31,6 +31,8 @@ import com.pipe.richpipi.ui.theme.dockBackground
 import org.jetbrains.compose.resources.painterResource
 import richpipi.composeapp.generated.resources.Res
 import richpipi.composeapp.generated.resources.add_item
+import richpipi.composeapp.generated.resources.recover_data_icon
+import richpipi.composeapp.generated.resources.login_icon
 import richpipi.composeapp.generated.resources.save_icon
 
 @Composable
@@ -62,13 +64,13 @@ fun MainBottomBar(
         ) {
             Row(
                 modifier = Modifier
-                    .height(64.dp)
+                    .height(70.dp)
                     .padding(horizontal = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(0.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 DockIcon(
-                    painter = painterResource(Res.drawable.save_icon),
+                    painter = painterResource(Res.drawable.login_icon),
                     contentDescription = "Login",
                     onClick = onLoginButtonClick,
                 )
@@ -79,7 +81,7 @@ fun MainBottomBar(
                     enabled = isAuthenticated,
                 )
                 DockIcon(
-                    painter = painterResource(Res.drawable.save_icon),
+                    painter = painterResource(Res.drawable.recover_data_icon),
                     contentDescription = "Restore",
                     onClick = onRestoreButtonClick,
                     enabled = isAuthenticated,
