@@ -37,6 +37,9 @@ class TransactionalViewModelAndroidTest {
         }
 
         override suspend fun deleteTransaction(id: Int): Int = 1
+
+        override suspend fun deleteAllTransactions(): Int = 0
+        override suspend fun insertTransactions(transactions: List<Transaction>): List<Long> = emptyList()
     }
 
     @Test

@@ -29,6 +29,19 @@ class GetAllItemsUseCaseTest {
                 0
             }
         }
+
+        override suspend fun deleteAllTransactions(): Int {
+            val count = items.size
+            items.clear()
+            return count
+        }
+
+        override suspend fun insertTransactions(transactions: List<Transaction>): List<Long> {
+            return transactions.map { transaction ->
+                items.add(transaction.copy(id = items.size + 1))
+                items.size.toLong()
+            }
+        }
     }
 
     @Test

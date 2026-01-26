@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import domain.model.BackupResult
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import richpipi.composeapp.generated.resources.Res
 import richpipi.composeapp.generated.resources.form_close_button_description
@@ -83,6 +84,14 @@ private fun SaveDialogContent(
     LaunchedEffect(backupResult) {
         if (backupResult != null) {
             isLoading = false
+        }
+    }
+
+    // Auto-dismiss dialog after successful backup
+    LaunchedEffect(backupResult) {
+        if (backupResult is BackupResult.Success) {
+            delay(1500) // Small delay so user can see the success message
+            onDismiss()
         }
     }
 

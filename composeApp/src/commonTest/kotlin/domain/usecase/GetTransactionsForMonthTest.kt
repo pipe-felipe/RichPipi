@@ -27,6 +27,10 @@ class GetTransactionsForMonthTest {
         override suspend fun makeTransaction(transaction: Transaction): Long = 0
 
         override suspend fun deleteTransaction(id: Int): Int = 0
+
+        override suspend fun deleteAllTransactions(): Int = 0
+
+        override suspend fun insertTransactions(transactions: List<Transaction>): List<Long> = emptyList()
     }
 
     @Test

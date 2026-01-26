@@ -4,6 +4,7 @@ import domain.BackupConstants
 import domain.model.BackupResult
 import domain.model.BackupService
 import domain.model.SpreadsheetData
+import domain.model.SpreadsheetFile
 import domain.repository.BackupRepository
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -149,5 +150,23 @@ class TestMockBackupRepository(
     override suspend fun authenticate(service: BackupService): BackupResult {
         authenticateCalled = true
         return authenticateResult
+    }
+
+    override suspend fun listBackupSpreadsheets(
+        service: BackupService,
+        folderName: String,
+    ): List<SpreadsheetFile> {
+        return emptyList()
+    }
+
+    override suspend fun readSpreadsheetData(
+        service: BackupService,
+        spreadsheetId: String,
+    ): SpreadsheetData? {
+        return null
+    }
+
+    override suspend fun getAuthenticatedUserName(service: BackupService): String? {
+        return null
     }
 }

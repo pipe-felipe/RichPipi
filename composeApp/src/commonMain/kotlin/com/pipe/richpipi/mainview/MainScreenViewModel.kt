@@ -1,11 +1,16 @@
 package com.pipe.richpipi.mainview
 
 import com.pipe.richpipi.platform.currentMonthYear
-import com.pipe.richpipi.platform.monthBoundsUtcMillis
 import di.BackupModule
 import domain.model.BackupResult
+import domain.model.ImportResult
+import domain.model.SpreadsheetFile
 import domain.model.Transaction
+import domain.usecase.AuthResult
 import domain.usecase.ExportDataToSpreadsheetUseCase
+import domain.usecase.IAuthenticateUseCase
+import domain.usecase.ImportDataFromSpreadsheetUseCase
+import domain.usecase.ListBackupsResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -25,6 +30,8 @@ class MainScreenViewModel(
     itemsSource: Flow<List<Transaction>> = emptyFlow(),
     private val onDeleteItem: (Int) -> Unit = {},
     private val exportDataToSpreadsheetUseCase: ExportDataToSpreadsheetUseCase? = null,
+    private val importDataFromSpreadsheetUseCase: ImportDataFromSpreadsheetUseCase? = null,
+    private val authenticateUseCase: IAuthenticateUseCase = BackupModule.authenticateUseCase,
 ) {
     private val _items = MutableStateFlow<List<Transaction>>(emptyList())
     val items: StateFlow<List<Transaction>> = _items.asStateFlow()
@@ -49,10 +56,65 @@ class MainScreenViewModel(
         MutableStateFlow(
             formatMonthYear(initialMonthYear.first, initialMonthYear.second),
         )
-    val currentMonthYearText: StateFlow<String> = _currentMonthYearText.asStateFlow()
+    val currentMonthYearText: StateFlow<String> =
+        _currentMonthYearText.asStateFlow()
 
     private val scope = CoroutineScope(Dispatchers.Default)
 
+    private val _userName = MutableStateFlow<String?>(null)
+    val userName: StateFlow<String?> = _userName.asStateFlow()
+
+    sealed class AuthStatus {
+        object NotAuthenticated : AuthStatus()
+        data class Authenticated(val userName: String) : AuthStatus()
+        object Error : AuthStatus()
+    }
+
+    private val _authStatus =
+        MutableStateFlow<AuthStatus>(AuthStatus.NotAuthenticated)
+    val authStatus: StateFlow<AuthStatus> = _authStatus
+
+    fun authenticate(onSignInRequired: () -> Unit) {
+        scope.launch {
+            try {
+                when (val result = authenticateUseCase.execute()) {
+                    is AuthResult.Success -> {
+                        _userName.value = result.userName
+                        _authStatus.value = AuthStatus.Authenticated(
+                            result.userName ?: "Desconhecido",
+                        )
+                    }
+
+                    is AuthResult.SignInRequired -> {
+                        _authStatus.value = AuthStatus.NotAuthenticated
+                        onSignInRequired()
+                    }
+
+                    is AuthResult.Error -> {
+                        _authStatus.value = AuthStatus.Error
+                    }
+                }
+            } catch (e: Exception) {
+                _authStatus.value = AuthStatus.Error
+            }
+        }
+    }
+
+    fun refreshUserName() {
+        scope.launch {
+            try {
+                val name = authenticateUseCase.getCurrentUserName()
+                _userName.value = name
+                if (name.isNullOrBlank()) {
+                    _authStatus.value = AuthStatus.NotAuthenticated
+                } else {
+                    _authStatus.value = AuthStatus.Authenticated(name)
+                }
+            } catch (e: Exception) {
+                _authStatus.value = AuthStatus.Error
+            }
+        }
+    }
 
     init {
         scope.launch {
@@ -60,43 +122,55 @@ class MainScreenViewModel(
                 itemsSource.collect { list ->
                     _allItems.value = list
                 }
-            } catch (_: Throwable) {
-                // ignore
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Throwable) {
+                println("Error collecting transactions: ${e.message}")
             }
         }
 
         scope.launch {
-            combine(_allItems, _currentMonth, _currentYear) { list, month, year ->
-                val (start, endExclusive) = monthBoundsUtcMillis(month = month, year = year)
+            combine(
+                _allItems,
+                _currentMonth,
+                _currentYear,
+            ) { list, month, year ->
                 list.filter { tx ->
-                    // Recurring items should only be considered once the month reaches their start date
-                    // (createdAt is stored as epoch millis).
                     if (tx.isRecurring) {
-                        tx.createdAt < endExclusive
+                        // Recurring transactions appear from their start month onwards
+                        (tx.targetYear < year) ||
+                            (tx.targetYear == year && tx.targetMonth <= month)
                     } else {
-                        tx.createdAt in start..<endExclusive
+                        // Non-recurring transactions appear only in their target month
+                        tx.targetMonth == month && tx.targetYear == year
                     }
                 }
             }.collect { filtered ->
                 _items.value = filtered
 
-                // Month-scoped totals
                 val (inc, exp) = computeTotals(filtered)
                 _totalIncomeText.value = "R$ ${formatTwoDecimals(inc)}"
                 _totalExpenseText.value = "R$ ${formatTwoDecimals(exp)}"
 
-                // Accumulated saving up to the end of the selected month:
-                // - Non-recurring: count if tx.createdAt < selectedMonthEndExclusive
-                // - Recurring: only counts once the month reaches its start month, so also require tx.createdAt < selectedMonthEndExclusive
-                val (_, selectedMonthEndExclusive) =
-                    monthBoundsUtcMillis(month = _currentMonth.value, year = _currentYear.value)
+                val selectedMonth = _currentMonth.value
+                val selectedYear = _currentYear.value
 
                 val accumulatedItems = _allItems.value.filter { tx ->
-                    tx.createdAt < selectedMonthEndExclusive
+                    // Include transactions up to and including the selected month
+                    (tx.targetYear < selectedYear) ||
+                        (tx.targetYear == selectedYear && tx.targetMonth <= selectedMonth)
                 }
 
-                val (allInc, allExp) = computeTotals(accumulatedItems)
-                _totalSavingText.value = "R$ ${formatTwoDecimals(allInc - allExp)}"
+                // For savings calculation, only count income up to current month
+                // (future income should not be counted)
+                val (currentMonth, currentYear) = currentMonthYear()
+                val (allInc, allExp) = computeTotalsForSavingsWithTargetMonth(
+                    accumulatedItems,
+                    currentMonth = currentMonth,
+                    currentYear = currentYear,
+                )
+                _totalSavingText.value =
+                    "R$ ${formatTwoDecimals(allInc - allExp)}"
             }
         }
     }
@@ -113,7 +187,8 @@ class MainScreenViewModel(
         } else {
             _currentMonth.value = month - 1
         }
-        _currentMonthYearText.value = formatMonthYear(_currentMonth.value, _currentYear.value)
+        _currentMonthYearText.value =
+            formatMonthYear(_currentMonth.value, _currentYear.value)
     }
 
     fun goToNextMonth() {
@@ -126,7 +201,8 @@ class MainScreenViewModel(
         } else {
             _currentMonth.value = month + 1
         }
-        _currentMonthYearText.value = formatMonthYear(_currentMonth.value, _currentYear.value)
+        _currentMonthYearText.value =
+            formatMonthYear(_currentMonth.value, _currentYear.value)
     }
 
     fun goToCurrentMonth() {
@@ -145,7 +221,10 @@ class MainScreenViewModel(
         _backupResult.value = null
     }
 
-    fun backupToDrive(onResult: (BackupResult) -> Unit, onSignInRequired: () -> Unit) {
+    fun backupToDrive(
+        onSignInRequired: () -> Unit,
+        onResult: ((BackupResult) -> Unit)? = null,
+    ) {
         onResultCallback = onResult
         _backupResult.value = null
         scope.launch {
@@ -153,30 +232,34 @@ class MainScreenViewModel(
                 when (val result = createSpreadsheet()) {
                     is BackupResult.SignInRequired -> {
                         _backupResult.value = result
-                        onResult(result) // Notifica o dialog para mostrar a mensagem
-                        onSignInRequired() // Abre a tela de login
+                        onResult?.invoke(result)
+                        onSignInRequired()
                     }
+
                     else -> {
                         _backupResult.value = result
-                        onResult(result)
+                        onResult?.invoke(result)
                     }
                 }
             } catch (e: Exception) {
                 val error = BackupResult.Error("Falha ao criar backup", e)
                 _backupResult.value = error
-                onResult(error)
+                onResult?.invoke(error)
             }
         }
     }
 
     fun onSignInSuccess() {
         scope.launch {
+            refreshUserName()
+
             try {
                 val result = createSpreadsheet()
                 _backupResult.value = result
                 onResultCallback?.invoke(result)
             } catch (e: Exception) {
-                val error = BackupResult.Error("Falha ao criar backup após o login", e)
+                val error =
+                    BackupResult.Error("Falha ao criar backup após o login", e)
                 _backupResult.value = error
                 onResultCallback?.invoke(error)
             }
@@ -184,13 +267,85 @@ class MainScreenViewModel(
     }
 
     private suspend fun createSpreadsheet(): BackupResult {
-        // If we have an export use case, use it to export data with content
-        // Otherwise, fall back to the simple spreadsheet creation
         return exportDataToSpreadsheetUseCase?.execute(
             Clock.System.now().toEpochMilliseconds(),
         ) ?: BackupModule.createSpreadSheetUseCase.execute(
             Clock.System.now().toEpochMilliseconds(),
         )
+    }
+
+    private val _availableBackups =
+        MutableStateFlow<List<SpreadsheetFile>>(emptyList())
+    val availableBackups: StateFlow<List<SpreadsheetFile>> =
+        _availableBackups.asStateFlow()
+
+    private val _restoreResult = MutableStateFlow<ImportResult?>(null)
+    val restoreResult: StateFlow<ImportResult?> = _restoreResult.asStateFlow()
+
+    private val _isLoadingBackups = MutableStateFlow(false)
+    val isLoadingBackups: StateFlow<Boolean> = _isLoadingBackups.asStateFlow()
+
+    fun clearRestoreResult() {
+        _restoreResult.value = null
+    }
+
+    private var onRestoreSignInRequired: (() -> Unit)? = null
+
+    fun loadAvailableBackups(onSignInRequired: () -> Unit) {
+        onRestoreSignInRequired = onSignInRequired
+        scope.launch {
+            _isLoadingBackups.value = true
+            _restoreResult.value = null
+            _availableBackups.value = emptyList()
+            try {
+                when (
+                    val result =
+                        BackupModule.listBackupSpreadsheetsUseCase.execute()
+                ) {
+                    is ListBackupsResult.Success -> {
+                        _availableBackups.value = result.spreadsheets
+                        if (result.spreadsheets.isEmpty()) {
+                            _restoreResult.value = ImportResult.NoBackupsFound
+                        }
+                    }
+
+                    is ListBackupsResult.SignInRequired -> {
+                        _restoreResult.value = ImportResult.SignInRequired
+                        onSignInRequired()
+                    }
+
+                    is ListBackupsResult.Error -> {
+                        _restoreResult.value =
+                            ImportResult.Error(result.message)
+                    }
+                }
+            } catch (e: Exception) {
+                _restoreResult.value =
+                    ImportResult.Error("Falha ao carregar backups", e)
+            } finally {
+                _isLoadingBackups.value = false
+            }
+        }
+    }
+
+    fun restoreFromBackup(spreadsheetId: String, onSignInRequired: () -> Unit) {
+        scope.launch {
+            _restoreResult.value = null
+            try {
+                val result =
+                    importDataFromSpreadsheetUseCase?.execute(spreadsheetId)
+                        ?: ImportResult.Error("Funcionalidade de importação não disponível")
+
+                _restoreResult.value = result
+
+                if (result is ImportResult.SignInRequired) {
+                    onSignInRequired()
+                }
+            } catch (e: Exception) {
+                _restoreResult.value =
+                    ImportResult.Error("Falha ao restaurar backup", e)
+            }
+        }
     }
 
     private fun formatMonthYear(month: Int, year: Int): String {

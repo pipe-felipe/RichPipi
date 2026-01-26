@@ -53,6 +53,9 @@ class MainActivity : ComponentActivity() {
         // Create export use case with transaction repository
         val exportDataToSpreadsheetUseCase = BackupModule.createExportDataToSpreadsheetUseCase(repo)
 
+        // Create import use case with transaction repository
+        val importDataFromSpreadsheetUseCase = BackupModule.createImportDataFromSpreadsheetUseCase(repo)
+
         val factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
@@ -71,6 +74,7 @@ class MainActivity : ComponentActivity() {
             App(
                 transactionalViewModel = vm,
                 exportDataToSpreadsheetUseCase = exportDataToSpreadsheetUseCase,
+                importDataFromSpreadsheetUseCase = importDataFromSpreadsheetUseCase,
                 onSignInRequired = {
                     GoogleSignInHandler.getSignInIntent()?.let { intent ->
                         signInLauncher.launch(intent)

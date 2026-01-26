@@ -20,6 +20,8 @@ class TransactionRepositoryImpl(private val dao: TransactionDao) : TransactionRe
                     humanDate = entity.humanDate ?: "",
                     isRecurring = entity.isRecurring,
                     createdAt = entity.createdAt,
+                    targetMonth = entity.targetMonth,
+                    targetYear = entity.targetYear,
                 )
             }
         }
@@ -40,6 +42,8 @@ class TransactionRepositoryImpl(private val dao: TransactionDao) : TransactionRe
                     humanDate = entity.humanDate ?: "",
                     isRecurring = entity.isRecurring,
                     createdAt = entity.createdAt,
+                    targetMonth = entity.targetMonth,
+                    targetYear = entity.targetYear,
                 )
             }
         }
@@ -54,11 +58,34 @@ class TransactionRepositoryImpl(private val dao: TransactionDao) : TransactionRe
             humanDate = transaction.humanDate,
             isRecurring = transaction.isRecurring,
             createdAt = transaction.createdAt,
+            targetMonth = transaction.targetMonth,
+            targetYear = transaction.targetYear,
         )
         return dao.addTransaction(entity)
     }
 
     override suspend fun deleteTransaction(id: Int): Int {
         return dao.deleteTransactionById(id)
+    }
+
+    override suspend fun deleteAllTransactions(): Int {
+        return dao.deleteAll()
+    }
+
+    override suspend fun insertTransactions(transactions: List<Transaction>): List<Long> {
+        val entities = transactions.map { transaction ->
+            TransactionEntity(
+                amountCents = transaction.amountCents,
+                type = transaction.type,
+                category = transaction.category,
+                description = transaction.description,
+                humanDate = transaction.humanDate,
+                isRecurring = transaction.isRecurring,
+                createdAt = transaction.createdAt,
+                targetMonth = transaction.targetMonth,
+                targetYear = transaction.targetYear,
+            )
+        }
+        return dao.insertAll(entities)
     }
 }

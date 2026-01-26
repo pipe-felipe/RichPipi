@@ -46,7 +46,15 @@ class TransactionRepositoryMappingTest {
 
                 override suspend fun getTransactionById(id: Int) = fakeDao.list.find { it.id == id }
                 override suspend fun addTransaction(item: TransactionEntity) = fakeDao.addTransaction(item)
+                override suspend fun insertAll(items: List<TransactionEntity>): List<Long> {
+                    return items.map { fakeDao.addTransaction(it) }
+                }
                 override suspend fun deleteTransactionById(id: Int) = fakeDao.deleteTransactionById(id)
+                override suspend fun deleteAll(): Int {
+                    val count = fakeDao.list.size
+                    fakeDao.list.clear()
+                    return count
+                }
             },
         )
 

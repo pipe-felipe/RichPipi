@@ -31,12 +31,17 @@ import com.pipe.richpipi.ui.theme.dockBackground
 import org.jetbrains.compose.resources.painterResource
 import richpipi.composeapp.generated.resources.Res
 import richpipi.composeapp.generated.resources.add_item
+import richpipi.composeapp.generated.resources.recover_data_icon
+import richpipi.composeapp.generated.resources.login_icon
 import richpipi.composeapp.generated.resources.save_icon
 
 @Composable
 fun MainBottomBar(
     onAddButtonClick: () -> Unit,
     onSaveButtonClick: () -> Unit,
+    onRestoreButtonClick: () -> Unit,
+    onLoginButtonClick: () -> Unit,
+    isAuthenticated: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -59,15 +64,27 @@ fun MainBottomBar(
         ) {
             Row(
                 modifier = Modifier
-                    .height(64.dp)
+                    .height(70.dp)
                     .padding(horizontal = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(0.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                DockIcon(
+                    painter = painterResource(Res.drawable.login_icon),
+                    contentDescription = "Login",
+                    onClick = onLoginButtonClick,
+                )
                 DockIcon(
                     painter = painterResource(Res.drawable.save_icon),
                     contentDescription = "Save",
                     onClick = onSaveButtonClick,
+                    enabled = isAuthenticated,
+                )
+                DockIcon(
+                    painter = painterResource(Res.drawable.recover_data_icon),
+                    contentDescription = "Restore",
+                    onClick = onRestoreButtonClick,
+                    enabled = isAuthenticated,
                 )
                 DockIcon(
                     painter = painterResource(Res.drawable.add_item),
@@ -85,11 +102,12 @@ private fun DockIcon(
     contentDescription: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     var isPressed by remember { mutableStateOf(false) }
 
     val scale by animateFloatAsState(
-        targetValue = if (isPressed) 1.15f else 1f,
+        targetValue = if (isPressed && enabled) 1.15f else 1f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessLow,
@@ -97,22 +115,29 @@ private fun DockIcon(
         label = "dockIconScale",
     )
 
+    val alpha = if (enabled) 1f else 0.4f
+
     Box(
         modifier = modifier
             .fillMaxHeight()
-            .pointerInput(Unit) {
+            .pointerInput(enabled) {
                 detectTapGestures(
                     onPress = {
-                        isPressed = true
-                        tryAwaitRelease()
-                        isPressed = false
-                        onClick()
+                        if (enabled) {
+                            isPressed = true
+                            tryAwaitRelease()
+                            isPressed = false
+                            onClick()
+                        } else {
+                            onClick()
+                        }
                     },
                 )
             }
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
+                this.alpha = alpha
             },
         contentAlignment = Alignment.Center,
     ) {

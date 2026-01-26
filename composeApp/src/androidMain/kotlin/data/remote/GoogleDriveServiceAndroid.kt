@@ -21,9 +21,9 @@ import com.google.api.services.sheets.v4.model.ValueRange
 import data.local.EncryptedCredentialsManager
 import domain.model.BackupResult
 import domain.model.SpreadsheetData
+import domain.model.SpreadsheetFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlin.collections.get
 
 /**
  * Android implementation of GoogleDriveService using Google Drive API v3.
@@ -40,10 +40,14 @@ class GoogleDriveServiceAndroid(
     private var googleSignInClient: GoogleSignInClient
 
     init {
-        val signInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestEmail()
-            .requestScopes(Scope(DriveScopes.DRIVE_FILE), Scope(SheetsScopes.SPREADSHEETS))
-            .build()
+        val signInOptions =
+            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .requestScopes(
+                    Scope(DriveScopes.DRIVE_FILE),
+                    Scope(SheetsScopes.SPREADSHEETS),
+                )
+                .build()
         googleSignInClient = GoogleSignIn.getClient(context, signInOptions)
     }
 
@@ -106,7 +110,8 @@ class GoogleDriveServiceAndroid(
     override suspend fun createFolder(folderName: String): BackupResult {
         return try {
             withContext(Dispatchers.IO) {
-                val service = driveService ?: return@withContext BackupResult.Error("Not authenticated")
+                val service = driveService
+                    ?: return@withContext BackupResult.Error("Not authenticated")
 
                 val existing = service.files().list()
                     .setQ("name='$folderName' and mimeType='application/vnd.google-apps.folder' and trashed=false")
@@ -116,7 +121,6 @@ class GoogleDriveServiceAndroid(
                     return@withContext BackupResult.Success
                 }
 
-                // Create new folder
                 val folder = File().apply {
                     name = folderName
                     mimeType = "application/vnd.google-apps.folder"
@@ -136,7 +140,8 @@ class GoogleDriveServiceAndroid(
     ): BackupResult {
         return try {
             withContext(Dispatchers.IO) {
-                val service = driveService ?: return@withContext BackupResult.Error("Not authenticated")
+                val service = driveService
+                    ?: return@withContext BackupResult.Error("Not authenticated")
 
                 val existing = service.files().list()
                     .setQ("name='$folderName' and mimeType='application/vnd.google-apps.folder' and trashed=false")
@@ -151,7 +156,8 @@ class GoogleDriveServiceAndroid(
                         mimeType = "application/vnd.google-apps.folder"
                     }
                     service.files().create(folder).setFields("id").execute().id
-                } ?: return@withContext BackupResult.Error("Failed to obtain folder id")
+                }
+                    ?: return@withContext BackupResult.Error("Failed to obtain folder id")
 
                 val spreadsheet = File().apply {
                     name = spreadsheetName
@@ -163,7 +169,10 @@ class GoogleDriveServiceAndroid(
                 BackupResult.Success
             }
         } catch (e: Exception) {
-            BackupResult.Error("Failed to create spreadsheet in Google Drive", e)
+            BackupResult.Error(
+                "Failed to create spreadsheet in Google Drive",
+                e,
+            )
         }
     }
 
@@ -174,10 +183,11 @@ class GoogleDriveServiceAndroid(
     ): BackupResult {
         return try {
             withContext(Dispatchers.IO) {
-                val driveApi = driveService ?: return@withContext BackupResult.Error("Not authenticated")
-                val sheetsApi = sheetsService ?: return@withContext BackupResult.Error("Sheets service not initialized")
+                val driveApi = driveService
+                    ?: return@withContext BackupResult.Error("Not authenticated")
+                val sheetsApi = sheetsService
+                    ?: return@withContext BackupResult.Error("Sheets service not initialized")
 
-                // Find or create the folder
                 val existing = driveApi.files().list()
                     .setQ("name='$folderName' and mimeType='application/vnd.google-apps.folder' and trashed=false")
                     .setFields("files(id)")
@@ -191,17 +201,21 @@ class GoogleDriveServiceAndroid(
                         mimeType = "application/vnd.google-apps.folder"
                     }
                     driveApi.files().create(folder).setFields("id").execute().id
-                } ?: return@withContext BackupResult.Error("Failed to obtain folder id")
+                }
+                    ?: return@withContext BackupResult.Error("Failed to obtain folder id")
 
-                // Create spreadsheet using Sheets API
-                val spreadsheetProperties = SpreadsheetProperties().setTitle(spreadsheetName)
-                val spreadsheet = Spreadsheet().setProperties(spreadsheetProperties)
-                val createdSpreadsheet = sheetsApi.spreadsheets().create(spreadsheet).execute()
+                val spreadsheetProperties =
+                    SpreadsheetProperties().setTitle(spreadsheetName)
+                val spreadsheet =
+                    Spreadsheet().setProperties(spreadsheetProperties)
+                val createdSpreadsheet =
+                    sheetsApi.spreadsheets().create(spreadsheet).execute()
                 val spreadsheetId = createdSpreadsheet.spreadsheetId
                     ?: return@withContext BackupResult.Error("Failed to create spreadsheet")
 
-                // Move spreadsheet to the folder using Drive API
-                val file = driveApi.files().get(spreadsheetId).setFields("parents").execute()
+                val file =
+                    driveApi.files().get(spreadsheetId).setFields("parents")
+                        .execute()
                 val previousParents = file.parents?.joinToString(",") ?: ""
                 driveApi.files().update(spreadsheetId, null)
                     .setAddParents(folderId)
@@ -209,7 +223,6 @@ class GoogleDriveServiceAndroid(
                     .setFields("id, parents")
                     .execute()
 
-                // Write data to the spreadsheet
                 val allData = mutableListOf<List<Any>>()
                 allData.add(data.headers)
                 data.rows.forEach { row -> allData.add(row) }
@@ -223,17 +236,109 @@ class GoogleDriveServiceAndroid(
                 BackupResult.Success
             }
         } catch (e: Exception) {
-            BackupResult.Error("Failed to create spreadsheet with data in Google Drive", e)
+            BackupResult.Error(
+                "Failed to create spreadsheet with data in Google Drive",
+                e,
+            )
+        }
+    }
+
+    override suspend fun listSpreadsheets(folderName: String): List<SpreadsheetFile> {
+        return try {
+            withContext(Dispatchers.IO) {
+                val driveApi = driveService ?: return@withContext emptyList()
+
+                val folderResult = driveApi.files().list()
+                    .setQ("name='$folderName' and mimeType='application/vnd.google-apps.folder' and trashed=false")
+                    .setFields("files(id)")
+                    .execute()
+
+                if (folderResult.files.isNullOrEmpty()) {
+                    return@withContext emptyList()
+                }
+
+                val folderId = folderResult.files[0].id
+
+                val spreadsheetResult = driveApi.files().list()
+                    .setQ("'$folderId' in parents and mimeType='application/vnd.google-apps.spreadsheet' and trashed=false")
+                    .setFields("files(id, name, createdTime)")
+                    .setOrderBy("createdTime desc")
+                    .execute()
+
+                spreadsheetResult.files?.map { file ->
+                    SpreadsheetFile(
+                        id = file.id,
+                        name = file.name,
+                        createdTime = file.createdTime?.toString(),
+                    )
+                } ?: emptyList()
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    override suspend fun readSpreadsheetData(spreadsheetId: String): SpreadsheetData? {
+        return try {
+            withContext(Dispatchers.IO) {
+                val sheetsApi = sheetsService ?: return@withContext null
+
+                val response = sheetsApi.spreadsheets().values()
+                    .get(spreadsheetId, "A:Z")
+                    .execute()
+
+                val values = response.getValues() ?: return@withContext null
+
+                if (values.isEmpty()) {
+                    return@withContext SpreadsheetData(
+                        headers = emptyList(),
+                        rows = emptyList(),
+                    )
+                }
+
+                val headers = values[0].map { it?.toString() ?: "" }
+
+                val rows = if (values.size > 1) {
+                    values.drop(1).map { row ->
+                        row.map { it?.toString() ?: "" }
+                    }
+                } else {
+                    emptyList()
+                }
+
+                SpreadsheetData(headers = headers, rows = rows)
+            }
+        } catch (e: Exception) {
+            null
         }
     }
 
     override suspend fun isAuthenticated(): Boolean {
-        return isAuthenticatedFlag && driveService != null && sheetsService != null
+        if (isAuthenticatedFlag && driveService != null && sheetsService != null) {
+            return true
+        }
+
+        return try {
+            val account = GoogleSignIn.getLastSignedInAccount(context)
+            if (account != null) {
+                try {
+                    setupDriveService(account)
+                    true
+                } catch (setupError: Exception) {
+                    println("Failed to setup drive service: ${setupError.message}")
+                    false
+                }
+            } else {
+                false
+            }
+        } catch (e: Exception) {
+            println("isAuthenticated check failed: ${e.message}")
+            false
+        }
     }
 
     override suspend fun authenticate(): BackupResult {
         return try {
-            // Check if user is already signed in
             val account = GoogleSignIn.getLastSignedInAccount(context)
             if (account != null && GoogleSignIn.hasPermissions(
                     account,
@@ -244,12 +349,22 @@ class GoogleDriveServiceAndroid(
                 setupDriveService(account)
                 BackupResult.Success
             } else {
-                // User needs to sign in - return SignInRequired
-                // The UI layer should call getSignInIntent() and launch the sign-in flow
                 BackupResult.SignInRequired
             }
         } catch (e: Exception) {
-            BackupResult.Error("Failed to authenticate with Google Drive: ${e.message}", e)
+            BackupResult.Error(
+                "Failed to authenticate with Google Drive: ${e.message}",
+                e,
+            )
+        }
+    }
+
+    override suspend fun getAuthenticatedUserName(): String? {
+        return try {
+            val account = GoogleSignIn.getLastSignedInAccount(context)
+            account?.displayName ?: account?.email
+        } catch (e: Exception) {
+            null
         }
     }
 

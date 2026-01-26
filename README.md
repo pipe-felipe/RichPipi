@@ -37,3 +37,15 @@ in your IDE’s toolbar or open the [/iosApp](./iosApp) directory in Xcode and r
 ---
 
 Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+
+
+## Run locally
+
+You need to create the file local properties in the project root
+````shell
+sdk.dir=path to SDK, example to windows: C\:\\Android
+
+# Google OAuth Configuration
+google.web.client.id=client_id
+
+````

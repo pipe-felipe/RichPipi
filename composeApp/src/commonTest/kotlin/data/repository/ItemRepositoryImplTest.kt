@@ -60,6 +60,8 @@ class ItemRepositoryImplTest {
                 override suspend fun getTransactionById(id: Int) = fakeDao.list.find { it.id == id }
                 override suspend fun addTransaction(item: TransactionEntity) = fakeDao.addItem(item)
                 override suspend fun deleteTransactionById(id: Int) = fakeDao.deleteById(id)
+                override suspend fun insertAll(items: List<TransactionEntity>): List<Long> = emptyList()
+                override suspend fun deleteAll(): Int = 0
             },
         )
 
@@ -97,6 +99,8 @@ class ItemRepositoryImplTest {
                 override suspend fun getTransactionById(id: Int) = fakeDao.list.find { it.id == id }
                 override suspend fun addTransaction(item: TransactionEntity) = fakeDao.addItem(item)
                 override suspend fun deleteTransactionById(id: Int) = fakeDao.deleteById(id)
+                override suspend fun insertAll(items: List<TransactionEntity>): List<Long> = emptyList()
+                override suspend fun deleteAll(): Int = 0
             },
         )
 
@@ -134,6 +138,8 @@ class ItemRepositoryImplTest {
                 override suspend fun getTransactionById(id: Int) = fakeDao.list.find { it.id == id }
                 override suspend fun addTransaction(item: TransactionEntity) = fakeDao.addItem(item)
                 override suspend fun deleteTransactionById(id: Int) = fakeDao.deleteById(id)
+                override suspend fun insertAll(items: List<TransactionEntity>): List<Long> = emptyList()
+                override suspend fun deleteAll(): Int = 0
             },
         )
 

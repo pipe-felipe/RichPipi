@@ -38,4 +38,23 @@ você pode continuar com seus dados sem perder nada 😊🐶</string>
     <string name="label_invalid_number">Número Inválido</string>
 
     <string name="no_transaction">Sem transações para mostrar</string>
+    <string name="auth_status_not_authenticated">Sem conta 😅</string>
+    <string name="auth_status_authenticated">Conta: %1$s 🐶</string>
+    <string name="auth_status_error">Erro de autenticação 😕</string>
+
+    <string name="login_required_dialog_title">Autenticação Necessária</string>
+    <string name="login_required_dialog_message">Para usar backup e recuperação, você precisa fazer login com sua conta Google. Clique no botão de login na barra inferior para continuar.</string>
+    <string name="login_required_dialog_button">Entendi</string>
+
+    <string name="already_authenticated_dialog_title">Já Autenticado</string>
+    <string name="already_authenticated_dialog_message">Você já está autenticado! Pode usar os botões de backup e recuperação normalmente.</string>
+
+    <string name="restore_dialog_title">Restaurar Backup</string>
+    <string name="restore_dialog_description">Selecione um backup do Google Drive para restaurar seus dados. Atenção: os dados atuais serão substituídos.</string>
+    <string name="restore_dialog_success">Backup restaurado com sucesso! %1$d transações importadas. 😊</string>
+    <string name="restore_dialog_error">Erro: %1$s</string>
+    <string name="restore_dialog_auth_required">Autenticação necessária...</string>
+    <string name="restore_dialog_no_backups">Nenhum backup encontrado.</string>
+    <string name="restore_dialog_loading">Carregando backups...</string>
+    <string name="restore_dialog_select_backup">Selecione um backup para restaurar:</string>
 </resources>

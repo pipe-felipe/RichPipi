@@ -2,6 +2,7 @@ package data.remote
 
 import domain.model.BackupResult
 import domain.model.SpreadsheetData
+import domain.model.SpreadsheetFile
 
 /**
  * iOS implementation of GoogleDriveService.
@@ -28,11 +29,23 @@ class GoogleDriveServiceIOS : GoogleDriveService {
         return BackupResult.Error("Google Drive not yet implemented for iOS")
     }
 
+    override suspend fun listSpreadsheets(folderName: String): List<SpreadsheetFile> {
+        return emptyList()
+    }
+
+    override suspend fun readSpreadsheetData(spreadsheetId: String): SpreadsheetData? {
+        return null
+    }
+
     override suspend fun isAuthenticated(): Boolean {
         return false
     }
 
     override suspend fun authenticate(): BackupResult {
         return BackupResult.Error("Google Drive authentication not yet implemented for iOS")
+    }
+
+    override suspend fun getAuthenticatedUserName(): String? {
+        return null
     }
 }

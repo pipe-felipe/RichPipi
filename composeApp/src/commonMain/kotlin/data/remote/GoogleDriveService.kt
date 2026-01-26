@@ -2,6 +2,7 @@ package data.remote
 
 import domain.model.BackupResult
 import domain.model.SpreadsheetData
+import domain.model.SpreadsheetFile
 
 /**
  * Interface for Google Drive operations.
@@ -37,6 +38,20 @@ interface GoogleDriveService {
     ): BackupResult
 
     /**
+     * Lists all spreadsheets in the backup folder.
+     * @param folderName The name of the folder to list spreadsheets from
+     * @return List of available spreadsheet files
+     */
+    suspend fun listSpreadsheets(folderName: String): List<SpreadsheetFile>
+
+    /**
+     * Reads data from a spreadsheet.
+     * @param spreadsheetId The ID of the spreadsheet to read
+     * @return SpreadsheetData containing headers and rows, or null if failed
+     */
+    suspend fun readSpreadsheetData(spreadsheetId: String): SpreadsheetData?
+
+    /**
      * Checks if the user is authenticated with Google Drive.
      * @return true if authenticated, false otherwise
      */
@@ -47,4 +62,10 @@ interface GoogleDriveService {
      * @return BackupResult indicating success or failure
      */
     suspend fun authenticate(): BackupResult
+
+    /**
+     * Gets the name of the currently authenticated user.
+     * @return The user's display name, or null if not authenticated
+     */
+    suspend fun getAuthenticatedUserName(): String?
 }

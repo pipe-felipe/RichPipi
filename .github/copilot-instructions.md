@@ -10,22 +10,6 @@ The project uses Jetpack Compose for UI.
 
 UI layers must follow the View–ViewModel architecture.
 
-**Composable functions are responsible only for:**
-- Rendering UI
-- Emitting UI events
-
-**Composable functions must not contain:**
-- Business logic
-- Data access logic
-- Direct calls to repositories, APIs, or databases
-
-**ViewModels:**
-- Hold UI state
-- Handle user actions
-- Communicate with domain use cases
-- Expose immutable state to the UI
-- Must not contain platform-specific code when avoidable
-
 ## 🧼 Clean Architecture for Integrations
 
 All external integrations must follow Clean Architecture principles, including:
@@ -129,4 +113,3 @@ No new feature, integration, or business logic should be added without correspon
 ## Code Style
 - For every string, you should put in portuguese in the strings.xml
 - The variable name should be in english, but the string value should be in portuguese.
-
