@@ -19,6 +19,7 @@ runner = "1.5.2"
 sqlite = "2.6.2"
 ksp = "2.3.3"
 room = "2.8.4"
+mokkery = "2.7.1"
 
 [libraries]
 androidx-core-ktx-v150 = { module = "androidx.test:core-ktx", version.ref = "coreKtx" }
@@ -31,6 +32,7 @@ junit = { module = "androidx.test.ext:junit", version.ref = "junitVersion" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
+mokkery-runtime = { module = "dev.mokkery:mokkery-runtime", version.ref = "mokkery" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
 androidx-lifecycle-viewmodelCompose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-runtimeCompose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
@@ -70,3 +72,4 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 androidx-room = { id = "androidx.room", version.ref = "room" }
+mokkery = { id = "dev.mokkery", version.ref = "mokkery" }

@@ -31,17 +31,10 @@ import com.pipe.richpipi.ui.theme.dockBackground
 import org.jetbrains.compose.resources.painterResource
 import richpipi.composeapp.generated.resources.Res
 import richpipi.composeapp.generated.resources.add_item
-import richpipi.composeapp.generated.resources.login_icon
-import richpipi.composeapp.generated.resources.recover_data_icon
-import richpipi.composeapp.generated.resources.save_icon
 
 @Composable
 fun MainBottomBar(
     onAddButtonClick: () -> Unit,
-    onSaveButtonClick: () -> Unit,
-    onRestoreButtonClick: () -> Unit,
-    onLoginButtonClick: () -> Unit,
-    isAuthenticated: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -55,7 +48,9 @@ fun MainBottomBar(
                 .shadow(
                     elevation = 12.dp,
                     shape = RoundedCornerShape(24.dp),
-                    ambientColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f),
+                    ambientColor = MaterialTheme.colorScheme.onSurface.copy(
+                        alpha = 0.15f
+                    ),
                     spotColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
                 ),
             shape = RoundedCornerShape(24.dp),
@@ -69,23 +64,6 @@ fun MainBottomBar(
                 horizontalArrangement = Arrangement.spacedBy(0.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                DockIcon(
-                    painter = painterResource(Res.drawable.login_icon),
-                    contentDescription = "Login",
-                    onClick = onLoginButtonClick,
-                )
-                DockIcon(
-                    painter = painterResource(Res.drawable.save_icon),
-                    contentDescription = "Save",
-                    onClick = onSaveButtonClick,
-                    enabled = isAuthenticated,
-                )
-                DockIcon(
-                    painter = painterResource(Res.drawable.recover_data_icon),
-                    contentDescription = "Restore",
-                    onClick = onRestoreButtonClick,
-                    enabled = isAuthenticated,
-                )
                 DockIcon(
                     painter = painterResource(Res.drawable.add_item),
                     contentDescription = "Add",
