@@ -8,4 +8,3 @@ package com.pipe.richpipi.platform
  * - year: full year (e.g., 2026)
  */
 expect fun currentMonthYear(): Pair<Int, Int>
-

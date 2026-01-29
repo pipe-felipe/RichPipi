@@ -17,18 +17,15 @@ class MainActivity : ComponentActivity() {
 
     private var mainScreenViewModel: MainScreenViewModel? = null
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-
 
         val db = DatabaseProvider.provideDatabase(this)
         val repo = TransactionRepositoryImpl(db.transactionDao())
         val addItemUseCase = MakeTransactionUseCase(repo)
         val getAllItemsUseCase = GetTransactions(repo)
         val deleteItemUseCase = DeleteTransactionUseCase(repo)
-
 
         val factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")

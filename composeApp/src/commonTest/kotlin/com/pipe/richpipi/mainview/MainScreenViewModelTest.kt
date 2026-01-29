@@ -67,7 +67,6 @@ class MainScreenViewModelTest {
         assertEquals(-15.0, saving)
     }
 
-
     @Test
     fun `recurring income only counts in accumulated saving from its start month onward`() = runBlocking {
         val (janStart, _) = monthBoundsUtcMillis(month = 1, year = 2026)

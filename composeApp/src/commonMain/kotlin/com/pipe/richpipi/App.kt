@@ -51,8 +51,6 @@ fun App(
         val currentMonth by mainVm.currentMonth.collectAsState()
         val currentYear by mainVm.currentYear.collectAsState()
 
-
-
         MainScreenContent(
             itemsList = itemsList,
             totalIncomeText = incomeText,

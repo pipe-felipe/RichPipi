@@ -44,7 +44,7 @@ fun MainScreenContent(
     onNextMonth: () -> Unit,
     onCurrentMonthClick: () -> Unit,
     onAddButtonClick: () -> Unit,
-    onDeleteItem: (Int) -> Unit
+    onDeleteItem: (Int) -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(

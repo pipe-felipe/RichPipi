@@ -49,7 +49,7 @@ fun MainBottomBar(
                     elevation = 12.dp,
                     shape = RoundedCornerShape(24.dp),
                     ambientColor = MaterialTheme.colorScheme.onSurface.copy(
-                        alpha = 0.15f
+                        alpha = 0.15f,
                     ),
                     spotColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
                 ),

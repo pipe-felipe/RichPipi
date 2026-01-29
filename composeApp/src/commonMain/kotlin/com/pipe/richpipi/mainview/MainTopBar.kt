@@ -146,8 +146,8 @@ fun MainTopBar(
 
             HorizontalDivider(
                 color = MaterialTheme.colorScheme.onSurface.copy(
-                    alpha = 0.06f
-                )
+                    alpha = 0.06f,
+                ),
             )
         }
     }
