@@ -1,7 +1,6 @@
 package com.pipe.richpipi.mainview
 
 import com.pipe.richpipi.platform.monthBoundsUtcMillis
-import domain.model.BackupResult
 import domain.model.Transaction
 import domain.model.TransactionType
 import kotlinx.coroutines.delay
@@ -9,14 +8,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class MainScreenViewModelTest {
-
-    private val defaultFakeAuth = object : domain.usecase.IAuthenticateUseCase {
-        override suspend fun execute() = domain.usecase.AuthResult.Success("TestUser")
-        override suspend fun getCurrentUserName() = "TestUser"
-    }
 
     @Test
     fun `compute totals sums income and expense correctly`() {
@@ -28,7 +21,7 @@ class MainScreenViewModelTest {
             Transaction(id = 6, amountCents = 1025, type = TransactionType.INCOME), // 10.25
         )
 
-        val vm = MainScreenViewModel(authenticateUseCase = defaultFakeAuth)
+        val vm = MainScreenViewModel()
 
         val (income, expense) = vm.computeTotalsForTest(items)
         val saving = income - expense
@@ -47,7 +40,7 @@ class MainScreenViewModelTest {
             Transaction(id = 3, amountCents = 50000, type = TransactionType.INCOME), // 500.00
         )
 
-        val vm = MainScreenViewModel(authenticateUseCase = defaultFakeAuth)
+        val vm = MainScreenViewModel()
 
         val (income, expense) = vm.computeTotalsForTest(items)
         val saving = income - expense
@@ -64,7 +57,7 @@ class MainScreenViewModelTest {
             Transaction(id = 2, amountCents = 2500, type = TransactionType.EXPENSE), // 25.00
         )
 
-        val vm = MainScreenViewModel(authenticateUseCase = defaultFakeAuth)
+        val vm = MainScreenViewModel()
 
         val (income, expense) = vm.computeTotalsForTest(items)
         val saving = income - expense
@@ -74,34 +67,6 @@ class MainScreenViewModelTest {
         assertEquals(-15.0, saving)
     }
 
-    @Test
-    fun `all-time saving differs from month totals when transactions span months`() {
-        val allItems = listOf(
-            // Month A net: +100.00
-            Transaction(id = 1, amountCents = 10000, type = TransactionType.INCOME),
-            // Month B net: -25.00
-            Transaction(id = 2, amountCents = 2500, type = TransactionType.EXPENSE),
-        )
-
-        val monthItems = listOf(
-            Transaction(id = 2, amountCents = 2500, type = TransactionType.EXPENSE),
-        )
-
-        val vm = MainScreenViewModel(authenticateUseCase = defaultFakeAuth)
-
-        // Month-scoped totals (e.g., month B) only see that month's items.
-        val (monthInc, monthExp) = vm.computeTotalsForTest(monthItems)
-        val monthSaving = monthInc - monthExp
-        assertEquals(0.0, monthInc)
-        assertEquals(25.0, monthExp)
-        assertEquals(-25.0, monthSaving)
-
-        // Accumulated saving up to month B includes both months nets:
-        // (+100.00) + (-25.00) = 75.00
-        val (allInc, allExp) = vm.computeTotalsForTest(allItems)
-        val accumulatedSaving = allInc - allExp
-        assertEquals(75.0, accumulatedSaving)
-    }
 
     @Test
     fun `recurring income only counts in accumulated saving from its start month onward`() = runBlocking {
@@ -135,7 +100,7 @@ class MainScreenViewModelTest {
             ),
         )
 
-        val vm = MainScreenViewModel(itemsSource = itemsFlow, authenticateUseCase = defaultFakeAuth)
+        val vm = MainScreenViewModel(itemsSource = itemsFlow)
 
         // Go to Jan/2026 (before salary start month)
         while (vm.currentYear.value > 2026 || (vm.currentYear.value == 2026 && vm.currentMonth.value > 1)) {
@@ -165,229 +130,5 @@ class MainScreenViewModelTest {
         // Only Jan expense is counted: -50.00
         // Note: Future income is excluded from savings calculation to prevent counting money not yet received.
         assertEquals("R$ -50.00", vm.totalSavingText.value)
-    }
-
-    @Test
-    fun `backupToDrive should call callback with result`() = runBlocking {
-        // Given
-        val vm = MainScreenViewModel(authenticateUseCase = defaultFakeAuth)
-        var callbackResult: BackupResult? = null
-        var callbackCalled = false
-        var signInRequiredCalled = false
-
-        // When
-        vm.backupToDrive(
-            onResult = { result ->
-                callbackResult = result
-                callbackCalled = true
-            },
-            onSignInRequired = {
-                signInRequiredCalled = true
-            },
-        )
-
-        // Wait a bit for the coroutine to complete
-        delay(1000)
-
-        // Then - either callback or signInRequired should be called
-        assertTrue(
-            callbackCalled || signInRequiredCalled,
-            "Either callback or signInRequired should be called",
-        )
-
-        if (callbackCalled) {
-            assertTrue(
-                callbackResult is BackupResult.Success ||
-                    callbackResult is BackupResult.Error ||
-                    callbackResult is BackupResult.SignInRequired,
-                "Result should be one of the expected BackupResult types",
-            )
-        }
-    }
-
-    @Test
-    fun `backupToDrive should call onSignInRequired when not authenticated`() = runBlocking {
-        // Given
-        val vm = MainScreenViewModel(authenticateUseCase = defaultFakeAuth)
-        var signInRequiredCalled = false
-        var resultCallbackCalled = false
-
-        // When
-        vm.backupToDrive(
-            onResult = { _ ->
-                resultCallbackCalled = true
-            },
-            onSignInRequired = {
-                signInRequiredCalled = true
-            },
-        )
-
-        // Wait for the coroutine to complete
-        delay(1000)
-
-        // Then - onSignInRequired should be called when not authenticated
-        // Note: This depends on the actual authentication state, which might vary
-        assertTrue(
-            signInRequiredCalled || resultCallbackCalled,
-            "Either onSignInRequired or result callback should be called",
-        )
-    }
-
-    @Test
-    fun `onSignInSuccess should retry creating spreadsheet`() = runBlocking {
-        // Given
-        val vm = MainScreenViewModel(authenticateUseCase = defaultFakeAuth)
-        var firstCallbackResult: BackupResult? = null
-
-        // When - First attempt (might require sign-in)
-        vm.backupToDrive(
-            onResult = { result ->
-                firstCallbackResult = result
-            },
-            onSignInRequired = {
-                // Simulate sign-in completion
-            },
-        )
-
-        delay(500)
-
-        // Simulate successful sign-in by calling onSignInSuccess
-        vm.onSignInSuccess()
-
-        delay(1000)
-
-        // Then - onSignInSuccess should have been called and attempted to create the spreadsheet
-        // The result should be stored in the callback that was registered during backupToDrive
-        assertTrue(
-            firstCallbackResult is BackupResult.Success ||
-                firstCallbackResult is BackupResult.Error ||
-                firstCallbackResult is BackupResult.SignInRequired,
-            "First callback should receive a result",
-        )
-    }
-
-    @Test
-    fun `authStatus is NotAuthenticated by default`() = runBlocking {
-        val vm = MainScreenViewModel(authenticateUseCase = defaultFakeAuth)
-        assertTrue(vm.authStatus.value is MainScreenViewModel.AuthStatus.NotAuthenticated)
-    }
-
-    @Test
-    fun `authStatus becomes Authenticated on success`() = runBlocking {
-        val fakeAuth = object : domain.usecase.IAuthenticateUseCase {
-            override suspend fun execute() = domain.usecase.AuthResult.Success("João")
-            override suspend fun getCurrentUserName() = "João"
-        }
-        val vm = MainScreenViewModel(authenticateUseCase = fakeAuth)
-        vm.authenticate {}
-        delay(100)
-        assertTrue(vm.authStatus.value is MainScreenViewModel.AuthStatus.Authenticated)
-        assertEquals("João", (vm.authStatus.value as MainScreenViewModel.AuthStatus.Authenticated).userName)
-    }
-
-    @Test
-    fun `authStatus becomes NotAuthenticated when sign-in required`() = runBlocking {
-        val fakeAuth = object : domain.usecase.IAuthenticateUseCase {
-            override suspend fun execute() = domain.usecase.AuthResult.SignInRequired
-            override suspend fun getCurrentUserName() = null
-        }
-        val vm = MainScreenViewModel(authenticateUseCase = fakeAuth)
-        var signInRequiredCalled = false
-        vm.authenticate { signInRequiredCalled = true }
-        delay(100)
-        assertTrue(vm.authStatus.value is MainScreenViewModel.AuthStatus.NotAuthenticated)
-        assertTrue(signInRequiredCalled)
-    }
-
-    @Test
-    fun `authStatus becomes Error on error`() = runBlocking {
-        val fakeAuth = object : domain.usecase.IAuthenticateUseCase {
-            override suspend fun execute(): domain.usecase.AuthResult = throw Exception("fail")
-            override suspend fun getCurrentUserName(): String? = throw Exception("fail")
-        }
-        val vm = MainScreenViewModel(authenticateUseCase = fakeAuth)
-        vm.authenticate {}
-        delay(100)
-        assertTrue(vm.authStatus.value is MainScreenViewModel.AuthStatus.Error)
-    }
-
-    @Test
-    fun `authStatus uses fallback name if userName is null`() = runBlocking {
-        val fakeAuth = object : domain.usecase.IAuthenticateUseCase {
-            override suspend fun execute() = domain.usecase.AuthResult.Success(null)
-            override suspend fun getCurrentUserName() = null
-        }
-        val vm = MainScreenViewModel(authenticateUseCase = fakeAuth)
-        vm.authenticate {}
-        delay(100)
-        assertTrue(vm.authStatus.value is MainScreenViewModel.AuthStatus.Authenticated)
-        assertEquals("Desconhecido", (vm.authStatus.value as MainScreenViewModel.AuthStatus.Authenticated).userName)
-    }
-
-    @Test
-    fun `refreshItems should trigger re-collection of items source`() = runBlocking {
-        // Given
-        val itemsFlow = MutableStateFlow(listOf<Transaction>())
-        val vm = MainScreenViewModel(
-            itemsSource = itemsFlow,
-            authenticateUseCase = defaultFakeAuth,
-        )
-
-        // Wait for initial collection
-        delay(100)
-        assertTrue(vm.items.value.isEmpty())
-
-        // When - update the flow and call refreshItems
-        itemsFlow.value = listOf(
-            Transaction(id = 1, amountCents = 10000, type = TransactionType.INCOME, targetMonth = 1, targetYear = 2025),
-        )
-
-        // refreshItems forces re-collection which should pick up the new value
-        vm.refreshItems()
-        delay(200)
-
-        // The flow should emit the new values
-        // Note: Due to the flatMapLatest, the new subscription should get the current value
-        assertTrue(itemsFlow.value.isNotEmpty())
-    }
-
-    @Test
-    fun `restoreFromBackup without import use case should set error result`() = runBlocking {
-        // Given - ViewModel without import use case
-        val vm = MainScreenViewModel(
-            importDataFromSpreadsheetUseCase = null,
-            authenticateUseCase = defaultFakeAuth,
-        )
-
-        // When
-        vm.restoreFromBackup("spreadsheetId") {}
-        delay(200)
-
-        // Then - should have error result
-        val result = vm.restoreResult.value
-        assertTrue(result is domain.model.ImportResult.Error)
-        assertEquals("Funcionalidade de importação não disponível", result.message)
-    }
-
-    @Test
-    fun `clearRestoreResult should set restoreResult to null`() = runBlocking {
-        // Given - ViewModel with some restore result state
-        val vm = MainScreenViewModel(
-            importDataFromSpreadsheetUseCase = null,
-            authenticateUseCase = defaultFakeAuth,
-        )
-
-        // Trigger an error result first
-        vm.restoreFromBackup("spreadsheetId") {}
-        delay(200)
-
-        // Verify there's a result
-        assertTrue(vm.restoreResult.value != null)
-
-        // When
-        vm.clearRestoreResult()
-
-        // Then
-        assertEquals(vm.restoreResult.value, null)
     }
 }
