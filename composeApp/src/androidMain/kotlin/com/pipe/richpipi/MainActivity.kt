@@ -4,57 +4,28 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import com.pipe.richpipi.form.TransactionalViewModel
 import com.pipe.richpipi.mainview.MainScreenViewModel
 import data.local.database.DatabaseProvider
-import data.remote.GoogleSignInHandler
-import data.remote.initializeGoogleDriveService
 import data.repository.TransactionRepositoryImpl
-import di.BackupModule
 import domain.usecase.DeleteTransactionUseCase
 import domain.usecase.GetTransactions
 import domain.usecase.MakeTransactionUseCase
-import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
     private var mainScreenViewModel: MainScreenViewModel? = null
 
-    private val signInLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult(),
-    ) { result ->
-        lifecycleScope.launch {
-            // Processa o resultado do sign-in
-            val signInResult = GoogleSignInHandler.handleSignInResult(result.data)
-
-            // Se a autenticação foi bem-sucedida, tenta criar a planilha novamente
-            if (signInResult is domain.model.BackupResult.Success) {
-                mainScreenViewModel?.onSignInSuccess()
-            }
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-
-        // Initialize Google Drive service
-        initializeGoogleDriveService(this)
 
         val db = DatabaseProvider.provideDatabase(this)
         val repo = TransactionRepositoryImpl(db.transactionDao())
         val addItemUseCase = MakeTransactionUseCase(repo)
         val getAllItemsUseCase = GetTransactions(repo)
         val deleteItemUseCase = DeleteTransactionUseCase(repo)
-
-        // Create export use case with transaction repository
-        val exportDataToSpreadsheetUseCase = BackupModule.createExportDataToSpreadsheetUseCase(repo)
-
-        // Create import use case with transaction repository
-        val importDataFromSpreadsheetUseCase = BackupModule.createImportDataFromSpreadsheetUseCase(repo)
 
         val factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
@@ -73,13 +44,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             App(
                 transactionalViewModel = vm,
-                exportDataToSpreadsheetUseCase = exportDataToSpreadsheetUseCase,
-                importDataFromSpreadsheetUseCase = importDataFromSpreadsheetUseCase,
-                onSignInRequired = {
-                    GoogleSignInHandler.getSignInIntent()?.let { intent ->
-                        signInLauncher.launch(intent)
-                    }
-                },
                 onSignInSuccess = { viewModel ->
                     mainScreenViewModel = viewModel
                 },

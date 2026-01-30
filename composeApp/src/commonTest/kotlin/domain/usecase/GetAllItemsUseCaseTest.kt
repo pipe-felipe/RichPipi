@@ -1,69 +1,44 @@
 package domain.usecase
 
+import dev.mokkery.answering.returns
+import dev.mokkery.every
+import dev.mokkery.everySuspend
+import dev.mokkery.matcher.any
+import dev.mokkery.mock
 import domain.model.Transaction
-import kotlinx.coroutines.flow.MutableStateFlow
+import domain.model.TransactionType
+import domain.repository.TransactionRepository
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class GetAllItemsUseCaseTest {
-    private class FakeRepo : domain.repository.TransactionRepository {
-        val items = mutableListOf<Transaction>()
-        override fun getTransactions() = MutableStateFlow(items) as kotlinx.coroutines.flow.Flow<List<Transaction>>
-
-        override fun getTransactionsForMonth(monthStartMillis: Long, monthEndExclusiveMillis: Long) =
-            getTransactions()
-
-        override suspend fun makeTransaction(transaction: Transaction): Long {
-            items.add(transaction.copy(id = items.size + 1))
-            return items.size.toLong()
-        }
-
-        override suspend fun deleteTransaction(id: Int): Int {
-            val idx = items.indexOfFirst { it.id == id }
-            return if (idx >= 0) {
-                items.removeAt(idx)
-                1
-            } else {
-                0
-            }
-        }
-
-        override suspend fun deleteAllTransactions(): Int {
-            val count = items.size
-            items.clear()
-            return count
-        }
-
-        override suspend fun insertTransactions(transactions: List<Transaction>): List<Long> {
-            return transactions.map { transaction ->
-                items.add(transaction.copy(id = items.size + 1))
-                items.size.toLong()
-            }
-        }
-    }
 
     @Test
     fun `getAllItems returns flow of items`() = runBlocking {
-        val repo = FakeRepo()
+        val transaction = Transaction(
+            id = 1,
+            amountCents = 100,
+            type = TransactionType.INCOME,
+            description = "d",
+            createdAt = 1L,
+        )
+
+        val repo = mock<TransactionRepository> {
+            every { getTransactions() } returns flowOf(listOf(transaction))
+            every { getTransactionsForMonth(any(), any()) } returns flowOf(emptyList())
+            everySuspend { makeTransaction(any()) } returns 1L
+            everySuspend { deleteTransaction(any()) } returns 1
+            everySuspend { deleteAllTransactions() } returns 1
+            everySuspend { insertTransactions(any()) } returns listOf(1L)
+        }
+
         val useCase = GetTransactions(repo)
 
-        // initially empty
-        val initial = useCase().first()
-        assertEquals(0, initial.size)
-
-        // add item and verify
-        repo.makeTransaction(
-            Transaction(
-                amountCents = 100,
-                type = domain.model.TransactionType.INCOME,
-                description = "d",
-                createdAt = 1L,
-            ),
-        )
-        val after = useCase().first()
-        assertEquals(1, after.size)
-        assertEquals(100, after[0].amountCents)
+        val result = useCase().first()
+        assertEquals(1, result.size)
+        assertEquals(100, result[0].amountCents)
     }
 }

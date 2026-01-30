@@ -1,14 +1,17 @@
 package com.pipe.richpipi.form
 
+import dev.mokkery.answering.calls
+import dev.mokkery.answering.returns
+import dev.mokkery.every
+import dev.mokkery.everySuspend
+import dev.mokkery.matcher.any
+import dev.mokkery.mock
 import domain.model.Transaction
 import domain.model.TransactionType
 import domain.repository.TransactionRepository
 import domain.usecase.DeleteTransactionUseCase
 import domain.usecase.GetTransactions
 import domain.usecase.MakeTransactionUseCase
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -17,34 +20,22 @@ import org.junit.Test
 
 class TransactionalViewModelAndroidTest {
 
-    private class CapturingRepository : TransactionRepository {
-        private val itemsFlow = MutableStateFlow<List<Transaction>>(emptyList())
-
-        @Volatile
-        var makeCalled = false
-
-        @Volatile
-        var lastMadeTransaction: Transaction? = null
-
-        override fun getTransactions(): Flow<List<Transaction>> = itemsFlow.asStateFlow()
-
-        override fun getTransactionsForMonth(monthStartMillis: Long, monthEndExclusiveMillis: Long): Flow<List<Transaction>> = flowOf(emptyList())
-
-        override suspend fun makeTransaction(transaction: Transaction): Long {
-            makeCalled = true
-            lastMadeTransaction = transaction
-            return 123L
-        }
-
-        override suspend fun deleteTransaction(id: Int): Int = 1
-
-        override suspend fun deleteAllTransactions(): Int = 0
-        override suspend fun insertTransactions(transactions: List<Transaction>): List<Long> = emptyList()
-    }
-
     @Test
     fun submit_calls_add_use_case_with_parsed_cents_and_month_start_date() {
-        val repo = CapturingRepository()
+        var capturedTransaction: Transaction? = null
+
+        val repo = mock<TransactionRepository> {
+            every { getTransactions() } returns flowOf(emptyList())
+            every { getTransactionsForMonth(any(), any()) } returns flowOf(emptyList())
+            everySuspend { makeTransaction(any()) } calls { (tx: Transaction) ->
+                capturedTransaction = tx
+                123L
+            }
+            everySuspend { deleteTransaction(any()) } returns 1
+            everySuspend { deleteAllTransactions() } returns 0
+            everySuspend { insertTransactions(any()) } returns emptyList()
+        }
+
         val vm = TransactionalViewModel(
             addItemUseCase = MakeTransactionUseCase(repo),
             getAllItemsUseCase = GetTransactions(repo),
@@ -67,16 +58,16 @@ class TransactionalViewModelAndroidTest {
 
         vm.submit(month = month, year = year)
 
+        // Wait for async operation to complete
         val deadline = System.currentTimeMillis() + 2_000
-        while (!repo.makeCalled && System.currentTimeMillis() < deadline) {
+        while (capturedTransaction == null && System.currentTimeMillis() < deadline) {
             Thread.sleep(10)
         }
 
-        assertTrue(repo.makeCalled)
-        val tx = repo.lastMadeTransaction
-        assertNotNull(tx)
+        assertNotNull("Transaction was not made within timeout", capturedTransaction)
+        val tx = capturedTransaction!!
 
-        assertEquals(1050L, tx!!.amountCents)
+        assertEquals(1050L, tx.amountCents)
         assertEquals(TransactionType.INCOME, tx.type)
         assertEquals(expectedHumanDate, tx.humanDate)
         assertTrue(tx.isRecurring)

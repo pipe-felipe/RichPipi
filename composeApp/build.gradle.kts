@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.ksp)
     alias(libs.plugins.androidx.room)
+    alias(libs.plugins.mokkery)
 }
 
 room {
@@ -40,17 +41,6 @@ kotlin {
             implementation(libs.androidx.sqlite)
             implementation(libs.androidx.sqlite.bundled)
 
-            // Google Drive API
-            implementation(libs.google.api.client.android)
-            implementation(libs.google.api.services.drive)
-            implementation(libs.google.api.services.sheets)
-            implementation(libs.google.http.client.android)
-            implementation(libs.androidx.credentials)
-            implementation(libs.androidx.credentials.auth)
-            implementation(libs.googleid)
-            implementation(libs.play.services.auth)
-            implementation(libs.kotlinx.coroutines.play.services)
-
             // Security
             implementation(libs.androidx.security.crypto)
         }
@@ -70,6 +60,7 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.mokkery.runtime)
         }
 
         // Instrumented Android tests source set (androidInstrumentedTest)
@@ -107,12 +98,6 @@ android {
         if (localPropertiesFile.exists()) {
             localPropertiesFile.inputStream().use { localProperties.load(it) }
         }
-
-        buildConfigField(
-            "String",
-            "GOOGLE_WEB_CLIENT_ID",
-            "\"${localProperties.getProperty("google.web.client.id", "")}\"",
-        )
     }
 
     packaging {

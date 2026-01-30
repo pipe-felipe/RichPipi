@@ -40,19 +40,12 @@ fun MainScreenContent(
     totalExpenseText: String,
     totalSavingText: String,
     currentMonthYear: String,
-    authStatus: MainScreenViewModel.AuthStatus,
     onPreviousMonth: () -> Unit,
     onNextMonth: () -> Unit,
     onCurrentMonthClick: () -> Unit,
     onAddButtonClick: () -> Unit,
-    onSaveButtonClick: () -> Unit,
-    onRestoreButtonClick: () -> Unit,
-    onLoginButtonClick: () -> Unit,
-    onLoginRequiredClick: () -> Unit,
     onDeleteItem: (Int) -> Unit,
 ) {
-    val isAuthenticated = authStatus is MainScreenViewModel.AuthStatus.Authenticated
-
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
@@ -62,7 +55,6 @@ fun MainScreenContent(
                     totalExpenseText = totalExpenseText,
                     totalSavingText = totalSavingText,
                     currentMonthYear = currentMonthYear,
-                    authStatus = authStatus,
                     onPreviousMonth = onPreviousMonth,
                     onNextMonth = onNextMonth,
                     onCurrentMonthClick = onCurrentMonthClick,
@@ -105,10 +97,6 @@ fun MainScreenContent(
 
         MainBottomBar(
             onAddButtonClick = onAddButtonClick,
-            onSaveButtonClick = if (isAuthenticated) onSaveButtonClick else onLoginRequiredClick,
-            onRestoreButtonClick = if (isAuthenticated) onRestoreButtonClick else onLoginRequiredClick,
-            onLoginButtonClick = onLoginButtonClick,
-            isAuthenticated = isAuthenticated,
             modifier = Modifier.align(Alignment.BottomCenter),
         )
     }
